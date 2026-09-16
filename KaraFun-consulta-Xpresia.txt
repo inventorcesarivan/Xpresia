@@ -1,0 +1,87 @@
+CONSULTA COMERCIAL Y TÉCNICA — XPRESIA + KARAFUN OEM/API
+===========================================================
+
+Proyecto
+--------
+Xpresia es una aplicación web de evaluación de expresión artística. Incluye
+módulos para canto, lectura, actuación, danza y otras habilidades.
+
+Objetivo de la integración
+--------------------------
+Queremos incorporar un Modo Karaoke en el que:
+
+1. El usuario selecciona una canción de karaoke dentro de Xpresia.
+2. KaraFun proporciona el contenido de karaoke, reproducción y letras sincronizadas.
+3. Xpresia captura exclusivamente la voz del usuario mediante el micrófono.
+4. Xpresia realiza su propia evaluación de la actuación vocal.
+5. Queremos estudiar la posibilidad de comparar la interpretación del usuario
+   con la referencia musical de KaraFun para analizar afinación, ritmo y sincronización.
+6. La interfaz y experiencia de usuario serían propias de Xpresia.
+
+Preguntas para KaraFun
+----------------------
+1. ¿Qué modalidad OEM/API corresponde a una aplicación web como Xpresia?
+2. ¿Existe un SDK/API o reproductor embebible para aplicaciones web?
+3. ¿Qué contenido de karaoke puede reproducirse dentro de una aplicación propia?
+4. ¿Se pueden obtener letras sincronizadas por sílabas o por fragmentos?
+5. ¿Se puede acceder mediante API a BPM, tonalidad, acordes, dificultad y otros
+   metadatos musicales?
+6. ¿Existe acceso a las vocal scoring transcriptions o datos equivalentes que
+   permitan desarrollar una evaluación de afinación/ritmo?
+7. ¿Es posible utilizar esos datos junto con el audio capturado por el micrófono
+   de Xpresia para generar una puntuación propia?
+8. ¿Se puede integrar el inicio de sesión de KaraFun para usuarios que ya tengan
+   una suscripción?
+9. ¿Qué modelo de licenciamiento y regalías se aplica a una aplicación web de
+   consumo como Xpresia?
+10. ¿Cuál sería el coste inicial y/o recurrente de la integración OEM/API?
+11. ¿Existe una cuenta de prueba, sandbox o simulador para comenzar el desarrollo?
+12. ¿Qué restricciones existen sobre países, número de usuarios, monetización,
+    publicidad y distribución?
+13. ¿Qué requisitos técnicos, de seguridad y de revisión son necesarios antes
+    del lanzamiento?
+
+Mensaje en inglés para enviar
+-----------------------------
+Subject: Xpresia — OEM/API integration for a vocal karaoke evaluation app
+
+Hello KaraFun team,
+
+I am developing Xpresia, a web-based artistic expression evaluation platform.
+Xpresia includes a vocal evaluation module and we would like to add a dedicated
+Karaoke mode.
+
+The concept is to integrate licensed karaoke content into our own application.
+KaraFun would provide the karaoke content, playback and synchronized lyrics,
+while Xpresia would use the user's microphone to evaluate their vocal
+performance.
+
+We are particularly interested in exploring whether KaraFun OEM/API can provide
+access to synchronized lyrics and musical metadata such as BPM, key, chords and
+difficulty, as well as any vocal-scoring or reference data available for
+competitive/battle modes.
+
+Our goal would be to combine the licensed karaoke reference with the user's
+microphone input and create an Xpresia-specific evaluation of singing
+performance, including possible analysis of timing, pitch and synchronization.
+
+The user interface, branding and evaluation experience would be developed by
+Xpresia.
+
+Could you please advise us on:
+
+- the appropriate OEM/API solution for a web application;
+- available web playback/SDK/API options;
+- synchronized lyrics and available musical metadata;
+- access to vocal scoring/reference data, if available;
+- authentication and user subscription integration;
+- licensing, royalties and commercial pricing;
+- sandbox/testing access and technical documentation;
+- geographic, user-count and monetization restrictions; and
+- the requirements for production approval and launch.
+
+We would be happy to provide a more detailed technical description of Xpresia
+and our expected use case.
+
+Best regards,
+Xpresia team

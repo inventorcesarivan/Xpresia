@@ -1,0 +1,34 @@
+PRUEBA DEL MODO KARAOKE — XPRESIA
+=================================
+
+IMPORTANTE
+----------
+El Error 153 de YouTube aparece cuando el reproductor no recibe un HTTP Referer
+válido. YouTube documenta este requisito para los reproductores incrustados.
+
+La nueva versión incluye:
+- meta referrer: strict-origin-when-cross-origin
+- referrerpolicy en el iframe de YouTube
+- parámetro origin dinámico cuando Xpresia está publicado en HTTP/HTTPS
+- aviso si el usuario intenta probar el video abriendo index.html directamente
+  como archivo local (file://)
+
+CÓMO PROBAR
+-----------
+1. Descomprime el proyecto.
+2. Publica la carpeta en Netlify o usa la URL de Netlify de Xpresia.
+3. Abre Xpresia desde https://...
+4. En Canto selecciona Modo Karaoke.
+5. Pega un enlace de YouTube de un video que permita reproducción embebida.
+6. Pulsa Cargar video.
+7. Comprueba que aparece el video.
+8. Comienza la evaluación y verifica que el micrófono sigue captando la voz.
+9. Prueba pausa y continuación.
+
+NOTA
+----
+Algunos videos de YouTube no permiten reproducción embebida. En esos casos
+YouTube puede devolver errores 101/150 aunque el código de Xpresia sea correcto.
+
+Para la versión comercial de Xpresia, se está evaluando una integración oficial
+con KaraFun mediante su modalidad OEM/API.
