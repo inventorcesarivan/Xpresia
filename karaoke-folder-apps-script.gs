@@ -51,9 +51,11 @@ function listKaraokeFiles_(folderId) {
     const mime = String(file.getMimeType() || '');
     const name = String(file.getName() || '');
 
-    // Solo vídeos. Si prefieres aceptar cualquier archivo de Drive,
-    // elimina esta condición.
-    if (!mime.startsWith('video/')) continue;
+    // Aceptar vídeos aunque Drive entregue un MIME inesperado.
+    // Esto cubre MP4/MOV/WebM/M4V/MKV/AVI y otros archivos de vídeo comunes.
+    const ext = (name.match(/\.([a-z0-9]+)$/i) || [,''])[1].toLowerCase();
+    const videoExts = ['mp4','mov','webm','m4v','mkv','avi','mpeg','mpg','3gp','ogv'];
+    if (!mime.startsWith('video/') && videoExts.indexOf(ext) === -1) continue;
 
     const title = name.replace(/\.[^.]+$/, '').trim() || 'Karaoke sin título';
     const artistParts = title.split(/\s+-\s+/);

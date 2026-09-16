@@ -774,23 +774,23 @@ async function loadKaraokeLibrary(){
     const note=document.querySelector('.karaokeNote');
     if(note)note.textContent='Biblioteca conectada a la carpeta seleccionada. Puedes cambiarla cuando quieras y pulsar ↻ Actualizar.';
   }catch(err){
-    console.warn('Biblioteca Karaoke externa no disponible:',err);
-    // En móviles puede fallar temporalmente la consulta JSONP de Apps Script.
-    // La biblioteca propia local queda como respaldo y no se pierde por ese fallo.
+    console.warn('Biblioteca Karaoke de Google Drive no disponible:',err);
+    // La biblioteca local es SOLO un respaldo. No debe presentarse como si
+    // la carpeta de Google Drive hubiera sido cargada correctamente.
     try{
       const res=await fetch('karaoke-library.json?v='+Date.now(),{cache:'no-store'});
       if(!res.ok)throw new Error('HTTP '+res.status);
       const local=await res.json();
       karaokeLibrary=Array.isArray(local)?local:(Array.isArray(local.songs)?local.songs:[]);
       renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
-      updateKaraokeFolderStatus('✓ Biblioteca propia de Xpresia cargada.');
+      updateKaraokeFolderStatus('⚠️ Google Drive no respondió. Mostrando biblioteca local de prueba.');
       const note=document.querySelector('.karaokeNote');
-      if(note)note.textContent='Biblioteca propia de Xpresia. Puedes conectar otra carpeta de Google Drive cuando quieras.';
+      if(note)note.textContent='La biblioteca local de prueba está disponible, pero la carpeta de Google Drive todavía no respondió. Revisa la publicación de Apps Script.';
       return;
     }catch(localErr){
       console.error('Tampoco se pudo cargar la biblioteca propia:',localErr);
       karaokeLibrary=[];
-      updateKaraokeFolderStatus('⚠️ No se pudo cargar la biblioteca. Comprueba tu conexión e inténtalo nuevamente.');
+      updateKaraokeFolderStatus('⚠️ No se pudo conectar con Google Drive ni cargar la biblioteca local.');
       if(box)box.innerHTML='<div class="karaokeEmpty">No se pudo cargar la biblioteca. Pulsa ↻ Actualizar para volver a intentarlo.</div>';
     }
   }
@@ -832,9 +832,27 @@ document.getElementById('karaokeFolderConnectBtn').onclick=connectKaraokeFolder;
 document.getElementById('cameraModeBtn').onclick=()=>setEvaluationMode('camera');document.getElementById('voiceModeBtn').onclick=()=>setEvaluationMode('voice');document.getElementById("karaokeModeBtn").onclick=()=>setEvaluationMode("karaoke");document.getElementById("karaokeLoadBtn").onclick=loadKaraokeVideo;document.getElementById("karaokeClearBtn").onclick=clearKaraokeVideo;document.getElementById('karaokeSearch').oninput=e=>renderKaraokeLibrary(e.target.value);document.getElementById('karaokeRefreshBtn').onclick=loadKaraokeLibrary;loadKaraokeLibrary();document.getElementById('musicAccess').onclick=openMusicPanel;document.getElementById('cancelMusic').onclick=cancelMusicPanel;document.getElementById('saveMusic').onclick=saveMusicSelection;document.getElementById('musicLinkTest').onclick=prepareUrlMusic;document.getElementById('musicSelect').onchange=e=>{const id=e.target.value;document.getElementById('musicFileWrap').style.display=id==='custom'?'block':'none';document.getElementById('musicUrlWrap').style.display=id==='url'?'block':'none';if(id==='none'){pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};previewMusic(pendingMusic);return}if(id==='custom'){pendingMusic={id:'custom',name:'Mi música',url:'',objectUrl:true};setMusicStatus('Selecciona un archivo de audio para escucharlo.');return}if(id==='url'){pendingMusic={id:'url',name:'Base desde enlace',url:'',sourceUrl:'',objectUrl:false};setMusicStatus('Pega un enlace directo a un archivo de audio y pulsa “Probar enlace”.');return}const item=musicLibrary[id];pendingMusic={id,name:item.name,url:item.url,objectUrl:false};previewMusic(pendingMusic)};updateMusicSelectedStatus();document.getElementById('musicFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(pendingMusicObjectUrl)URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=URL.createObjectURL(file);pendingMusic={id:'custom',name:file.name,url:pendingMusicObjectUrl,objectUrl:true};previewMusic(pendingMusic)};document.getElementById('musicUrl').onchange=()=>{if(document.getElementById('musicUrl').value.trim())prepareUrlMusic()};
 
 let activationOpening=false;
-function enterXpresia(e){if(e){e.preventDefault();e.stopPropagation()}if(activationOpening)return;activationOpening=true;activation.style.display='none';categoryChosen=false;hideGuideText();updateEvaluationModeUI();openPanel('mainMenu');setTop('Bienvenidos a Xpresia');setTimeout(()=>{activationOpening=false},250)}
-activation.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()},{passive:false});
-activation.addEventListener('pointerup',enterXpresia,{passive:false});
+function enterXpresia(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  if(activationOpening)return;
+  activationOpening=true;
+  activation.style.display='none';
+  categoryChosen=false;
+  category='dance';
+  evaluationMode='camera';
+  const cat=document.getElementById('category');if(cat)cat.value='dance';
+  hideGuideText();
+  updateDescription();
+  updateTextConfigUI();
+  updateEvaluationModeUI();
+  openPanel('mainMenu');
+  setTop('Bienvenidos a Xpresia');
+  setTimeout(()=>{activationOpening=false},350);
+}
+// Importante en móviles: usar SOLO click. Si se usa pointerup + click, el click
+// sintetizado puede caer sobre el elemento que queda debajo al ocultar la portada
+// y abrir accidentalmente una sección/configuración.
+activation.style.touchAction='manipulation';
 activation.addEventListener('click',enterXpresia,{passive:false});
 const panels=['mainMenu','evaluationPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel'];
 function closePanels(){panels.forEach(id=>document.getElementById(id).style.display='none');hideGuideText();menuOpen=false}
