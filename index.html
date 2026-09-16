@@ -784,6 +784,8 @@ async function loadKaraokeLibrary(){
       karaokeLibrary=Array.isArray(local)?local:(Array.isArray(local.songs)?local.songs:[]);
       renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
       updateKaraokeFolderStatus('⚠️ Google Drive no respondió. Mostrando biblioteca local de prueba.');
+      const detail=(err&&err.message)?String(err.message):'Error desconocido';
+      console.warn('Detalle Apps Script:',detail);
       const note=document.querySelector('.karaokeNote');
       if(note)note.textContent='La biblioteca local de prueba está disponible, pero la carpeta de Google Drive todavía no respondió. Revisa la publicación de Apps Script.';
       return;
@@ -1534,11 +1536,19 @@ function forceMainMenuOnResume(){
     setTop('Bienvenidos a Xpresia');
   }catch(e){console.warn('Restablecimiento de inicio:',e)}
 }
-window.addEventListener('pageshow',function(){
-  if(!evalRunning)forceMainMenuOnResume();
+window.addEventListener('pageshow',function(event){
+  // Solo corregimos restauraciones reales desde bfcache/historial.
+  // En una carga normal NO debemos volver a mostrar la portada después de que
+  // el navegador ya haya terminado de iniciar la página, porque eso produce
+  // un rebote visible en PC al pulsar la portada.
+  if(event && event.persisted && !evalRunning){
+    setTimeout(forceMainMenuOnResume,40);
+  }
 });
-// También evita que una restauración del historial conserve la pantalla de configuración.
-try{if(performance.getEntriesByType('navigation')[0]?.type==='back_forward'&&!evalRunning)forceMainMenuOnResume()}catch(e){}
+try{
+  const nav=performance.getEntriesByType('navigation')[0];
+  if(nav?.type==='back_forward' && !evalRunning) setTimeout(forceMainMenuOnResume,40);
+}catch(e){}
 spectrumLoop();
 </script>
 </body>
