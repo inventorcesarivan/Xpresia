@@ -15,29 +15,6 @@
 const DEFAULT_FOLDER_ID = '1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2';
 
 function doGet(e) {
-  const params = e && e.parameter ? e.parameter : {};
-  const mode = String(params.mode || '').trim().toLowerCase();
-
-  // Puente HTML para navegadores móviles/WebViews. La página de Apps Script
-  // obtiene los datos con google.script.run (sin CORS/JSONP) y los envía al
-  // Xpresia padre mediante postMessage.
-  if (mode === 'bridge') {
-    const folderId = String(params.folderId || DEFAULT_FOLDER_ID).trim();
-    const safeFolderId = JSON.stringify(folderId);
-    const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><script>
-      const folderId = ${safeFolderId};
-      function send(ok, songs, error){
-        try { parent.postMessage({type:'xpresia-karaoke-bridge', ok:!!ok, songs:Array.isArray(songs)?songs:[], error:error||''}, '*'); } catch(e) {}
-      }
-      google.script.run
-        .withSuccessHandler(function(songs){ send(true, songs, ''); })
-        .withFailureHandler(function(err){ send(false, [], String(err && err.message || err || 'Error de Apps Script')); })
-        .getKaraokeLibrary(folderId);
-    </script></body></html>`;
-    return HtmlService.createHtmlOutput(html)
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-
   const callback = e && e.parameter ? String(e.parameter.callback || '').trim() : '';
   try {
     const requestedFolderId = e && e.parameter ? String(e.parameter.folderId || '').trim() : '';
@@ -49,12 +26,6 @@ function doGet(e) {
     const payload = JSON.stringify({ ok: false, error: String(err && err.message || err), songs: [] });
     return output_(payload, callback);
   }
-}
-
-/** Devuelve la biblioteca para el puente HTML de navegadores móviles. */
-function getKaraokeLibrary(folderId) {
-  const id = String(folderId || DEFAULT_FOLDER_ID).trim();
-  return listKaraokeFiles_(id);
 }
 
 function output_(json, callback) {
