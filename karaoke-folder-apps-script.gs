@@ -1,26 +1,60 @@
 /**
  * Xpresia — Biblioteca Karaoke desde una carpeta de Google Drive
  *
- * Carpeta configurada:
+ * Carpeta predeterminada:
  * 1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2
+ *
+ * Xpresia puede enviar otro folderId. El script intentará leerlo con
+ * los permisos de la cuenta que ejecuta la aplicación web.
  *
  * Este script se publica como Aplicación web y Xpresia consulta este endpoint.
  * La aplicación web se ejecuta como el propietario del script, por lo que
  * puede leer la carpeta aunque no sea necesario exponer credenciales en Xpresia.
  */
 
-const FOLDER_ID = '1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2';
+const DEFAULT_FOLDER_ID = '1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2';
 
 function doGet(e) {
+  const params = e && e.parameter ? e.parameter : {};
+  const mode = String(params.mode || '').trim().toLowerCase();
+
+  // Puente HTML para navegadores móviles/WebViews. La página de Apps Script
+  // obtiene los datos con google.script.run (sin CORS/JSONP) y los envía al
+  // Xpresia padre mediante postMessage.
+  if (mode === 'bridge') {
+    const folderId = String(params.folderId || DEFAULT_FOLDER_ID).trim();
+    const safeFolderId = JSON.stringify(folderId);
+    const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><script>
+      const folderId = ${safeFolderId};
+      function send(ok, songs, error){
+        try { parent.postMessage({type:'xpresia-karaoke-bridge', ok:!!ok, songs:Array.isArray(songs)?songs:[], error:error||''}, '*'); } catch(e) {}
+      }
+      google.script.run
+        .withSuccessHandler(function(songs){ send(true, songs, ''); })
+        .withFailureHandler(function(err){ send(false, [], String(err && err.message || err || 'Error de Apps Script')); })
+        .getKaraokeLibrary(folderId);
+    </script></body></html>`;
+    return HtmlService.createHtmlOutput(html)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
   const callback = e && e.parameter ? String(e.parameter.callback || '').trim() : '';
   try {
-    const songs = listKaraokeFiles_();
-    const payload = JSON.stringify({ ok: true, folderId: FOLDER_ID, songs: songs });
+    const requestedFolderId = e && e.parameter ? String(e.parameter.folderId || '').trim() : '';
+    const folderId = requestedFolderId || DEFAULT_FOLDER_ID;
+    const songs = listKaraokeFiles_(folderId);
+    const payload = JSON.stringify({ ok: true, folderId: folderId, songs: songs });
     return output_(payload, callback);
   } catch (err) {
     const payload = JSON.stringify({ ok: false, error: String(err && err.message || err), songs: [] });
     return output_(payload, callback);
   }
+}
+
+/** Devuelve la biblioteca para el puente HTML de navegadores móviles. */
+function getKaraokeLibrary(folderId) {
+  const id = String(folderId || DEFAULT_FOLDER_ID).trim();
+  return listKaraokeFiles_(id);
 }
 
 function output_(json, callback) {
@@ -36,8 +70,8 @@ function output_(json, callback) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function listKaraokeFiles_() {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
+function listKaraokeFiles_(folderId) {
+  const folder = DriveApp.getFolderById(folderId);
   const files = folder.getFiles();
   const songs = [];
 
@@ -46,9 +80,11 @@ function listKaraokeFiles_() {
     const mime = String(file.getMimeType() || '');
     const name = String(file.getName() || '');
 
-    // Solo vídeos. Si prefieres aceptar cualquier archivo de Drive,
-    // elimina esta condición.
-    if (!mime.startsWith('video/')) continue;
+    // Aceptar vídeos aunque Drive entregue un MIME inesperado.
+    // Esto cubre MP4/MOV/WebM/M4V/MKV/AVI y otros archivos de vídeo comunes.
+    const ext = (name.match(/\.([a-z0-9]+)$/i) || [,''])[1].toLowerCase();
+    const videoExts = ['mp4','mov','webm','m4v','mkv','avi','mpeg','mpg','3gp','ogv'];
+    if (!mime.startsWith('video/') && videoExts.indexOf(ext) === -1) continue;
 
     const title = name.replace(/\.[^.]+$/, '').trim() || 'Karaoke sin título';
     const artistParts = title.split(/\s+-\s+/);
@@ -77,9 +113,9 @@ function listKaraokeFiles_() {
  * Ejecuta esta función una vez desde el editor para comprobar permisos y acceso.
  */
 function testFolderAccess() {
-  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const folder = DriveApp.getFolderById(DEFAULT_FOLDER_ID);
   Logger.log('Carpeta: ' + folder.getName());
-  const songs = listKaraokeFiles_();
+  const songs = listKaraokeFiles_(DEFAULT_FOLDER_ID);
   Logger.log('Vídeos encontrados: ' + songs.length);
   songs.forEach(function(song) { Logger.log(song.name + ' → ' + song.id); });
 }

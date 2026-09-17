@@ -1,22 +1,14 @@
-# Xpresia — Diagnóstico de biblioteca Google Drive
+# Diagnóstico Xpresia Karaoke v13
 
-## Problema actual
-Si Xpresia muestra:
-"Google Drive no respondió. Mostrando biblioteca local de prueba"
-la página está funcionando, pero el endpoint de Google Apps Script no está entregando la respuesta JSONP a Xpresia.
+Apps Script ya fue comprobado: la implementación activa devuelve `ok:true` y una lista real de vídeos de la carpeta de Drive.
 
-## Revisar en Google Apps Script
-1. Abrir el proyecto que contiene `karaoke-folder-apps-script.gs`.
-2. Ejecutar manualmente `testFolderAccess()` una vez y autorizar los permisos de Drive.
-3. Confirmar que el registro muestra la carpeta y vídeos encontrados.
-4. Ir a **Implementar → Administrar implementaciones**.
-5. Editar la implementación de tipo **Aplicación web**.
-6. **Ejecutar como:** la cuenta propietaria del script.
-7. **Quién tiene acceso:** cualquier usuario / cualquiera, según la opción que muestre Google.
-8. Crear una nueva versión y volver a implementar.
-9. Usar la URL `/exec` de esa implementación en `KARAOKE_API_URL` de `index.html`.
+La v13 agrega una función Netlify server-side (`netlify/functions/karaoke.js`) para que PC y móvil consulten la biblioteca mediante una petición same-origin. Así el navegador móvil no depende de JSONP, CORS ni de iframes de Apps Script.
 
-Importante: la carpeta y los vídeos deben ser accesibles por la cuenta que ejecuta el Apps Script. Que un archivo esté configurado como "cualquiera con el enlace" no sustituye los permisos de la cuenta que ejecuta `DriveApp`.
+### Prueba recomendada
+1. Publicar/desplegar la carpeta completa en Netlify.
+2. Abrir la URL HTTPS de Netlify.
+3. Entrar en Canto → Karaoke.
+4. Pulsar `↻ Actualizar`.
+5. Deben aparecer las canciones reales de Drive.
 
-## Qué significa la canción de prueba
-La canción que aparece después de pulsar Actualizar proviene exclusivamente de `karaoke-library.json`. No demuestra que Drive haya respondido.
+No es necesario modificar ni volver a publicar Apps Script para esta v13.
