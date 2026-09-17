@@ -752,15 +752,59 @@ function loadKaraokeLibraryFromAppsScript(){
     const api=String(KARAOKE_API_URL||'').trim();
     if(!api){reject(new Error('KARAOKE_API_URL no configurada'));return}
     if(!karaokeFolderId){reject(new Error('No hay carpeta configurada'));return}
-    const callback='xpresiaKaraokeCallback_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-    let finished=false;
-    const script=document.createElement('script');
-    const cleanup=()=>{try{delete window[callback]}catch(e){};script.remove()};
-    const timer=setTimeout(()=>{if(finished)return;finished=true;cleanup();reject(new Error('Tiempo de espera agotado al consultar Apps Script'))},12000);
-    window[callback]=(data)=>{if(finished)return;finished=true;clearTimeout(timer);cleanup();if(data&&data.ok&&Array.isArray(data.songs)){resolve(data.songs)}else{reject(new Error(data?.error||'Apps Script no devolvió una biblioteca válida'))}};
-    script.onerror=()=>{if(finished)return;finished=true;clearTimeout(timer);cleanup();reject(new Error('No se pudo contactar con Apps Script'))};
-    script.src=api+(api.includes('?')?'&':'?')+'callback='+encodeURIComponent(callback)+'&folderId='+encodeURIComponent(karaokeFolderId)+'&_='+Date.now();
-    document.head.appendChild(script);
+
+    // Google Apps Script responde mediante JSONP. En algunos móviles la
+    // conexión inicial puede tardar bastante más que en PC, especialmente
+    // cuando el script se despierta por primera vez. Por eso dejamos más
+    // margen y hacemos una segunda tentativa si la primera expira.
+    const maxAttempts=2;
+    let attempt=0;
+    let settled=false;
+    let lastError=null;
+
+    const tryRequest=()=>{
+      if(settled)return;
+      attempt++;
+      const callback='xpresiaKaraokeCallback_'+Date.now()+'_'+Math.floor(Math.random()*1000000);
+      let timer=null;
+      const script=document.createElement('script');
+      script.async=true;
+      script.type='text/javascript';
+      script.referrerPolicy='no-referrer-when-downgrade';
+      const cleanup=()=>{
+        if(timer)clearTimeout(timer);
+        try{delete window[callback]}catch(e){window[callback]=undefined}
+        try{script.remove()}catch(e){if(script.parentNode)script.parentNode.removeChild(script)}
+      };
+      window[callback]=(data)=>{
+        if(settled)return;
+        settled=true;
+        cleanup();
+        if(data&&data.ok&&Array.isArray(data.songs)){
+          resolve(data.songs);
+        }else{
+          reject(new Error(data?.error||'Apps Script no devolvió una biblioteca válida'));
+        }
+      };
+      script.onerror=()=>{
+        lastError=new Error('No se pudo contactar con Apps Script (intento '+attempt+')');
+        cleanup();
+        if(attempt<maxAttempts){setTimeout(tryRequest,700);return}
+        if(!settled){settled=true;reject(lastError)}
+      };
+      timer=setTimeout(()=>{
+        lastError=new Error('Tiempo de espera agotado al consultar Apps Script (intento '+attempt+')');
+        cleanup();
+        if(attempt<maxAttempts){setTimeout(tryRequest,700);return}
+        if(!settled){settled=true;reject(lastError)}
+      },30000);
+      const sep=api.includes('?')?'&':'?';
+      script.src=api+sep+'callback='+encodeURIComponent(callback)+'&folderId='+encodeURIComponent(karaokeFolderId)+'&compact=1&_='+Date.now()+'_'+attempt;
+      // Insertarlo en body mejora compatibilidad con algunos navegadores
+      // móviles/WebViews que manejan de forma diferente scripts dinámicos.
+      (document.body||document.head||document.documentElement).appendChild(script);
+    };
+    tryRequest();
   });
 }
 async function loadKaraokeLibrary(){
