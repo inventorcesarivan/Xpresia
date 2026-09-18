@@ -42,8 +42,9 @@ function doGet(e) {
   try {
     const requestedFolderId = e && e.parameter ? String(e.parameter.folderId || '').trim() : '';
     const folderId = requestedFolderId || DEFAULT_FOLDER_ID;
+    const folder = DriveApp.getFolderById(folderId);
     const songs = listKaraokeFiles_(folderId);
-    const payload = JSON.stringify({ ok: true, folderId: folderId, songs: songs });
+    const payload = JSON.stringify({ ok: true, folderId: folderId, folderName: folder.getName(), songs: songs });
     return output_(payload, callback);
   } catch (err) {
     const payload = JSON.stringify({ ok: false, error: String(err && err.message || err), songs: [] });
