@@ -2,7 +2,7 @@
  * Xpresia — Biblioteca Karaoke desde una carpeta de Google Drive
  *
  * Carpeta predeterminada:
- * 1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2
+ * 1bCMFbQS5FFu9Ot65MCbNDgmY2z27WpUm
  *
  * Xpresia puede enviar otro folderId. El script intentará leerlo con
  * los permisos de la cuenta que ejecuta la aplicación web.
@@ -12,7 +12,7 @@
  * puede leer la carpeta aunque no sea necesario exponer credenciales en Xpresia.
  */
 
-const DEFAULT_FOLDER_ID = '1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2';
+const DEFAULT_FOLDER_ID = '1bCMFbQS5FFu9Ot65MCbNDgmY2z27WpUm';
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};

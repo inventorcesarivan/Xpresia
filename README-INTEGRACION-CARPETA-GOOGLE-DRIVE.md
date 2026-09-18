@@ -3,7 +3,7 @@
 ## Carpeta configurada
 
 ID:
-`1aU7Zsf3p0VFGoFr2tM09h_ZShni9IkL2`
+`1bCMFbQS5FFu9Ot65MCbNDgmY2z27WpUm`
 
 En esta versión Xpresia deja de depender de `karaoke-library.json` para la biblioteca principal. La aplicación web de Google Apps Script lee directamente los vídeos de esa carpeta y devuelve sus datos a Xpresia.
 
