@@ -1,36 +1,20 @@
-# Xpresia v20 — Biblioteca de Karaoke
+# Xpresia v20 — Bibliotecas de Google Drive
 
-## Funcionamiento
+## Flujo
+Xpresia -> Netlify -> Apps Script -> carpeta Drive solicitada.
 
-Xpresia inicia automáticamente con una biblioteca propia de Google Drive. La carpeta predeterminada está configurada internamente y **no se muestra al usuario**.
+## Apps Script
+1. Reemplaza el código por `karaoke-folder-apps-script.gs`.
+2. Implementa como aplicación web.
+3. Ejecutar como: Yo.
+4. Quién tiene acceso: Cualquiera.
+5. Crea una nueva versión y vuelve a implementar.
 
-La carpeta predeterminada actual es:
+## Para una carpeta de otra cuenta
+La carpeta externa debe estar compartida con la **misma cuenta que figura como propietaria/ejecutora del Apps Script**.
 
-`https://drive.google.com/drive/folders/1bCMFbQS5FFu9Ot65MCbNDgmY2z27WpUm`
+Para diagnosticar: pega el ID de la carpeta externa en `TEST_FOLDER_ID` y ejecuta `testSpecificFolder()`.
+- Si encuentra los vídeos: Apps Script tiene acceso y Xpresia podrá leer la carpeta.
+- Si da un error de permisos: hay que compartir la carpeta con la cuenta ejecutora del Apps Script.
 
-El usuario conserva una única opción visible:
-
-**➕ Cargar otro karaoke mediante enlace**
-
-Ese campo acepta:
-- un enlace de YouTube para cargar un karaoke individual;
-- un enlace a un archivo de Google Drive compartido como lector para cargar un karaoke individual;
-- un enlace a una carpeta de Google Drive para reemplazar temporalmente la biblioteca mostrada por otra biblioteca.
-
-La biblioteca predeterminada se carga mediante:
-
-`Xpresia -> Netlify Function -> Apps Script -> carpeta de Google Drive`
-
-## Importante
-
-Para que la biblioteca predeterminada funcione, la cuenta que ejecuta Apps Script debe tener acceso a la carpeta indicada.
-
-No se utiliza `localStorage` para cambiar la biblioteca predeterminada. El enlace de la biblioteca propia queda fijo dentro de Xpresia y Netlify.
-
-## Prueba
-
-1. Publicar la carpeta completa en Netlify.
-2. Abrir Xpresia.
-3. Entrar en Canto -> Karaoke.
-4. La biblioteca debería cargarse automáticamente.
-5. Para probar otra carpeta, pegar su enlace en **Cargar otro karaoke mediante enlace**.
+La v20 no sustituye una carpeta externa por la biblioteca principal cuando falla.
