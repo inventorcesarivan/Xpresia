@@ -736,7 +736,7 @@ function updateEvaluationModeUI(){
   if(solo){solo.style.display=shouldShowVisual?'block':'none';solo.setAttribute('aria-hidden',shouldShowVisual?'false':'true')}
   if(kv){kv.style.display=showKaraoke?'block':'none';kv.setAttribute('aria-hidden',showKaraoke?'false':'true')}
   if(img){const src=!categoryChosen?DEFAULT_VISUAL_IMAGE:(category==='reading'?'assets/imagenes/eval_lectura.jpg':category==='sing'?'assets/imagenes/eval_canto.jpg':category==='acting'?'assets/imagenes/eval_actuacion.jpg':category==='aura'?'assets/imagenes/eval_presencia.jpg':category==='imitation'?'assets/imagenes/eval_imitacion.jpg':'assets/imagenes/eval_movimiento.jpg');img.src=src;img.alt=!categoryChosen?'Xpresia — Arte y expresión en movimiento':(profiles[category]?.name||'Evaluación Xpresia')}
-  if(label){if(!categoryChosen)label.innerHTML='✨ Xpresia<small>Arte y expresión en movimiento</small>';else if(evaluationMode==='karaoke')label.innerHTML='🎵 Modo Karaoke<small>Canta siguiendo el video y las letras</small>';else if(category==='reading')label.innerHTML='📖 Modo solo micrófono<small>Lee con tu voz y deja que tu narración sea la protagonista</small>';else if(category==='sing')label.innerHTML='🎙️ Modo solo micrófono<small>Tu voz es la protagonista</small>';else label.innerHTML='✨ '+(profiles[category]?.name||'Xpresia')+'<small>Descubre y expresa tus habilidades</small>'}
+  if(label){if(!categoryChosen)label.innerHTML='✨ Xpresia<small>Arte y expresión en movimiento</small>';else if(evaluationMode==='karaoke')label.innerHTML='🎵 Modo Karaoke<small>Canta siguiendo el video y las letras</small>';else if(category==='reading')label.innerHTML='📖 Modo solo micrófono<small>Lee con tu voz y deja que tu narración sea la protagonista</small>';else if(category==='sing')label.innerHTML='🎙️ Modo solo micrófono<small>Tu voz es la protagonista</small>';else label.innerHTML='✨ '+(profiles[category]?.name||'Xpresia')+'<small>Descubre y expresa tus habilidades</small>';const topLabel=document.getElementById('evalModeTopLabel');if(topLabel)topLabel.innerHTML=label.innerHTML}
   positionVisualStage();updateLiveGuideVisibility();updateEvaluationPanelContext();
 }
 function positionVisualStage(){
@@ -766,6 +766,9 @@ function updateLiveGuideVisibility(){
   if(shouldShow){
     if(!guideTextType)renderGuideText(category,duration||60);
     guide.classList.add('liveTextGuide');guide.style.setProperty('display','block','important');
+  }else if(evalRunning&&categoryChosen){
+    guide.classList.add('liveTextGuide');guide.style.setProperty('display','block','important');
+    const textBox=document.getElementById('liveTextGuideText');if(textBox)textBox.style.display='none';
   }else{
     guide.style.display='none';
   }
