@@ -26,12 +26,12 @@ function doGet(e) {
     const safeFolderId = JSON.stringify(folderId);
     const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><script>
       const folderId = ${safeFolderId};
-      function send(ok, songs, error){
-        try { parent.postMessage({type:'xpresia-karaoke-bridge', ok:!!ok, songs:Array.isArray(songs)?songs:[], error:error||''}, '*'); } catch(e) {}
+      function send(ok, songs, error, returnedFolderId, folderName){
+        try { parent.postMessage({type:'xpresia-karaoke-bridge', ok:!!ok, songs:Array.isArray(songs)?songs:[], error:error||'', folderId:String(returnedFolderId||''), folderName:String(folderName||'')}, '*'); } catch(e) {}
       }
       google.script.run
-        .withSuccessHandler(function(songs){ send(true, songs, ''); })
-        .withFailureHandler(function(err){ send(false, [], String(err && err.message || err || 'Error de Apps Script')); })
+        .withSuccessHandler(function(result){ send(!!result.ok, result.songs || [], result.error || '', result.folderId || '', result.folderName || ''); })
+        .withFailureHandler(function(err){ send(false, [], String(err && err.message || err || 'Error de Apps Script'), folderId, ''); })
         .getKaraokeLibrary(folderId);
     </script></body></html>`;
     return HtmlService.createHtmlOutput(html)
@@ -55,7 +55,13 @@ function doGet(e) {
 /** Devuelve la biblioteca para el puente HTML de navegadores móviles. */
 function getKaraokeLibrary(folderId) {
   const id = String(folderId || DEFAULT_FOLDER_ID).trim();
-  return listKaraokeFiles_(id);
+  try {
+    const folder = DriveApp.getFolderById(id);
+    const songs = listKaraokeFiles_(id);
+    return { ok: true, folderId: id, folderName: folder.getName(), songs: songs, error: '' };
+  } catch (err) {
+    return { ok: false, folderId: id, folderName: '', songs: [], error: String(err && err.message || err || 'No se pudo acceder a la carpeta') };
+  }
 }
 
 function output_(json, callback) {
@@ -117,6 +123,18 @@ function testFolderAccess() {
   const folder = DriveApp.getFolderById(DEFAULT_FOLDER_ID);
   Logger.log('Carpeta: ' + folder.getName());
   const songs = listKaraokeFiles_(DEFAULT_FOLDER_ID);
+  Logger.log('Vídeos encontrados: ' + songs.length);
+  songs.forEach(function(song) { Logger.log(song.name + ' → ' + song.id); });
+}
+
+
+/** Prueba una carpeta concreta. Pega su ID al ejecutar esta función. */
+function testSpecificFolder() {
+  const folderId = 'PEGA_AQUI_EL_ID_DE_LA_CARPETA';
+  const folder = DriveApp.getFolderById(folderId);
+  Logger.log('Cuenta ejecutora: ' + Session.getEffectiveUser().getEmail());
+  Logger.log('Carpeta: ' + folder.getName() + ' → ' + folder.getId());
+  const songs = listKaraokeFiles_(folderId);
   Logger.log('Vídeos encontrados: ' + songs.length);
   songs.forEach(function(song) { Logger.log(song.name + ' → ' + song.id); });
 }

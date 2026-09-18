@@ -802,8 +802,16 @@ function loadKaraokeLibraryViaBridge(){
       if(finished||event.source!==iframe.contentWindow)return;
       const data=event.data;
       if(!data||data.type!=='xpresia-karaoke-bridge')return;
-      if(data.ok&&Array.isArray(data.songs)) { if(data.folderId && String(data.folderId)!==folderId) finish(false,new Error('El puente devolvió otra carpeta de Drive')); else finish(true,data.songs); }
-      else finish(false,new Error(data.error||'El puente de Apps Script no devolvió una biblioteca válida'));
+      if(data && data.type==='xpresia-karaoke-bridge' && data.ok){
+        const returnedFolderId=String(data.folderId||'').trim();
+        if(returnedFolderId && returnedFolderId!==folderId){ finish(false,new Error('El puente devolvió otra carpeta de Drive. Solicitada: '+folderId+' · Recibida: '+returnedFolderId)); return; }
+        if(Array.isArray(data.songs)){
+          karaokeConnectedFolderName=String(data.folderName||'');
+          finish(true,data.songs);
+          return;
+        }
+      }
+      finish(false,new Error(data && data.error ? data.error : 'El puente de Apps Script no devolvió una biblioteca válida'));
     };
     const timer=setTimeout(()=>finish(false,new Error('Tiempo de espera agotado al consultar Apps Script mediante puente móvil')),30000);
     window.addEventListener('message',onMessage);
@@ -912,8 +920,20 @@ async function loadKaraokeLibrary(){
     if(note)note.textContent='Biblioteca conectada a la carpeta seleccionada. Puedes cambiarla cuando quieras y pulsar ↻ Actualizar.';
   }catch(err){
     console.warn('Biblioteca Karaoke de Google Drive no disponible:',err);
-    // La biblioteca local es SOLO un respaldo. No debe presentarse como si
-    // la carpeta de Google Drive hubiera sido cargada correctamente.
+    // Si el usuario conectó una carpeta personalizada, NO usar la biblioteca
+    // local de prueba porque podría hacer parecer que se cargó la carpeta correcta.
+    const isDefaultFolder=String(karaokeFolderId||'')===String(DEFAULT_KARAOKE_FOLDER_ID||'');
+    if(!isDefaultFolder){
+      karaokeLibrary=[];
+      renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
+      const detail=(err&&err.message)?String(err.message):'Error desconocido';
+      updateKaraokeFolderStatus('⚠️ No se pudo acceder a la carpeta seleccionada. '+detail);
+      const note=document.querySelector('.karaokeNote');
+      if(note)note.textContent='La carpeta fue seleccionada, pero Apps Script no pudo leerla. Verifica que la cuenta que ejecuta Apps Script tenga acceso a esa carpeta.';
+      if(box)box.innerHTML='<div class="karaokeEmpty">No se pudo cargar esta biblioteca. Revisa el acceso de la cuenta de Apps Script y pulsa ↻ Actualizar.</div>';
+      return;
+    }
+    // La biblioteca local es SOLO un respaldo para la carpeta predeterminada.
     try{
       const res=await fetch('karaoke-library.json?v='+Date.now(),{cache:'no-store'});
       if(!res.ok)throw new Error('HTTP '+res.status);
