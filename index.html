@@ -352,6 +352,49 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .xpresiaInstallCard h2{margin:0 0 10px;font-size:clamp(22px,5vw,30px);font-weight:900}.xpresiaInstallCard p{margin:0 auto 18px;max-width:380px;line-height:1.45;opacity:.9;font-size:15px}.xpresiaInstallActions{display:grid;gap:10px}.xpresiaInstallBtn,.xpresiaContinueBtn{width:100%;border:0;border-radius:14px;padding:14px 16px;font-weight:900;font-size:15px;cursor:pointer}.xpresiaInstallBtn{color:#06101c;background:linear-gradient(135deg,#00e5ff,#70f8ff);box-shadow:0 0 18px rgba(0,229,255,.3)}.xpresiaContinueBtn{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}.xpresiaInstallStatus{min-height:20px;margin-top:12px;font-size:12px;opacity:.72;line-height:1.35}
 @media(max-width:600px){#xpresiaInstallOverlay{padding:14px}.xpresiaInstallCard{padding:21px 17px 17px;border-radius:20px}}
 </style>
+
+<style id="xpresia-v47-ui-order">
+/* Xpresia v47 — jerarquía de acciones y orden de configuración. */
+/* Las tres acciones siguen siendo tarjetas cuadradas. Evaluar ocupa una fila propia y es ~15% mayor. */
+.skillHubOptions{
+  grid-template-columns:repeat(2,minmax(0,285px));
+  justify-content:center;
+  align-items:stretch;
+  gap:14px;
+}
+#skillHubEvaluate{
+  grid-column:1 / -1;
+  width:100%;
+  max-width:328px; /* 285px × 1.15 aprox. */
+  aspect-ratio:1 / 1;
+  justify-self:center;
+}
+#skillHubLearn,
+#skillHubCompete{
+  aspect-ratio:1 / 1;
+  width:100%;
+  max-width:285px;
+  justify-self:center;
+}
+@media(max-width:700px){
+  .skillHubOptions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:11px;
+  }
+  #skillHubEvaluate{
+    max-width:236px; /* 205px × 1.15 aprox. */
+  }
+  #skillHubLearn,
+  #skillHubCompete{
+    max-width:205px;
+  }
+}
+@media(max-width:390px){
+  .skillHubOptions{gap:9px}
+  #skillHubEvaluate{max-width:230px}
+}
+</style>
+
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
@@ -2154,8 +2197,9 @@ function openGuidedPanel(cat){
   const isVoice=cat==='sing'||cat==='reading';
   const isImitation=cat==='imitation';
   const steps=[];
-  steps.push({n:1,icon:'⏱️',title:'Selecciona el tiempo de tu evaluación',value:durationLabel(),key:'duration'});
-  steps.push({n:2,icon:'🎯',title:'Selecciona el modo de evaluación',value:modeLabel(),key:'mode'});
+  // Orden visual de configuración: 1) modo de evaluación, 2) tiempo, y luego las demás opciones.
+  steps.push({n:1,icon:'🎯',title:'Selecciona el modo de evaluación',value:modeLabel(),key:'mode'});
+  steps.push({n:2,icon:'⏱️',title:'Selecciona el tiempo de tu evaluación',value:durationLabel(),key:'duration'});
   if(!isVoice || cat==='sing' || cat==='reading') steps.push({n:3,icon:'🎵',title:'Selecciona la música',value:(cat==='sing'&&singImitationMode)?(karaokeSelectedItem?.title||'Selecciona un karaoke'):(selectedMusic.name||'Sin música de fondo'),key:'music'});
   // Texto en pantalla: paso independiente para Canto libre, Lectura y Actuación.
   // En Canto Modo imitación/Karaoke no aparece porque las letras pertenecen al video.
