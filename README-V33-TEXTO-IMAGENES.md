@@ -1,0 +1,1 @@
+Xpresia v33: se eliminó el texto HTML superpuesto de los botones cuya imagen ya contiene títulos/descripciones. Se mantienen aria-label/title para accesibilidad y se redujeron overlays oscuros para preservar la legibilidad del texto integrado en las imágenes.

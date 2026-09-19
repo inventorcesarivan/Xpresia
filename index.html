@@ -258,7 +258,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .guidedIntro{margin:10px auto 16px;color:#dffcff;line-height:1.5}
 .guidedSteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
 .guidedStep{position:relative;width:100%;aspect-ratio:1/1;min-height:0;display:flex;align-items:flex-end;justify-content:stretch;text-align:left;padding:0;overflow:hidden;border:2px solid rgba(0,229,255,.65);border-radius:20px;background-color:#071225;background-size:cover;background-position:center;color:#fff;cursor:pointer;box-shadow:0 0 18px rgba(0,229,255,.14);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
-.guidedStep::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,7,20,.06) 18%,rgba(2,7,20,.25) 42%,rgba(2,7,20,.94) 100%);z-index:0}
+.guidedStep::before{content:"";position:absolute;inset:0;background:transparent;z-index:0}
 .guidedStep:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,229,255,.28);border-color:#8ff7ff}
 .guidedStep .stepNum{position:absolute;z-index:2;left:10px;top:10px;display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:rgba(4,12,32,.76);border:1px solid #00e5ff;color:#8ff7ff;font-weight:900;box-shadow:0 0 12px rgba(0,229,255,.25)}
 .guidedStep .stepText{position:relative;z-index:2;width:100%;padding:48px 13px 13px;box-sizing:border-box;text-shadow:0 2px 8px #000,0 0 10px rgba(0,0,0,.9)}
@@ -272,7 +272,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 @media(max-width:700px){.evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.evalChoiceCard{min-height:0;width:100%;padding:10px;border-radius:17px}.evalChoiceCard strong{font-size:15px}.evalChoiceCard small{font-size:9px;margin-top:5px}.evalChoiceCard .evalChoiceArrow{width:34px;height:34px;font-size:18px;margin-top:7px}.evalChoiceCard::after{background:linear-gradient(180deg,rgba(3,5,20,0) 30%,rgba(3,5,20,.12) 100%)}}
 
 /* Modos de evaluación: tarjetas cuadradas con imagen de fondo, como el menú principal. */
-.modeChoice{position:relative;aspect-ratio:1/1;min-height:0;padding:0 13px 15px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;overflow:hidden;border-radius:20px;background-color:#07152e;background-image:linear-gradient(180deg,rgba(3,5,20,.04) 0%,rgba(3,5,20,.16) 34%,rgba(3,5,20,.72) 66%,rgba(3,5,20,.97) 100%),var(--mode-bg);background-size:cover;background-position:center;color:#fff;text-shadow:0 2px 5px #000,0 0 12px rgba(0,0,0,.9);box-shadow:0 0 18px rgba(0,229,255,.15);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,filter .2s ease}.modeChoice::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%)}.modeChoice:hover{transform:translateY(-4px) scale(1.01);border-color:#fff;box-shadow:0 0 28px rgba(0,229,255,.3)}.modeChoice.modeFree{border-color:#ff315d}.modeChoice.modeFree:hover{box-shadow:0 0 30px rgba(255,49,93,.4)}.modeChoice.modeImitation{border-color:#ff00df}.modeChoice.modeImitation:hover{box-shadow:0 0 30px rgba(255,0,223,.4)}.modeChoice small{position:relative;z-index:1;width:100%;margin-top:7px;color:#fff;font-size:clamp(12px,1.25vw,15px);line-height:1.35;font-weight:700;text-shadow:0 2px 6px #000,0 0 12px #000}.modeChoice{font-size:clamp(18px,1.8vw,25px);letter-spacing:.4px}.modeChoice.modeImitation{font-size:clamp(17px,1.7vw,24px)}
+.modeChoice{position:relative;aspect-ratio:1/1;min-height:0;padding:0 13px 15px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;overflow:hidden;border-radius:20px;background-color:#07152e;background-image:var(--mode-bg);background-size:cover;background-position:center;color:#fff;text-shadow:0 2px 5px #000,0 0 12px rgba(0,0,0,.9);box-shadow:0 0 18px rgba(0,229,255,.15);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,filter .2s ease}.modeChoice::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%)}.modeChoice:hover{transform:translateY(-4px) scale(1.01);border-color:#fff;box-shadow:0 0 28px rgba(0,229,255,.3)}.modeChoice.modeFree{border-color:#ff315d}.modeChoice.modeFree:hover{box-shadow:0 0 30px rgba(255,49,93,.4)}.modeChoice.modeImitation{border-color:#ff00df}.modeChoice.modeImitation:hover{box-shadow:0 0 30px rgba(255,0,223,.4)}.modeChoice small{position:relative;z-index:1;width:100%;margin-top:7px;color:#fff;font-size:clamp(12px,1.25vw,15px);line-height:1.35;font-weight:700;text-shadow:0 2px 6px #000,0 0 12px #000}.modeChoice{font-size:clamp(18px,1.8vw,25px);letter-spacing:.4px}.modeChoice.modeImitation{font-size:clamp(17px,1.7vw,24px)}
 @media(max-width:700px){.choiceGrid{gap:10px;margin:14px 0}.modeChoice{border-radius:17px;padding:0 9px 11px;font-size:clamp(15px,4vw,20px)}.modeChoice.modeImitation{font-size:clamp(14px,3.8vw,19px)}.modeChoice small{font-size:clamp(10px,2.8vw,13px);line-height:1.3}.modeChoice:hover{transform:none}}
 .modeKaraokeHighlight{color:#ff5ee9;text-shadow:0 0 10px rgba(255,0,223,.5);font-weight:900;white-space:nowrap}
 .activationForm{margin:12px auto 4px;max-width:520px;text-align:left}.activationForm label{display:block;margin:8px 0 5px;color:#bfefff;font-weight:800;font-size:12px}.activationForm input{width:100%;box-sizing:border-box;padding:12px 13px;border-radius:11px;border:1px solid rgba(0,229,255,.65);background:#07152e;color:#fff;font-size:15px}.activationForm .ageRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.activationError{min-height:18px;color:#ff8d9f;font-size:11px;text-align:center;margin:6px 0}.activationEnter{width:100%;margin-top:8px}
@@ -305,7 +305,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .skillHubPanel.hub-aura #skillHubEvaluate{background-image:url('./assets/imagenes/accion_evaluar_aura.jpg') !important}.skillHubPanel.hub-aura #skillHubLearn{background-image:url('./assets/imagenes/accion_aprender_aura.jpg') !important}.skillHubPanel.hub-aura #skillHubCompete{background-image:url('./assets/imagenes/accion_competir_aura.jpg') !important}
 .skillHubPanel.hub-imitation #skillHubEvaluate{background-image:url('./assets/imagenes/accion_evaluar_imitacion.jpg') !important}.skillHubPanel.hub-imitation #skillHubLearn{background-image:url('./assets/imagenes/accion_aprender_imitacion.jpg') !important}.skillHubPanel.hub-imitation #skillHubCompete{background-image:url('./assets/imagenes/accion_competir_imitacion.jpg') !important}
 .skillHubCard#skillHubEvaluate{background-image:url('./assets/imagenes/accion_evaluar_baile.jpg')}.skillHubCard#skillHubLearn{background-image:url('./assets/imagenes/accion_aprender_baile.jpg')}.skillHubCard#skillHubCompete{background-image:url('./assets/imagenes/accion_competir_baile.jpg')}
-.skillHubCard::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(3,8,24,.02) 28%,rgba(3,8,24,.18) 48%,rgba(3,8,24,.92) 100%);z-index:0;pointer-events:none}
+.skillHubCard::before{content:"";position:absolute;inset:0;background:transparent;z-index:0;pointer-events:none}
 .skillHubCard:hover{transform:translateY(-3px) scale(1.01);border-color:#fff;box-shadow:0 0 28px rgba(0,229,255,.28)}
 @keyframes xpresiaActiveBeat{0%,100%{transform:scale(1);box-shadow:0 0 12px rgba(255,40,60,.22),0 0 22px rgba(255,0,45,.10)}50%{transform:scale(1.018);box-shadow:0 0 20px rgba(255,40,60,.58),0 0 42px rgba(255,0,45,.22)}}
 #skillHubEvaluate{border-color:#ff334f!important;animation:xpresiaActiveBeat 1.65s ease-in-out infinite}
@@ -391,9 +391,9 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <h2 class="skillContextTitle" id="skillHubTitle">Habilidad</h2>
 <p class="skillHubIntro">Con Xpresia puedes hacer muchas cosas diferentes.<br/><b>Elige lo que desees hacer ahora y comienza a expandir tu potencial.</b></p>
 <div class="skillHubOptions">
-<button class="skillHubCard" id="skillHubEvaluate" type="button"><span class="skillHubIcon">🎯</span><span class="skillHubText"><strong>1 · EVALÚA TUS HABILIDADES</strong><small>Configura y realiza una evaluación personalizada.</small></span></button>
-<button class="skillHubCard learn" id="skillHubLearn" type="button"><span class="skillHubIcon">📚</span><span class="skillHubText"><strong>2 · APRENDE HABILIDADES</strong><small>Aprende, practica y desarrolla tu potencial.</small></span></button>
-<button class="skillHubCard compete" id="skillHubCompete" type="button"><span class="skillHubIcon">🏆</span><span class="skillHubText"><strong>3 · COMPITE CONTRA OTROS USUARIOS</strong><small>Muy pronto podrás poner tus habilidades a prueba.</small></span></button>
+<button class="skillHubCard" id="skillHubEvaluate" type="button" aria-label="Evalúa tus habilidades" title="Evalúa tus habilidades"></button>
+<button class="skillHubCard learn" id="skillHubLearn" type="button" aria-label="Aprende habilidades" title="Aprende habilidades"></button>
+<button class="skillHubCard compete" id="skillHubCompete" type="button" aria-label="Compite contra otros usuarios" title="Compite contra otros usuarios"></button>
 </div>
 </div>
 <div class="panel guidedPanel" id="guidedPanel" style="display:none"></div>
@@ -2131,7 +2131,7 @@ function openGuidedPanel(cat){
   const textAvailable=(cat==='reading'||cat==='acting'||(cat==='sing'&&!singImitationMode));
   if(textAvailable){ const n=steps.length+1; steps.push({n,icon:'📝',title:'Agrega texto en pantalla',value:textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo',key:'text'}); }
   if(isImitation) steps.push({n:steps.length+1,icon:'🎭',title:'Elige tu desafío',value:document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible',key:'imitation'});
-  panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+skillTitle(cat)+'</h2><p class="guidedIntro">Para evaluar tu habilidad primero debes elegir algunas opciones.</p><div class="guidedSteps">'+steps.map(st=>'<button class="guidedStep" type="button" data-step-key="'+st.key+'"><span class="stepNum">'+st.n+'</span><span class="stepText"><strong>'+st.icon+' PASO '+st.n+' · '+st.title+'</strong><small id="guidedValue-'+st.key+'">'+st.value+'</small></span></button>').join('')+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
+  panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+skillTitle(cat)+'</h2><p class="guidedIntro">Para evaluar tu habilidad primero debes elegir algunas opciones.</p><div class="guidedSteps">'+steps.map(st=>'<button class="guidedStep" type="button" data-step-key="'+st.key+'" aria-label="Paso '+st.n+': '+st.title+'" title="Paso '+st.n+': '+st.title+'"></button>').join('')+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
   const guidedImages={mode:'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
   panel.querySelectorAll('.guidedStep').forEach(b=>{const url=guidedImages[b.dataset.stepKey];if(url)b.style.backgroundImage='url(\"'+url+'\")';});
   panel.querySelector('#guidedBack').onclick=returnToMain;
@@ -2173,14 +2173,14 @@ function openModePanel(){
   const imitationDescription=category==='sing'?'Realiza la evaluación tomando como referencia un karaoke.':'Realiza la evaluación tomando como referencia un video de referencia.';
   const opts=[['free','🎤 Modo libre','Realiza la evaluación sin comparar tus movimientos o interpretación con un video de referencia.'],['imitation',imitationTitle,imitationDescription]];
   const modeImages={dance:{free:'assets/imagenes/modo_baile_libre.jpg',imitation:'assets/imagenes/modo_baile_imitacion.jpg'},sing:{free:'assets/imagenes/modo_canto_libre.jpg',imitation:'assets/imagenes/modo_canto_imitacion.jpg'},reading:{free:'assets/imagenes/modo_lectura_libre.jpg',imitation:'assets/imagenes/modo_lectura_imitacion.jpg'},acting:{free:'assets/imagenes/modo_actuacion_libre.jpg',imitation:'assets/imagenes/modo_actuacion_imitacion.jpg'},aura:{free:'assets/imagenes/modo_aura_libre.jpg',imitation:'assets/imagenes/modo_aura_imitacion.jpg'},imitation:{free:'assets/imagenes/modo_imitacion_libre.jpg',imitation:'assets/imagenes/modo_imitacion_imitacion.jpg'}};
-  box.innerHTML=opts.map(o=>'<button class="choiceButton modeChoice '+(o[0]==='free'?'modeFree':'modeImitation')+'" data-v="'+o[0]+'" data-category="'+category+'">'+o[1]+'<small>'+o[2]+'</small></button>').join('');
+  box.innerHTML=opts.map(o=>'<button class="choiceButton modeChoice '+(o[0]==='free'?'modeFree':'modeImitation')+'" type="button" data-v="'+o[0]+'" data-category="'+category+'" aria-label="'+o[1].replace(/<[^>]*>/g,'')+'" title="'+o[1].replace(/<[^>]*>/g,'')+'"></button>').join('');
   box.querySelectorAll('button.modeChoice').forEach(b=>{const img=modeImages[b.dataset.category]?.[b.dataset.v];if(img)b.style.setProperty('--mode-bg',"url('"+img+"')");b.onclick=()=>{
   const v=b.dataset.v;
     if(v==='free'){
       singImitationMode=false; karaokeWithCamera=false;
       // Actuación, Farmear Aura e Imitación requieren cámara obligatoriamente:
       // no deben mostrar el subpanel de elección entre cámara y sin cámara.
-      if(['acting','aura','imitation'].includes(category)){
+      if(!['sing','reading'].includes(category)){
         resetEvaluationSelectionState();
         evaluationMode='camera';
         updateEvaluationModeUI();
@@ -2304,3 +2304,18 @@ spectrumLoop();
 </script>
 </body>
 </html>
+
+<style>/* v33: las imágenes de las tarjetas ya contienen su propio texto. */
+.guidedStep .stepNum,.guidedStep .stepText,.skillHubCard .skillHubIcon,.skillHubCard .skillHubText,.modeChoice small{display:none!important}
+.guidedStep::before,.skillHubCard::before{background:transparent!important}
+</style>
+
+<style>
+/* v34: las tarjetas que usan imágenes con texto integrado no muestran
+   ningún texto HTML adicional encima de la imagen. */
+.guidedStep{font-size:0 !important;color:transparent !important;}
+.guidedStep > *, .guidedStep .stepNum, .guidedStep .stepText{display:none !important;visibility:hidden !important;}
+.guidedStep::before,.guidedStep::after{content:none !important;background:transparent !important;}
+.modeChoice > *, .evalChoiceCard > *, .skillHubCard > *{visibility:hidden !important;}
+.modeChoice::before,.modeChoice::after,.evalChoiceCard::after,.skillHubCard::before{background:transparent !important;}
+</style>
