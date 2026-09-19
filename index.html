@@ -2120,7 +2120,7 @@ function openGuidedPanel(cat){
   updateGuidedPanel(); openPanel('guidedPanel');
 }
 function durationLabel(){return duration===0?'Libre':duration<60?duration+' segundos':(duration/60)+' minuto'+(duration===60?'':'s')}
-function modeLabel(){if(category==='dance'&&evaluationMode==='camera')return 'Modo libre';if(category==='sing'&&singImitationMode)return 'Modo imitación (Karaoke)';return evaluationMode==='voice'?'Modo libre · Sin cámara':evaluationMode==='karaoke'?'Modo imitación (Karaoke)':'Modo libre · Con cámara'}
+function modeLabel(){if(category==='dance'&&evaluationMode==='camera')return 'Modo libre';if(category==='sing'&&singImitationMode)return 'Modo imitación (Karaoke)';return evaluationMode==='voice'?'Modo libre · Sin cámara':evaluationMode==='karaoke'?(category==='sing'?'Modo imitación (Karaoke)':'Modo imitación'):'Modo libre · Con cámara'}
 function guidedStepAction(key){
   if(key==='duration')openDurationPanel();
   else if(key==='mode')openModePanel();
@@ -2149,7 +2149,9 @@ function openImitationChallengePanel(){
 function openDurationPanel(){const box=document.getElementById('durationChoices'); if(!box)return; const opts=[[60,'1 minuto'],[120,'2 minutos'],[180,'3 minutos'],[240,'4 minutos'],[300,'5 minutos']]; box.innerHTML=opts.map(([v,t])=>'<button class="choiceButton" data-v="'+v+'">⏱️ '+t+'</button>').join(''); box.querySelectorAll('button').forEach(b=>b.onclick=()=>{duration=+b.dataset.v;document.getElementById('duration').value=String(duration);updateGuidedPanel();openPanel('guidedPanel')}); document.getElementById('durationBack').onclick=()=>openPanel('guidedPanel');openPanel('durationPanel')}
 function openModePanel(){
   const box=document.getElementById('modeChoices');if(!box)return;
-  const opts=[['free','🎤 Modo libre','Realiza la evaluación sin comparar tus movimientos o interpretación con un video de referencia.'],['imitation','🎭 Modo imitación <span class="modeKaraokeHighlight">(Karaoke)</span>','Realiza la evaluación tomando como referencia un karaoke.']];
+  const imitationTitle=category==='sing'?'🎭 Modo imitación <span class="modeKaraokeHighlight">(Karaoke)</span>':'🎭 Modo imitación';
+  const imitationDescription=category==='sing'?'Realiza la evaluación tomando como referencia un karaoke.':'Realiza la evaluación tomando como referencia un video de referencia.';
+  const opts=[['free','🎤 Modo libre','Realiza la evaluación sin comparar tus movimientos o interpretación con un video de referencia.'],['imitation',imitationTitle,imitationDescription]];
   const modeImages={dance:{free:'assets/imagenes/modo_baile_libre.jpg',imitation:'assets/imagenes/modo_baile_imitacion.jpg'},sing:{free:'assets/imagenes/modo_canto_libre.jpg',imitation:'assets/imagenes/modo_canto_imitacion.jpg'},reading:{free:'assets/imagenes/modo_lectura_libre.jpg',imitation:'assets/imagenes/modo_lectura_imitacion.jpg'},acting:{free:'assets/imagenes/modo_actuacion_libre.jpg',imitation:'assets/imagenes/modo_actuacion_imitacion.jpg'},aura:{free:'assets/imagenes/modo_aura_libre.jpg',imitation:'assets/imagenes/modo_aura_imitacion.jpg'},imitation:{free:'assets/imagenes/modo_imitacion_libre.jpg',imitation:'assets/imagenes/modo_imitacion_imitacion.jpg'}};
   box.innerHTML=opts.map(o=>'<button class="choiceButton modeChoice '+(o[0]==='free'?'modeFree':'modeImitation')+'" data-v="'+o[0]+'" data-category="'+category+'">'+o[1]+'<small>'+o[2]+'</small></button>').join('');
   box.querySelectorAll('button.modeChoice').forEach(b=>{const img=modeImages[b.dataset.category]?.[b.dataset.v];if(img)b.style.setProperty('--mode-bg',"url('"+img+"')");b.onclick=()=>{
