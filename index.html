@@ -355,7 +355,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 
 <style id="xpresia-v47-ui-order">
 /* Xpresia v47 — jerarquía de acciones y orden de configuración. */
-/* Las tres acciones siguen siendo tarjetas cuadradas. Evaluar ocupa una fila propia y es ~15% mayor. */
+/* Las tres acciones siguen siendo tarjetas cuadradas. Evaluar ocupa una fila propia, pero las tres conservan el mismo tamaño visual que las tarjetas de habilidades del menú inicial. */
 .skillHubOptions{
   grid-template-columns:repeat(2,minmax(0,285px));
   justify-content:center;
@@ -365,7 +365,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 #skillHubEvaluate{
   grid-column:1 / -1;
   width:100%;
-  max-width:328px; /* 285px × 1.15 aprox. */
+  max-width:285px; /* mismo tamaño que las tarjetas de habilidades del menú inicial */
   aspect-ratio:1 / 1;
   justify-self:center;
 }
@@ -382,7 +382,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
     gap:11px;
   }
   #skillHubEvaluate{
-    max-width:236px; /* 205px × 1.15 aprox. */
+    max-width:205px; /* mismo tamaño que las tarjetas de habilidades del menú inicial */
   }
   #skillHubLearn,
   #skillHubCompete{
@@ -391,7 +391,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 }
 @media(max-width:390px){
   .skillHubOptions{gap:9px}
-  #skillHubEvaluate{max-width:230px}
+  #skillHubEvaluate{max-width:205px}
 }
 </style>
 
