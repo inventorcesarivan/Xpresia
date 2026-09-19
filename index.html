@@ -256,11 +256,15 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 /* Navegación guiada por pasos */
 .guidedPanel{text-align:center}
 .guidedIntro{margin:10px auto 16px;color:#dffcff;line-height:1.5}
-.guidedSteps{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
-.guidedStep{width:100%;display:flex;align-items:center;gap:13px;text-align:left;padding:14px;border:1px solid rgba(0,229,255,.65);border-radius:15px;background:linear-gradient(135deg,rgba(8,25,61,.98),rgba(7,15,36,.98));color:#fff;cursor:pointer}
-.guidedStep .stepNum{flex:0 0 42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(0,229,255,.12);border:1px solid #00e5ff;color:#8ff7ff;font-weight:900}
-.guidedStep .stepText{flex:1}.guidedStep strong{display:block;font-size:14px}.guidedStep small{display:block;margin-top:4px;color:#bfefff;font-size:10px;line-height:1.35}
-.guidedStep.done{border-color:#20e889}.guidedStep.done .stepNum{border-color:#20e889;color:#65f5ad;background:rgba(32,232,137,.1)}
+.guidedSteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.guidedStep{position:relative;width:100%;aspect-ratio:1/1;min-height:0;display:flex;align-items:flex-end;justify-content:stretch;text-align:left;padding:0;overflow:hidden;border:2px solid rgba(0,229,255,.65);border-radius:20px;background-color:#071225;background-size:cover;background-position:center;color:#fff;cursor:pointer;box-shadow:0 0 18px rgba(0,229,255,.14);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.guidedStep::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,7,20,.06) 18%,rgba(2,7,20,.25) 42%,rgba(2,7,20,.94) 100%);z-index:0}
+.guidedStep:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,229,255,.28);border-color:#8ff7ff}
+.guidedStep .stepNum{position:absolute;z-index:2;left:10px;top:10px;display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:rgba(4,12,32,.76);border:1px solid #00e5ff;color:#8ff7ff;font-weight:900;box-shadow:0 0 12px rgba(0,229,255,.25)}
+.guidedStep .stepText{position:relative;z-index:2;width:100%;padding:48px 13px 13px;box-sizing:border-box;text-shadow:0 2px 8px #000,0 0 10px rgba(0,0,0,.9)}
+.guidedStep strong{display:block;font-size:14px;line-height:1.15;color:#fff}.guidedStep small{display:block;margin-top:6px;color:#e9fbff;font-size:11px;line-height:1.3;font-weight:700}
+.guidedStep.done{border-color:#20e889;box-shadow:0 0 22px rgba(32,232,137,.22)}.guidedStep.done .stepNum{border-color:#20e889;color:#65f5ad;background:rgba(4,28,22,.78)}
+@media(max-width:700px){.guidedSteps{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.guidedStep{border-radius:17px}.guidedStep .stepNum{width:34px;height:34px;border-radius:11px;left:8px;top:8px}.guidedStep .stepText{padding:42px 10px 10px}.guidedStep strong{font-size:12px}.guidedStep small{font-size:9px}}
 .guidedStart{margin-top:8px}.guidedStart:disabled{opacity:.42;cursor:not-allowed}
 .choicePanel{text-align:center}.choiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}.choiceButton{min-height:86px;padding:14px;border:2px solid #00e5ff;border-radius:15px;background:#07152e;color:#fff;font-weight:800;cursor:pointer}.choiceButton:hover{border-color:#fff}.choiceButton small{display:block;margin-top:5px;color:#bfefff;font-weight:500;font-size:10px}
 /* Modos de evaluación: tarjetas cuadradas con imagen de fondo, como el menú principal. */
@@ -2112,8 +2116,10 @@ function openGuidedPanel(cat){
   // En Canto Modo imitación/Karaoke no aparece porque las letras pertenecen al video.
   const textAvailable=(cat==='reading'||cat==='acting'||(cat==='sing'&&!singImitationMode));
   if(textAvailable){ const n=steps.length+1; steps.push({n,icon:'📝',title:'Agrega texto en pantalla',value:textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo',key:'text'}); }
-  if(isImitation) steps.push({n:3,icon:'🎭',title:'Elige tu desafío',value:document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible',key:'imitation'});
+  if(isImitation) steps.push({n:steps.length+1,icon:'🎭',title:'Elige tu desafío',value:document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible',key:'imitation'});
   panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+skillTitle(cat)+'</h2><p class="guidedIntro">Para evaluar tu habilidad primero debes elegir algunas opciones.</p><div class="guidedSteps">'+steps.map(st=>'<button class="guidedStep" type="button" data-step-key="'+st.key+'"><span class="stepNum">'+st.n+'</span><span class="stepText"><strong>'+st.icon+' PASO '+st.n+' · '+st.title+'</strong><small id="guidedValue-'+st.key+'">'+st.value+'</small></span></button>').join('')+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
+  const guidedImages={mode:'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
+  panel.querySelectorAll('.guidedStep').forEach(b=>{const url=guidedImages[b.dataset.stepKey];if(url)b.style.backgroundImage='url(\"'+url+'\")';});
   panel.querySelector('#guidedBack').onclick=returnToMain;
   panel.querySelectorAll('.guidedStep').forEach(b=>b.onclick=()=>guidedStepAction(b.dataset.stepKey));
   panel.querySelector('#guidedStart').onclick=()=>openEvaluationForGuided();
