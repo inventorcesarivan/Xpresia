@@ -300,17 +300,19 @@ async function setMicrophoneEnabled(enabled){
   }
   let newStream=null;
   try{
-    newStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    newStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:true,channelCount:1,sampleRate:48000}});
     if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
     if(audioContext.state==='suspended')await audioContext.resume();
     const source=audioContext.createMediaStreamSource(newStream);
     const gain=audioContext.createGain();
-    gain.gain.value=volumeLevel;
+    gain.gain.value=Math.min(2.25,Math.max(1.35,volumeLevel*1.9));
     if(!audioDestination)audioDestination=audioContext.createMediaStreamDestination();
     const analyser=audioContext.createAnalyser();
-    analyser.fftSize=512;analyser.smoothingTimeConstant=.78;
+    analyser.fftSize=1024;analyser.smoothingTimeConstant=.72;
+    analyser.minDecibels=-90;analyser.maxDecibels=-10;
     const spectrum=audioContext.createAnalyser();
-    spectrum.fftSize=1024;spectrum.smoothingTimeConstant=.82;
+    spectrum.fftSize=2048;spectrum.smoothingTimeConstant=.70;
+    spectrum.minDecibels=-90;spectrum.maxDecibels=-8;
     source.connect(analyser);source.connect(spectrum);source.connect(gain);gain.connect(audioDestination);
     // Guardar la cadena real del micrófono en el estado global. Sin estas
     // referencias las evaluaciones no podían consultar el analizador aunque
@@ -878,7 +880,7 @@ function updateMicNoiseFloor(){
   const rms=Math.sqrt(sum/n);
   if(Number.isFinite(rms)) micNoiseFloorRms=micNoiseFloorRms*.92+rms*.08;
 }
-function detectVoicePitch(){if(!micAnalyser||!audioContext)return null;const n=256,buf=new Float32Array(n);micAnalyser.getFloatTimeDomainData(buf);let sum=0;for(let i=0;i<n;i++)sum+=buf[i]*buf[i];const rms=Math.sqrt(sum/n);voiceRmsHistory.push(rms);if(voiceRmsHistory.length>600)voiceRmsHistory.shift();const recent=voiceRmsHistory.slice(-40);const sortedR=[...recent].sort((a,b)=>a-b);const floor=sortedR[Math.floor(sortedR.length*.2)]||0.003;const adaptiveFloor=Math.max(micNoiseFloorRms,floor);const threshold=Math.max(.014,adaptiveFloor*2.8);if(rms<threshold)return null;let bestTau=-1,bestCorr=0;const minTau=Math.max(2,Math.floor(audioContext.sampleRate/1000)),maxTau=Math.min(n-2,Math.floor(audioContext.sampleRate/75));for(let tau=minTau;tau<=maxTau;tau+=2){let corr=0,e1=0,e2=0;for(let i=0;i<n-tau;i+=2){const a=buf[i],b=buf[i+tau];corr+=a*b;e1+=a*a;e2+=b*b}const norm=corr/Math.sqrt((e1*e2)||1);if(norm>bestCorr){bestCorr=norm;bestTau=tau}}if(bestTau<0||bestCorr<.55)return null;const pitch=audioContext.sampleRate/bestTau;if(pitch<75||pitch>1000)return null;return{pitch,rms,confidence:bestCorr}}
+function detectVoicePitch(){if(!micAnalyser||!audioContext)return null;const n=256,buf=new Float32Array(n);micAnalyser.getFloatTimeDomainData(buf);let sum=0;for(let i=0;i<n;i++)sum+=buf[i]*buf[i];const rms=Math.sqrt(sum/n);voiceRmsHistory.push(rms);if(voiceRmsHistory.length>600)voiceRmsHistory.shift();const recent=voiceRmsHistory.slice(-40);const sortedR=[...recent].sort((a,b)=>a-b);const floor=sortedR[Math.floor(sortedR.length*.2)]||0.003;const adaptiveFloor=Math.max(micNoiseFloorRms,floor);const threshold=Math.max(.007,adaptiveFloor*1.9);if(rms<threshold)return null;let bestTau=-1,bestCorr=0;const minTau=Math.max(2,Math.floor(audioContext.sampleRate/1000)),maxTau=Math.min(n-2,Math.floor(audioContext.sampleRate/75));for(let tau=minTau;tau<=maxTau;tau+=2){let corr=0,e1=0,e2=0;for(let i=0;i<n-tau;i+=2){const a=buf[i],b=buf[i+tau];corr+=a*b;e1+=a*a;e2+=b*b}const norm=corr/Math.sqrt((e1*e2)||1);if(norm>bestCorr){bestCorr=norm;bestTau=tau}}if(bestTau<0||bestCorr<.55)return null;const pitch=audioContext.sampleRate/bestTau;if(pitch<75||pitch>1000)return null;return{pitch,rms,confidence:bestCorr}}
 function sampleMusicBeat(now){
   if(!recordMusicAnalyser||!selectedMusic.url)return;
   try{
@@ -906,7 +908,7 @@ function sampleVoice(){if(!micEnabled||!micAnalyser)return;const now=performance
   // Registramos también la envolvente de la voz aunque el detector de tono no encuentre
   // una nota. Esto permite medir presencia, entradas y regularidad rítmica.
   const n=256,buf=new Float32Array(n);micAnalyser.getFloatTimeDomainData(buf);let sum=0;for(let i=0;i<n;i++)sum+=buf[i]*buf[i];const rms=Math.sqrt(sum/n);
-  const recent=voiceRmsHistory.slice(-40),sorted=[...recent].sort((a,b)=>a-b);const floor=sorted[Math.floor(sorted.length*.2)]||0.003;const threshold=Math.max(.014,Math.max(micNoiseFloorRms,floor)*2.8);const active=rms>=threshold;
+  const recent=voiceRmsHistory.slice(-40),sorted=[...recent].sort((a,b)=>a-b);const floor=sorted[Math.floor(sorted.length*.2)]||0.003;const threshold=Math.max(.007,Math.max(micNoiseFloorRms*.9,floor*.9)*1.9);const active=rms>=threshold;
   voiceActivitySamples.push({t:now,rms,active});if(voiceActivitySamples.length>900)voiceActivitySamples.shift();
   if(active&&!lastVoiceActive)voiceOnsetTimes.push(now);if(voiceOnsetTimes.length>120)voiceOnsetTimes.shift();lastVoiceActive=active;
   sampleMusicBeat(now);
