@@ -593,7 +593,7 @@ function getStageScreenRect(){
   const topEl=document.getElementById('top'), bottomEl=document.getElementById('bottom');
   const tr=topEl?.getBoundingClientRect(), br=bottomEl?.getBoundingClientRect();
   const top=Math.max(8,(tr?.bottom||46)+margin);
-  const bottom=Math.min(innerHeight-8,(br?.top||innerHeight-50)-margin);
+  const bottom=Math.min(innerHeight-8,(br?.top||innerHeight-50)-margin-11);
   const side=8;
   // La cámara/imagen usa el mismo ancho útil que el panel principal de menú.
   // En móvil ocupa todo el ancho disponible; en web respeta el máximo común de 760 px.
@@ -2361,3 +2361,30 @@ spectrumLoop();
 </script>
 </body>
 </html>
+
+<style id="v45-altura-3mm">
+/* Xpresia v45 — ajuste fino de altura: aprox. 3 mm menos, recortando desde abajo hacia arriba. */
+:root{--xpresia-height-reduction:11px;}
+/* Paneles generales: conservan su borde superior y reducen ligeramente la altura por abajo. */
+.panel:not(.skillConfigPanel):not(#evaluationPanel){
+  max-height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+  height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+}
+/* Paneles de configuración: el borde superior queda en el mismo lugar y el inferior sube ~3 mm. */
+.skillConfigPanel,#evaluationPanel{
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 57px) !important;
+}
+/* Escenario/cámara/video: mismo ancho y borde superior; se reduce la zona inferior ~3 mm. */
+@media(min-width:701px){
+  /* El escenario se calcula desde JS; esta variable aporta el recorte inferior. */
+}
+@media(max-width:700px){
+  .panel:not(.skillConfigPanel):not(#evaluationPanel){
+    max-height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+    height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+  }
+  .skillConfigPanel,#evaluationPanel{
+    bottom:calc(max(8px,env(safe-area-inset-bottom)) + 57px) !important;
+  }
+}
+</style>
