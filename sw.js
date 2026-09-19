@@ -1,3 +1,4 @@
+// Xpresia PWA v43 - pass-through worker
 self.addEventListener('install', e => {
   self.skipWaiting();
 });
