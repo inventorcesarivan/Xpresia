@@ -2203,7 +2203,7 @@ function openGenericFreeModeSubpanel(){
   const box=panel.querySelector('#genericFreeModeChoices');
   const opts=[['camera','📷 Evaluación con cámara','Evaluaremos tu desempeño frente a la cámara.','camera','./assets/imagenes/evaluacion_con_camara.jpg'],['voice','🎙️ Evaluación sin cámara','Evaluaremos tu desempeño sin necesidad de utilizar la cámara.','voice','./assets/imagenes/evaluacion_sin_camara.jpg']];
   box.className='evalChoiceGrid';
-  box.innerHTML=opts.map(o=>'<button class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" style="background-image:url(\"'+o[4]+'\")"><span class="evalChoiceContent"><strong>'+o[1]+'</strong><small>'+o[2]+'</small><span class="evalChoiceArrow">›</span></span></button>').join('');
+  box.innerHTML=opts.map(o=>'<button class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" data-bg="'+o[4]+'"><span class="evalChoiceContent"><strong>'+o[1]+'</strong><small>'+o[2]+'</small><span class="evalChoiceArrow">›</span></span></button>').join('');box.querySelectorAll('.evalChoiceCard').forEach((card)=>{const bg=card.dataset.bg;if(bg)card.style.backgroundImage='url("'+bg+'")';});
   box.querySelectorAll('button').forEach(b=>b.onclick=()=>{resetEvaluationSelectionState();singImitationMode=false;karaokeWithCamera=false;evaluationMode=b.dataset.v;updateEvaluationModeUI();openGuidedPanel(category)});
   panel.querySelector('#genericFreeModeBack').onclick=()=>openPanel('modePanel');
   openPanel(id);
@@ -2219,7 +2219,7 @@ function openSingModeSubpanel(kind){
   const box=document.getElementById(kind==='free'?'singFreeModeChoices':'singImitationModeChoices');if(!box)return;
   const opts=[['camera','📷 Evaluación con cámara','Evaluaremos tu desempeño cantando y expresándote frente a la cámara.','camera','./assets/imagenes/evaluacion_con_camara.jpg'],['voice','🎙️ Evaluación sin cámara','Evaluaremos tu desempeño cantando, sin necesidad de expresarte frente a la cámara.','voice','./assets/imagenes/evaluacion_sin_camara.jpg']];
   box.className='evalChoiceGrid';
-  box.innerHTML=opts.map(o=>'<button class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" style="background-image:url(\"'+o[4]+'\")"><span class="evalChoiceContent"><strong>'+o[1]+'</strong><small>'+o[2]+'</small><span class="evalChoiceArrow">›</span></span></button>').join('');
+  box.innerHTML=opts.map(o=>'<button class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" data-bg="'+o[4]+'"><span class="evalChoiceContent"><strong>'+o[1]+'</strong><small>'+o[2]+'</small><span class="evalChoiceArrow">›</span></span></button>').join('');box.querySelectorAll('.evalChoiceCard').forEach((card)=>{const bg=card.dataset.bg;if(bg)card.style.backgroundImage='url("'+bg+'")';});
   box.querySelectorAll('button').forEach(b=>b.onclick=()=>{
     const v=b.dataset.v;
     resetEvaluationSelectionState();
