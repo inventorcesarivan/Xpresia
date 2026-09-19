@@ -1,0 +1,29 @@
+{
+  "id": "./",
+  "name": "Xpresia — Arte y expresión en movimiento",
+  "short_name": "Xpresia",
+  "description": "Xpresia es una experiencia de evaluación y expresión artística.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "orientation": "any",
+  "background_color": "#050b18",
+  "theme_color": "#050b18",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
