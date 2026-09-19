@@ -62,3 +62,14 @@ La cámara, el micrófono y la reproducción multimedia siguen dependiendo de la
 ## 7. Actualizaciones
 
 Cuando se publique una versión posterior, hay que cambiar el identificador `CACHE_NAME` de `service-worker.js` (por ejemplo `xpresia-v41-shell-1`). Así los dispositivos reciben la nueva caché.
+
+
+## v41 — botón de instalación propio
+
+Xpresia ahora muestra siempre un botón **“INSTALAR XPRESIA EN TU DISPOSITIVO · RECOMENDADO”**.
+
+- Si el navegador entrega el evento de instalación PWA, el botón abre directamente el diálogo nativo de instalación.
+- En iPhone/iPad muestra los pasos de Safari para **Compartir → Agregar a pantalla de inicio**.
+- Si el navegador todavía no habilita la instalación automática, muestra instrucciones en lugar de fallar silenciosamente.
+
+La página web no puede forzar una instalación cuando el navegador no la autoriza; en ese caso se utiliza la opción del propio navegador.

@@ -344,15 +344,18 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 /* El panel antiguo de texto queda oculto: el único acceso visible es Canto + Modo libre. */
 #evaluationPanel > #readingPanel{display:none !important;}
 
-/* PWA: controles de instalación. Permanecen ocultos hasta que el navegador los necesite. */
-#pwaInstallBtn{display:none;position:fixed;z-index:500;right:10px;bottom:max(8px,env(safe-area-inset-bottom));border:1px solid #ff00ff;background:linear-gradient(135deg,#301052,#102a55);color:#fff;border-radius:12px;padding:9px 12px;font-size:11px;font-weight:900;letter-spacing:.4px;box-shadow:0 0 14px rgba(255,0,255,.22);cursor:pointer}
+/* PWA: instalación. El acceso permanece visible para que el usuario no tenga que buscar la opción en el navegador. */
+#pwaInstallBtn{display:block;position:fixed;z-index:500;left:50%;transform:translateX(-50%);bottom:calc(max(8px,env(safe-area-inset-bottom)) + 48px);width:min(92vw,430px);box-sizing:border-box;border:1px solid #ff00ff;background:linear-gradient(135deg,#301052,#102a55);color:#fff;border-radius:14px;padding:11px 15px;font-size:12px;font-weight:900;letter-spacing:.35px;box-shadow:0 0 18px rgba(255,0,255,.28);cursor:pointer;text-align:center}
 #pwaInstallBtn:hover{filter:brightness(1.16)}
+#pwaInstallBtn.pwaReady{border-color:#00e5ff;box-shadow:0 0 18px rgba(0,229,255,.34),0 0 28px rgba(255,0,255,.12)}
+#pwaInstallBtn.pwaInstalled{display:none}
 #pwaIosHelp{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78)}
-#pwaIosHelp .pwaHelpCard{width:min(430px,94vw);padding:22px;border:2px solid #00e5ff;border-radius:22px;background:#0a1833;box-shadow:0 0 30px rgba(0,229,255,.3);text-align:center}
+#pwaIosHelp .pwaHelpCard{width:min(460px,94vw);padding:22px;border:2px solid #00e5ff;border-radius:22px;background:#0a1833;box-shadow:0 0 30px rgba(0,229,255,.3);text-align:center}
 #pwaIosHelp h2{margin:0 0 10px;color:#e0c3ff;font-size:22px}
 #pwaIosHelp p{color:#dffcff;line-height:1.5;font-size:14px;margin:8px 0}
 #pwaIosHelp .pwaShare{font-size:28px;margin:8px 0}
 #pwaIosHelp button{margin-top:12px}
+@media(max-width:700px){#pwaInstallBtn{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 48px);font-size:11px;padding:10px 12px}}
 
 </style>
 </head>
@@ -367,8 +370,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <div id="top"><span id="topMessage">Bienvenidos a Xpresia</span><span id="topTimer"></span><span id="topScore"></span><div class="topEvalControls" id="topEvalControls"><div aria-label="Control de volumen de música" id="liveMusicControls"><label>🔊 <input aria-label="Volumen de música" id="liveMusicVolume" max="1" min="0" step="0.05" type="range" value="0.8"/></label></div><button id="pauseTopBtn">⏸</button><button id="stopTopBtn">⏹</button></div></div>
 <div aria-label="Niveles de audio" id="topSpectrumMini"><canvas id="miniSpectrumCanvas"></canvas><span class="miniSpectrumLegend"><i class="micDot"></i>MIC <i class="musicDot"></i>BASE</span></div>
 <div id="bottom"><button id="menuBtn">MENÚ</button></div>
-<button id="pwaInstallBtn" type="button" aria-label="Instalar Xpresia">📲 INSTALAR XPRESIA</button>
-<div id="pwaIosHelp" role="dialog" aria-modal="true" aria-labelledby="pwaIosHelpTitle"><div class="pwaHelpCard"><h2 id="pwaIosHelpTitle">📲 Instalar Xpresia</h2><div class="pwaShare">↗️ ➜ ➕</div><p>En iPhone o iPad, abre el menú <b>Compartir</b> de Safari y elige <b>Agregar a pantalla de inicio</b>.</p><p>Así Xpresia quedará disponible como una app en tu dispositivo, sin App Store.</p><button id="pwaIosClose" type="button">Cerrar</button></div></div>
+<button id="pwaInstallBtn" type="button" aria-label="Instalar Xpresia en tu dispositivo">📲 INSTALAR XPRESIA EN TU DISPOSITIVO · RECOMENDADO</button>
+<div id="pwaIosHelp" role="dialog" aria-modal="true" aria-labelledby="pwaIosHelpTitle"><div class="pwaHelpCard"><h2 id="pwaIosHelpTitle">📲 Instalar Xpresia</h2><div class="pwaShare" id="pwaHelpIcon">↗️ ➜ ➕</div><p id="pwaHelpText">Si tu navegador permite la instalación directa, Xpresia abrirá automáticamente la ventana para instalarse.</p><p id="pwaHelpFallback">Si no aparece esa ventana, utiliza el menú del navegador y busca <b>Instalar aplicación</b> o <b>Agregar a pantalla de inicio</b>.</p><button id="pwaIosClose" type="button">Cerrar</button></div></div>
 
 <div class="panel xpresiaDashboard" id="mainMenu">
 <div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
@@ -2330,32 +2333,77 @@ try{
   const installBtn=document.getElementById('pwaInstallBtn');
   const iosHelp=document.getElementById('pwaIosHelp');
   const iosClose=document.getElementById('pwaIosClose');
+  const helpTitle=document.getElementById('pwaIosHelpTitle');
+  const helpIcon=document.getElementById('pwaHelpIcon');
+  const helpText=document.getElementById('pwaHelpText');
+  const helpFallback=document.getElementById('pwaHelpFallback');
   let deferredInstallPrompt=null;
-  const isStandalone=()=>window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+  const isStandalone=()=>!!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true);
   const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  function showInstallButton(){ if(installBtn && !isStandalone()) installBtn.style.display='block'; }
-  function hideInstallButton(){ if(installBtn) installBtn.style.display='none'; }
+  const isAndroid=/android/i.test(navigator.userAgent);
+  const isChromium=/chrome|crios|edg|opr|opera/i.test(navigator.userAgent);
+
+  function hideInstallButton(){
+    if(installBtn) installBtn.classList.add('pwaInstalled');
+  }
+  function showInstallButton(){
+    if(installBtn && !isStandalone()){
+      installBtn.classList.remove('pwaInstalled');
+      if(deferredInstallPrompt) installBtn.classList.add('pwaReady');
+    }
+  }
+  function showHelp(){
+    if(!iosHelp) return;
+    if(isIOS){
+      if(helpTitle) helpTitle.textContent='📲 Instalar Xpresia en iPhone/iPad';
+      if(helpIcon) helpIcon.textContent='↗️  →  ➕';
+      if(helpText) helpText.innerHTML='En <b>Safari</b>, pulsa <b>Compartir</b> y luego elige <b>Agregar a pantalla de inicio</b>.';
+      if(helpFallback) helpFallback.innerHTML='Después de agregarla, Xpresia aparecerá en tu pantalla de inicio y se abrirá como una aplicación.';
+    }else if(isAndroid){
+      if(helpTitle) helpTitle.textContent='📲 Instalar Xpresia en Android';
+      if(helpIcon) helpIcon.textContent='⋮  →  📲';
+      if(helpText) helpText.innerHTML='Si Chrome permite la instalación, debería aparecer <b>Instalar aplicación</b> en el menú <b>⋮</b> del navegador.';
+      if(helpFallback) helpFallback.innerHTML='Si no aparece, vuelve a cargar Xpresia con conexión a Internet y comprueba que estés usando <b>Chrome</b>. La instalación directa depende de que el navegador reconozca el sitio como instalable.';
+    }else{
+      if(helpTitle) helpTitle.textContent='📲 Instalar Xpresia en tu PC';
+      if(helpIcon) helpIcon.textContent='⋮  →  📲';
+      if(helpText) helpText.innerHTML='Si Chrome o Edge permite la instalación, debería aparecer <b>Instalar Xpresia</b> o <b>Instalar aplicación</b> en el menú del navegador.';
+      if(helpFallback) helpFallback.innerHTML='La instalación automática no puede ser forzada por una página web cuando el navegador todavía no la habilita. Asegúrate de abrir Xpresia desde <b>HTTPS</b>.';
+    }
+    iosHelp.style.display='flex';
+  }
+
   window.addEventListener('beforeinstallprompt',e=>{
     e.preventDefault();
     deferredInstallPrompt=e;
     showInstallButton();
   });
+
   if(installBtn){
     installBtn.addEventListener('click',async()=>{
+      if(isStandalone()) return;
       if(deferredInstallPrompt){
-        deferredInstallPrompt.prompt();
-        try{await deferredInstallPrompt.userChoice;}catch(_){}
+        try{
+          deferredInstallPrompt.prompt();
+          const result=await deferredInstallPrompt.userChoice;
+          if(result && result.outcome==='accepted') hideInstallButton();
+        }catch(err){ console.warn('PWA: no se pudo abrir el instalador',err); }
         deferredInstallPrompt=null;
-        hideInstallButton();
-      }else if(isIOS && !isStandalone()){
-        if(iosHelp) iosHelp.style.display='flex';
+        return;
       }
+      showHelp();
     });
   }
+
   if(iosClose) iosClose.addEventListener('click',()=>{if(iosHelp)iosHelp.style.display='none'});
   if(iosHelp) iosHelp.addEventListener('click',e=>{if(e.target===iosHelp)iosHelp.style.display='none'});
   window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;hideInstallButton()});
-  if(isIOS && !isStandalone()) setTimeout(showInstallButton,900);
+
+  // El botón es intencionalmente visible desde el principio: si el navegador
+  // habilita la instalación, el mismo botón abre el diálogo nativo; si no,
+  // muestra instrucciones específicas para ese dispositivo.
+  if(!isStandalone()) setTimeout(showInstallButton,250);
+
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>{
       navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(err=>console.warn('PWA: no se pudo registrar el service worker',err));
