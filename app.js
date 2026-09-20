@@ -658,6 +658,7 @@ function clearKaraokeVideo(){
 
 let karaokeSyncGuard=false;
 let karaokeNativeFailed=false;
+let karaokeNativeWatchdog=null;
 function getKaraokeDriveStreamSrc(driveId){
   if(!driveId)return '';
   return 'https://drive.google.com/uc?export=download&id='+encodeURIComponent(driveId);
@@ -694,16 +695,37 @@ function prepareKaraokeNativeVideo(raw){
   const driveId=parseDriveId(raw)||karaokeVideoId;
   if(!v||!driveId)return false;
   karaokeNativeFailed=false;
+  if(karaokeNativeWatchdog){clearTimeout(karaokeNativeWatchdog);karaokeNativeWatchdog=null}
   v.pause();
   v.removeAttribute('src');
   v.load();
+  // Google Drive puede entregar el archivo original (incluido un códec que el
+  // navegador móvil no pueda pintar) aunque el audio sí llegue a reproducirse.
+  // Intentamos primero la fuente directa y comprobamos que exista una pista de
+  // vídeo real antes de confiar en el reproductor nativo.
   v.src=getKaraokeDriveStreamSrc(driveId);
   v.muted=false;
   showKaraokeNativePlayer(true);
   updateKaraokePlayerUI();
+  const startedAt=performance.now();
+  const check=()=>{
+    if(karaokeNativeFailed||!v.isConnected)return;
+    const hasVideo=!!(v.videoWidth&&v.videoHeight);
+    const advancing=v.currentTime>0.15;
+    if(hasVideo){updateKaraokePlayerUI();return}
+    if(performance.now()-startedAt>2800 && advancing){
+      // Se oye el archivo pero no existe un frame de vídeo utilizable: volver al
+      // reproductor de Drive evita dejar una pantalla negra.
+      fallbackToDrivePlayer();
+      return;
+    }
+    karaokeNativeWatchdog=setTimeout(check,350);
+  };
+  karaokeNativeWatchdog=setTimeout(check,900);
   return true;
 }
 function fallbackToDrivePlayer(){
+  if(karaokeNativeWatchdog){clearTimeout(karaokeNativeWatchdog);karaokeNativeWatchdog=null}
   const v=document.getElementById('karaokePlayer'),frame=document.getElementById('karaokeFrame'),fallback=document.getElementById('karaokeLoadFallback');
   karaokeNativeFailed=true;
   try{v?.pause()}catch(e){}
