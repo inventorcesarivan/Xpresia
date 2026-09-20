@@ -616,7 +616,7 @@ function loadKaraokeVideo(rawInput, replaceLibrary=true){
       if(origin)params.set('origin',origin);
       frame.src='https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
     }else{
-      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
+      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal&controls=0&toolbar=0';
     }
   }
   if(status){
@@ -663,7 +663,7 @@ function getKaraokePreviewSrc(){
     if(origin)params.set('origin',origin);
     return 'https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
   }
-  if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
+  if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal&controls=0&toolbar=0';
   return '';
 }
 function stopKaraokePreview(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.src='about:blank'}catch(e){try{frame.removeAttribute('src')}catch(_){} }}
