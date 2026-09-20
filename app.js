@@ -505,7 +505,7 @@ async function loadKaraokeLibraryFromAppsScript(){
 }
 async function loadKaraokeLibrary(){
   const box=document.getElementById('karaokeResults');
-  if(box)box.innerHTML='<div class="karaokeEmpty">🔄 Cargando biblioteca de Xpresia...<br><small>Espera por favor, puede demorar un poco.</small></div>';
+  if(box)box.innerHTML='<div class="karaokeEmpty">🔄 Cargando biblioteca de Google Drive...</div>';
   try{
     const data=await loadKaraokeLibraryFromAppsScript();
     karaokeLibrary=Array.isArray(data)?data:[];
@@ -572,7 +572,7 @@ function selectKaraokeLibraryItem(item){
 }
 function clearKaraokeSourceState(message='', clearLibrary=true){
   karaokeVideoId='';karaokeReady=false;karaokeSelectedItem=null;karaokeFolderId=DEFAULT_KARAOKE_FOLDER_ID;karaokeFolderUrl='https://drive.google.com/drive/folders/'+DEFAULT_KARAOKE_FOLDER_ID;karaokeConnectedFolderName='';
-  const frame=document.getElementById('karaokeFrame');if(frame)frame.src='';const kv=document.getElementById('karaokePlayer');if(kv){try{kv.pause()}catch(e){}kv.removeAttribute('src');try{kv.load()}catch(e){}}
+  const frame=document.getElementById('karaokeFrame');if(frame)frame.src='';
   const input=document.getElementById('karaokeUrl');if(input)input.value='';
   const selected=document.getElementById('karaokeSelected');if(selected){selected.style.display='none';selected.innerHTML='';}
   const search=document.getElementById('karaokeSearch');if(search)search.value='';
@@ -617,9 +617,8 @@ function loadKaraokeVideo(rawInput, replaceLibrary=true){
       const params=new URLSearchParams({enablejsapi:'1',playsinline:'1',rel:'0'});
       if(origin)params.set('origin',origin);
       frame.src='https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
-      showKaraokeNativePlayer(false);
     }else{
-      prepareKaraokeNativeVideo(raw);
+      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
     }
   }
   if(status){
@@ -656,13 +655,6 @@ function clearKaraokeVideo(){
   loadKaraokeLibrary();
 }
 
-let karaokeSyncGuard=false;
-let karaokeNativeFailed=false;
-let karaokeNativeWatchdog=null;
-function getKaraokeDriveStreamSrc(driveId){
-  if(!driveId)return '';
-  return 'https://drive.google.com/uc?export=download&id='+encodeURIComponent(driveId);
-}
 function getKaraokePreviewSrc(){
   const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
   const ytId=parseYouTubeId(raw);
@@ -673,108 +665,13 @@ function getKaraokePreviewSrc(){
     if(origin)params.set('origin',origin);
     return 'https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
   }
-  if(driveId)return getKaraokeDriveStreamSrc(driveId);
+  if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
   return '';
 }
-function updateKaraokePlayerUI(){
-  const v=document.getElementById('karaokePlayer'),play=document.getElementById('karaokePlayBtn'),mute=document.getElementById('karaokeMuteBtn');
-  if(play)play.textContent=(v&&!v.paused)?'⏸':'▶';
-  if(mute)mute.textContent=(v&&v.muted)?'🔇':'🔊';
-}
-function showKaraokeNativePlayer(show){
-  const visual=document.getElementById('karaokeVisual'),v=document.getElementById('karaokePlayer'),frame=document.getElementById('karaokeFrame'),controls=document.getElementById('karaokeControls'),fallback=document.getElementById('karaokeLoadFallback');
-  if(!visual)return;
-  visual.classList.toggle('karaokeNativeReady',!!show);
-  if(v)v.style.display=show?'block':'none';
-  if(frame)frame.style.display=show?'none':'block';
-  if(controls)controls.style.display=show?'flex':'none';
-  if(fallback)fallback.style.display='none';
-}
-function prepareKaraokeNativeVideo(raw){
-  const v=document.getElementById('karaokePlayer');
-  const driveId=parseDriveId(raw)||karaokeVideoId;
-  if(!v||!driveId)return false;
-  karaokeNativeFailed=false;
-  if(karaokeNativeWatchdog){clearTimeout(karaokeNativeWatchdog);karaokeNativeWatchdog=null}
-  v.pause();
-  v.removeAttribute('src');
-  v.load();
-  // Google Drive puede entregar el archivo original (incluido un códec que el
-  // navegador móvil no pueda pintar) aunque el audio sí llegue a reproducirse.
-  // Intentamos primero la fuente directa y comprobamos que exista una pista de
-  // vídeo real antes de confiar en el reproductor nativo.
-  v.src=getKaraokeDriveStreamSrc(driveId);
-  v.muted=false;
-  showKaraokeNativePlayer(true);
-  updateKaraokePlayerUI();
-  const startedAt=performance.now();
-  const check=()=>{
-    if(karaokeNativeFailed||!v.isConnected)return;
-    const hasVideo=!!(v.videoWidth&&v.videoHeight);
-    const advancing=v.currentTime>0.15;
-    if(hasVideo){updateKaraokePlayerUI();return}
-    if(performance.now()-startedAt>2800 && advancing){
-      // Se oye el archivo pero no existe un frame de vídeo utilizable: volver al
-      // reproductor de Drive evita dejar una pantalla negra.
-      fallbackToDrivePlayer();
-      return;
-    }
-    karaokeNativeWatchdog=setTimeout(check,350);
-  };
-  karaokeNativeWatchdog=setTimeout(check,900);
-  return true;
-}
-function fallbackToDrivePlayer(){
-  if(karaokeNativeWatchdog){clearTimeout(karaokeNativeWatchdog);karaokeNativeWatchdog=null}
-  const v=document.getElementById('karaokePlayer'),frame=document.getElementById('karaokeFrame'),fallback=document.getElementById('karaokeLoadFallback');
-  karaokeNativeFailed=true;
-  try{v?.pause()}catch(e){}
-  if(v){v.removeAttribute('src');v.load()}
-  if(frame){frame.src='https://drive.google.com/file/d/'+encodeURIComponent(karaokeVideoId)+'/preview?autoplay=1&rm=minimal';frame.style.display='block'}
-  const visual=document.getElementById('karaokeVisual');visual?.classList.remove('karaokeNativeReady');
-  const controls=document.getElementById('karaokeControls');if(controls)controls.style.display='none';
-  if(fallback)fallback.style.display='flex';
-}
-function stopKaraokePreview(){
-  const v=document.getElementById('karaokePlayer'),frame=document.getElementById('karaokeFrame');
-  try{v?.pause()}catch(e){}
-  if(v){v.removeAttribute('src');try{v.load()}catch(e){}}
-  if(frame){try{frame.src='about:blank'}catch(e){try{frame.removeAttribute('src')}catch(_){} }}
-  updateKaraokePlayerUI();
-}
-function startKaraokePlayback(){
-  const v=document.getElementById('karaokePlayer');
-  if(v&&v.src&&!karaokeNativeFailed){
-    const p=v.play();
-    if(p)p.catch(()=>{if(!karaokeNativeFailed)fallbackToDrivePlayer()});
-    updateKaraokePlayerUI();
-    return;
-  }
-  const frame=document.getElementById('karaokeFrame');const src='https://drive.google.com/file/d/'+encodeURIComponent(karaokeVideoId)+'/preview?autoplay=1&rm=minimal';
-  if(frame&&karaokeVideoId){try{frame.src=src}catch(e){}}
-}
-function playKaraoke(){
-  const v=document.getElementById('karaokePlayer');
-  if(v&&v.src&&!karaokeNativeFailed){const p=v.play();if(p)p.catch(()=>fallbackToDrivePlayer());updateKaraokePlayerUI();return}
-  const frame=document.getElementById('karaokeFrame');if(frame&&karaokeVideoId){try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*')}catch(e){}}
-}
-function pauseKaraoke(){
-  const v=document.getElementById('karaokePlayer');
-  if(v&&v.src&&!karaokeNativeFailed){try{v.pause()}catch(e){}updateKaraokePlayerUI();return}
-  const frame=document.getElementById('karaokeFrame');if(frame){try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*')}catch(e){}}
-}
-function bindKaraokePlayer(){
-  const v=document.getElementById('karaokePlayer');if(!v||v.dataset.bound==='1')return;v.dataset.bound='1';
-  v.addEventListener('play',()=>{updateKaraokePlayerUI();if(evalRunning&&!evalPaused&&!karaokeSyncGuard){} });
-  v.addEventListener('pause',()=>{updateKaraokePlayerUI();if(evalRunning&&!evalPaused&&!karaokeSyncGuard){karaokeSyncGuard=true;try{pauseEvaluation()}finally{karaokeSyncGuard=false}}});
-  v.addEventListener('ended',()=>{updateKaraokePlayerUI();if(evalRunning&&!karaokeSyncGuard){karaokeSyncGuard=true;try{finishEvaluation(true)}finally{karaokeSyncGuard=false}}});
-  v.addEventListener('error',()=>{if(!karaokeNativeFailed)fallbackToDrivePlayer()});
-  v.addEventListener('loadedmetadata',updateKaraokePlayerUI);
-  document.getElementById('karaokePlayBtn')?.addEventListener('click',()=>{if(!evalRunning){if(v.paused)playKaraoke();else pauseKaraoke();return}if(evalPaused){pauseEvaluation()}else{pauseEvaluation()}});
-  document.getElementById('karaokeMuteBtn')?.addEventListener('click',()=>{v.muted=!v.muted;updateKaraokePlayerUI()});
-  document.getElementById('karaokeFallbackBtn')?.addEventListener('click',()=>{const f=document.getElementById('karaokeLoadFallback');if(f)f.style.display='none';const frame=document.getElementById('karaokeFrame');if(frame&&karaokeVideoId){frame.src='https://drive.google.com/file/d/'+encodeURIComponent(karaokeVideoId)+'/preview?autoplay=1&rm=minimal';frame.style.display='block'}});
-}
-bindKaraokePlayer();
+function stopKaraokePreview(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.src='about:blank'}catch(e){try{frame.removeAttribute('src')}catch(_){} }}
+function startKaraokePlayback(){const frame=document.getElementById('karaokeFrame');const src=getKaraokePreviewSrc();if(!frame||!src)return;try{frame.src=src}catch(e){}}
+function playKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame||!karaokeVideoId)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*')}catch(e){} }
+function pauseKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*')}catch(e){}}
 
 const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)cameraModeBtn.onclick=()=>setEvaluationMode('camera');const voiceModeBtn=document.getElementById('voiceModeBtn');if(voiceModeBtn)voiceModeBtn.onclick=()=>setEvaluationMode('voice');const karaokeModeBtn=document.getElementById('karaokeModeBtn');if(karaokeModeBtn)karaokeModeBtn.onclick=()=>setEvaluationMode('karaoke');document.getElementById("karaokeFolderBtn")?.addEventListener("click",promptKaraokeFolder);document.getElementById("karaokeVideoBtn")?.addEventListener("click",promptKaraokeVideo);document.getElementById("karaokeOfficialBtn")?.addEventListener("click",loadOfficialKaraokeLibrary);document.getElementById('karaokeSearch').oninput=e=>renderKaraokeLibrary(e.target.value);document.getElementById('karaokeRefreshBtn').onclick=loadOfficialKaraokeLibrary;loadKaraokeLibrary();document.getElementById('cancelMusic').onclick=cancelMusicPanel;document.getElementById('saveMusic').onclick=saveMusicSelection;document.getElementById('musicLinkTest').onclick=prepareUrlMusic;document.getElementById('musicSelect').onchange=e=>{const id=e.target.value;document.getElementById('musicFileWrap').style.display=id==='custom'?'block':'none';document.getElementById('musicUrlWrap').style.display=id==='url'?'block':'none';if(id==='none'){pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};previewMusic(pendingMusic);return}if(id==='custom'){pendingMusic={id:'custom',name:'Mi música',url:'',objectUrl:true};setMusicStatus('Selecciona un archivo de audio para escucharlo.');return}if(id==='url'){pendingMusic={id:'url',name:'Base desde enlace',url:'',sourceUrl:'',objectUrl:false};setMusicStatus('Pega un enlace directo a un archivo de audio y pulsa “Probar enlace”.');return}const item=musicLibrary[id];pendingMusic={id,name:item.name,url:item.url,objectUrl:false};previewMusic(pendingMusic)};updateMusicSelectedStatus();document.getElementById('musicFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(pendingMusicObjectUrl)URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=URL.createObjectURL(file);pendingMusic={id:'custom',name:file.name,url:pendingMusicObjectUrl,objectUrl:true};previewMusic(pendingMusic)};document.getElementById('musicUrl').onchange=()=>{if(document.getElementById('musicUrl').value.trim())prepareUrlMusic()};
 
@@ -1401,7 +1298,7 @@ function resetAppAfterEvaluation(){
   stopCamera();
   stopReadingRecognition();
   hideGuideText();
-  evalRunning=false; evalPaused=false; countdown=false; evaluationMode='camera'; karaokeVideoId=''; karaokeReady=false; const kf=document.getElementById('karaokeFrame'); if(kf)kf.src=''; const kp=document.getElementById('karaokePlayer'); if(kp){try{kp.pause()}catch(e){}kp.removeAttribute('src');try{kp.load()}catch(e){}} const ku=document.getElementById('karaokeUrl'); if(ku)ku.value=''; karaokeSelectedItem=null; const ks=document.getElementById('karaokeSelected'); if(ks)ks.style.display='none';
+  evalRunning=false; evalPaused=false; countdown=false; evaluationMode='camera'; karaokeVideoId=''; karaokeReady=false; const kf=document.getElementById('karaokeFrame'); if(kf)kf.src=''; const ku=document.getElementById('karaokeUrl'); if(ku)ku.value=''; karaokeSelectedItem=null; const ks=document.getElementById('karaokeSelected'); if(ks)ks.style.display='none';
   category='dance'; categoryChosen=false; textSource='sample'; customEvaluationText=''; imitationType='airguitar';
   selectedMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};
   pendingMusic={...selectedMusic};
