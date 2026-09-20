@@ -600,6 +600,7 @@ let stream=null,initPromise=null,cameraReady=false,mirror=false,menuOpen=false,p
 let micStream=null,audioContext=null,audioSource=null,audioGain=null,audioDestination=null,micAnalyser=null,spectrumAnalyser=null,micEnabled=false,volumeLevel=.8,micNoiseFloorRms=.004;
 let musicAudio=new Audio(),musicSource=null,musicGain=null,musicPlayer=new Audio(),recordMusicPlayer=new Audio(),recordAudioContext=null,recordMusicSource=null,recordMusicGain=null,recordMusicAnalyser=null,recordAudioDestination=null,selectedMusic={id:'none',name:'Sin música de fondo',url:''},pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false},pendingMusicObjectUrl=null;
 let karaokeAudioContext=null,karaokeAudioSource=null,karaokeAudioAnalyser=null,karaokeAudioReady=false,karaokeAudioUrl='';
+let karaokeDurationPromise=Promise.resolve(0);
 musicPlayer.crossOrigin='anonymous';recordMusicPlayer.crossOrigin='anonymous';musicPlayer.loop=true;musicPlayer.preload='metadata';
 const musicLibrary={
 'break-dance':{name:'Break dance',url:'assets/bases-laterales/1.mp3'},
@@ -1210,6 +1211,30 @@ function renderKaraokeLibrary(query=''){
   box.querySelectorAll('.karaokeResult').forEach(btn=>btn.onclick=()=>selectKaraokeLibraryItem(karaokeLibrary[+btn.dataset.kidx]));
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+async function resolveKaraokeDuration(item){
+  const candidates=[item?.durationSeconds,item?.duration,item?.durationSec,item?.duration_seconds,item?.durationMillis!=null?Number(item.durationMillis)/1000:null,item?.videoDuration,item?.lengthSeconds];
+  for(const raw of candidates){
+    const n=Number(raw);
+    if(Number.isFinite(n)&&n>0){
+      duration=Math.max(1,Math.round(n));
+      const d=document.getElementById('duration');if(d)d.value=String(duration);
+      return duration;
+    }
+  }
+  const url=getKaraokeAnalysisUrl(item);
+  const v=document.getElementById('karaokeAudioVideo');
+  if(!url||!v)return 0;
+  return await new Promise(resolve=>{
+    let settled=false;
+    const finish=(value)=>{if(settled)return;settled=true;clearTimeout(timer);v.removeEventListener('loadedmetadata',onMeta);v.removeEventListener('durationchange',onMeta);v.removeEventListener('error',onError);try{v.pause()}catch(e){};try{v.removeAttribute('src');v.load()}catch(e){};if(value>0){duration=Math.max(1,Math.round(value));const d=document.getElementById('duration');if(d)d.value=String(duration)}resolve(value>0?duration:0)};
+    const onMeta=()=>{const n=Number(v.duration);if(Number.isFinite(n)&&n>0)finish(n)};
+    const onError=()=>finish(0);
+    const timer=setTimeout(()=>finish(0),12000);
+    v.preload='metadata';v.muted=true;v.addEventListener('loadedmetadata',onMeta,{once:true});v.addEventListener('durationchange',onMeta);v.addEventListener('error',onError,{once:true});
+    try{v.src=url;v.load()}catch(e){finish(0)}
+  });
+}
+
 function selectKaraokeLibraryItem(item){
   if(!item)return;
   // Guardamos la selección ANTES de preparar la previsualización.
@@ -1222,6 +1247,13 @@ function selectKaraokeLibraryItem(item){
     karaokeVideoId=parseYouTubeId(mediaUrl)||parseDriveId(mediaUrl)||karaokeVideoId;
     karaokeReady=!!karaokeVideoId;
     evaluationMode='karaoke';
+    karaokeDurationPromise=resolveKaraokeDuration(item).then(sec=>{
+      if(sec>0){
+        const st=document.getElementById('karaokeStatus');
+        if(st)st.textContent='🎵 '+(item.title||'Karaoke')+' · duración detectada: '+formatTime(sec)+'.';
+      }
+      return sec;
+    });
   }else{
     karaokeSelectedItem=item;
   }
@@ -1389,7 +1421,15 @@ const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)ca
   // limpia el estado y borra karaokeSelectedItem.
   evaluationMode='karaoke';
   karaokeReady=!!karaokeVideoId;
-  guidedCompleted.music=true;const ks=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const mi=ks.indexOf('music');guidedActiveKey=ks[mi+1]||'';
+  const st=document.getElementById('karaokeStatus');
+  if(st)st.textContent='⏳ Detectando duración del karaoke…';
+  const detected=await (karaokeDurationPromise||resolveKaraokeDuration(karaokeSelectedItem));
+  if(!(detected>0)){
+    if(st)st.textContent='⚠️ No se pudo detectar automáticamente la duración de este video. Selecciona otro karaoke o agrega su duración a la biblioteca.';
+    return;
+  }
+  guidedCompleted.music=true;
+  guidedActiveKey='';
   updateEvaluationModeUI();
   updateGuidedPanel();
   openPanel('guidedPanel');
@@ -2229,9 +2269,9 @@ function openGuidedPanel(cat){
   // En Canto/Karaoke el flujo queda reducido a 3 pasos obligatorios:
   // 1) cámara o sin cámara, 2) duración, 3) karaoke.
   if(cat==='sing'){
+    // En Canto/Karaoke la duración se obtiene automáticamente del video seleccionado.
     steps.push({n:1,icon:'🎯',title:'Selecciona cámara o sin cámara',value:modeLabel(),key:'mode'});
-    steps.push({n:2,icon:'⏱️',title:'Selecciona el tiempo de tu evaluación',value:durationLabel(),key:'duration'});
-    steps.push({n:3,icon:'🎵',title:'Selecciona tu karaoke',value:karaokeSelectedItem?.title||'Selecciona una canción',key:'music'});
+    steps.push({n:2,icon:'🎵',title:'Selecciona tu karaoke',value:karaokeSelectedItem?.title||'Selecciona una canción',key:'music'});
   }else{
     // Orden visual de configuración: 1) modo de evaluación, 2) tiempo, y luego las demás opciones.
     steps.push({n:1,icon:'🎯',title:'Selecciona el modo de evaluación',value:modeLabel(),key:'mode'});
@@ -2391,7 +2431,7 @@ function updateGuidedPanel(){
     const key=v.id.replace('guidedValue-','');
     if(key==='duration')v.textContent=durationLabel();
     if(key==='mode')v.textContent=category==='sing'?(evaluationMode==='karaoke'?(karaokeWithCamera?'Con cámara':'Sin cámara'):'Selecciona una opción'):modeLabel();
-    if(key==='music')v.textContent=category==='sing'?(karaokeSelectedItem?.title||'Selecciona una canción'):(selectedMusic.name||'Sin música de fondo');
+    if(key==='music')v.textContent=category==='sing'?(karaokeSelectedItem?.title?(karaokeSelectedItem.title+' · '+(duration>0?formatTime(duration):'detectando duración')):'Selecciona una canción'):(selectedMusic.name||'Sin música de fondo');
     if(key==='text')v.textContent=textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo';
     if(key==='imitation')v.textContent=document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible';
   });
@@ -2412,7 +2452,7 @@ function updateGuidedPanel(){
 }
 function openEvaluationForGuided(){updateDescription();updateTextConfigUI();updateEvaluationModeUI();hideGuideText();setMicrophoneEnabled(true).catch(e=>console.warn('Micrófono:',e));countdownStart()}
 
-function openSkillHub(cat){if(evalRunning)return;resetEvaluationSelectionState();category=cat;categoryChosen=true;guidedCompleted={};guidedActiveKey=cat==='sing'?'mode':'';['dance','sing','reading','acting','aura','imitation'].forEach(c=>document.getElementById('skillHubPanel')?.classList.remove('hub-'+c));document.getElementById('skillHubPanel')?.classList.add('hub-'+cat);evaluationMode='camera';singImitationMode=false;karaokeWithCamera=false;guidedStep=0;const t=document.getElementById('skillHubTitle');if(t)t.textContent=cat==='sing'?'🎤 CANTO / KARAOKE':'✨ '+skillTitle(cat);const hubLabels={dance:{eval:'Evalúa tu desempeño Bailando',learn:'Aprende a Bailar'},sing:{eval:'Evalúa tu desempeño Cantando Karaoke',learn:'Aprende a Cantar'},reading:{eval:'Evalúa tu desempeño Leyendo',learn:'Aprende a Leer'},acting:{eval:'Evalúa tu desempeño Actuando',learn:'Aprende a Actuar'},aura:{eval:'Evalúa tu desempeño Farmeando Aura',learn:'Aprende a Farmear Aura'},imitation:{eval:'Evalúa tu desempeño Imitando',learn:'Aprende a Imitar'}};const labels=hubLabels[cat]||{eval:'Evalúa tu desempeño',learn:'Aprende habilidades'};const eb=document.querySelector('#skillHubEvaluate strong');if(eb)eb.textContent=labels.eval;const lb=document.querySelector('#skillHubLearn strong');if(lb)lb.textContent=labels.learn;const actionImageNames={dance:{evaluar:'accion_evaluar_baile.jpg',aprender:'accion_aprender_baile.jpg',competir:'accion_competir_baile.jpg'},sing:{evaluar:'accion_evaluar_canto.jpg',aprender:'accion_aprender_canto.jpg',competir:'accion_competir_canto.jpg'},acting:{evaluar:'accion_evaluar_actuacion.jpg',aprender:'accion_aprender_actuacion.jpg',competir:'accion_competir_actuacion.jpg'},reading:{evaluar:'accion_evaluar_lectura.jpg',aprender:'accion_aprender_lectura.jpg',competir:'accion_competir_lectura.jpg'},aura:{evaluar:'accion_evaluar_aura.jpg',aprender:'accion_aprender_aura.jpg',competir:'accion_competir_aura.jpg'},imitation:{evaluar:'accion_evaluar_imitacion.jpg',aprender:'accion_aprender_imitacion.jpg',competir:'accion_competir_imitacion.jpg'}};const actionImages=Object.fromEntries(Object.entries(actionImageNames[cat]||{}).map(([k,v])=>[k,'./assets/imagenes/'+v]));const actionButtons=[['skillHubEvaluate','evaluar'],['skillHubLearn','aprender'],['skillHubCompete','competir']];actionButtons.forEach(([id,key])=>{const b=document.getElementById(id);if(b){const url=actionImages[key];b.dataset.bg=url;b.style.setProperty('background-image','url(\"'+url+'\")','important');}});openPanel('skillHubPanel');hideGuideText()}
+function openSkillHub(cat){if(evalRunning)return;resetEvaluationSelectionState();category=cat;categoryChosen=true;guidedCompleted={};guidedActiveKey=cat==='sing'?'mode':'';if(cat==='sing'){duration=0;const d=document.getElementById('duration');if(d)d.value='0';} ['dance','sing','reading','acting','aura','imitation'].forEach(c=>document.getElementById('skillHubPanel')?.classList.remove('hub-'+c));document.getElementById('skillHubPanel')?.classList.add('hub-'+cat);evaluationMode='camera';singImitationMode=false;karaokeWithCamera=false;guidedStep=0;const t=document.getElementById('skillHubTitle');if(t)t.textContent=cat==='sing'?'🎤 CANTO / KARAOKE':'✨ '+skillTitle(cat);const hubLabels={dance:{eval:'Evalúa tu desempeño Bailando',learn:'Aprende a Bailar'},sing:{eval:'Evalúa tu desempeño Cantando Karaoke',learn:'Aprende a Cantar'},reading:{eval:'Evalúa tu desempeño Leyendo',learn:'Aprende a Leer'},acting:{eval:'Evalúa tu desempeño Actuando',learn:'Aprende a Actuar'},aura:{eval:'Evalúa tu desempeño Farmeando Aura',learn:'Aprende a Farmear Aura'},imitation:{eval:'Evalúa tu desempeño Imitando',learn:'Aprende a Imitar'}};const labels=hubLabels[cat]||{eval:'Evalúa tu desempeño',learn:'Aprende habilidades'};const eb=document.querySelector('#skillHubEvaluate strong');if(eb)eb.textContent=labels.eval;const lb=document.querySelector('#skillHubLearn strong');if(lb)lb.textContent=labels.learn;const actionImageNames={dance:{evaluar:'accion_evaluar_baile.jpg',aprender:'accion_aprender_baile.jpg',competir:'accion_competir_baile.jpg'},sing:{evaluar:'accion_evaluar_canto.jpg',aprender:'accion_aprender_canto.jpg',competir:'accion_competir_canto.jpg'},acting:{evaluar:'accion_evaluar_actuacion.jpg',aprender:'accion_aprender_actuacion.jpg',competir:'accion_competir_actuacion.jpg'},reading:{evaluar:'accion_evaluar_lectura.jpg',aprender:'accion_aprender_lectura.jpg',competir:'accion_competir_lectura.jpg'},aura:{evaluar:'accion_evaluar_aura.jpg',aprender:'accion_aprender_aura.jpg',competir:'accion_competir_aura.jpg'},imitation:{evaluar:'accion_evaluar_imitacion.jpg',aprender:'accion_aprender_imitacion.jpg',competir:'accion_competir_imitacion.jpg'}};const actionImages=Object.fromEntries(Object.entries(actionImageNames[cat]||{}).map(([k,v])=>[k,'./assets/imagenes/'+v]));const actionButtons=[['skillHubEvaluate','evaluar'],['skillHubLearn','aprender'],['skillHubCompete','competir']];actionButtons.forEach(([id,key])=>{const b=document.getElementById(id);if(b){const url=actionImages[key];b.dataset.bg=url;b.style.setProperty('background-image','url(\"'+url+'\")','important');}});openPanel('skillHubPanel');hideGuideText()}
 document.getElementById('skillHubBack').onclick=returnToMain;document.getElementById('skillHubEvaluate').onclick=()=>openGuidedPanel(category);document.getElementById('skillHubLearn').onclick=()=>openPanel('learningPanel');document.getElementById('skillHubCompete').onclick=()=>openPanel('competitionPanel');
 // Navegación robusta de paneles: todos los botones VOLVER de configuración tienen una ruta explícita.
 document.getElementById('danceImitationBack')?.addEventListener('click',()=>openPanel('modePanel'));
