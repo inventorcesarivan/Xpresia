@@ -1422,17 +1422,30 @@ const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)ca
   evaluationMode='karaoke';
   karaokeReady=!!karaokeVideoId;
   const st=document.getElementById('karaokeStatus');
-  if(st)st.textContent='⏳ Detectando duración del karaoke…';
-  const detected=await (karaokeDurationPromise||resolveKaraokeDuration(karaokeSelectedItem));
-  if(!(detected>0)){
-    if(st)st.textContent='⚠️ No se pudo detectar automáticamente la duración de este video. Selecciona otro karaoke o agrega su duración a la biblioteca.';
-    return;
-  }
+  if(st)st.textContent='⏳ Guardando selección y detectando duración…';
+  // La selección se confirma inmediatamente. No hacemos esperar al usuario a que
+  // termine la detección de metadatos de Google Drive antes de cerrar el panel.
   guidedCompleted.music=true;
   guidedActiveKey='';
   updateEvaluationModeUI();
   updateGuidedPanel();
   openPanel('guidedPanel');
+  const durationPromise=karaokeDurationPromise||Promise.resolve(resolveKaraokeDuration(karaokeSelectedItem));
+  durationPromise.then(sec=>{
+    if(sec>0){
+      const status=document.getElementById('karaokeStatus');
+      if(status)status.textContent='🎵 '+(karaokeSelectedItem?.title||'Karaoke')+' · duración detectada: '+formatTime(sec)+'.';
+    }else{
+      const status=document.getElementById('karaokeStatus');
+      if(status)status.textContent='⚠️ No se pudo detectar todavía la duración. Xpresia seguirá intentando obtenerla al preparar la evaluación.';
+    }
+    updateGuidedPanel();
+  }).catch(e=>{
+    console.warn('Detección de duración del karaoke:',e);
+    const status=document.getElementById('karaokeStatus');
+    if(status)status.textContent='⚠️ No se pudo detectar todavía la duración del karaoke.';
+    updateGuidedPanel();
+  });
 };document.getElementById('cancelKaraokeMusic').onclick=()=>openPanel('guidedPanel');document.getElementById('karaokePanelBack')?.addEventListener('click',()=>openPanel('guidedPanel'));document.getElementById('musicLinkTest').onclick=prepareUrlMusic;document.getElementById('musicSelect').onchange=e=>{const id=e.target.value;document.getElementById('musicFileWrap').style.display=id==='custom'?'block':'none';document.getElementById('musicUrlWrap').style.display=id==='url'?'block':'none';if(id==='none'){pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};previewMusic(pendingMusic);return}if(id==='custom'){pendingMusic={id:'custom',name:'Mi música',url:'',objectUrl:true};setMusicStatus('Selecciona un archivo de audio para escucharlo.');return}if(id==='url'){pendingMusic={id:'url',name:'Base desde enlace',url:'',sourceUrl:'',objectUrl:false};setMusicStatus('Pega un enlace directo a un archivo de audio y pulsa “Probar enlace”.');return}const item=musicLibrary[id];pendingMusic={id,name:item.name,url:item.url,objectUrl:false};previewMusic(pendingMusic)};updateMusicSelectedStatus();document.getElementById('musicFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(pendingMusicObjectUrl)URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=URL.createObjectURL(file);pendingMusic={id:'custom',name:file.name,url:pendingMusicObjectUrl,objectUrl:true};previewMusic(pendingMusic)};document.getElementById('musicUrl').onchange=()=>{if(document.getElementById('musicUrl').value.trim())prepareUrlMusic()};
 
 let activationOpening=false;
@@ -2438,8 +2451,10 @@ function updateGuidedPanel(){
   const buttons=Array.from(p.querySelectorAll('.guidedStep'));
   const keys=buttons.map(b=>b.dataset.stepKey);
   const allDone=keys.length>0 && keys.every(k=>!!guidedCompleted[k]);
+  const karaokeDurationReady=category!=='sing' || duration>0;
+  const canStart=allDone && karaokeDurationReady;
   const start=p.querySelector('#guidedStart');
-  if(start){start.disabled=!allDone;start.classList.toggle('active',allDone);start.textContent='▶ COMENZAR EVALUACIÓN';}
+  if(start){start.disabled=!canStart;start.classList.toggle('active',canStart);start.textContent='▶ COMENZAR EVALUACIÓN';}
   if(!allDone && (!guidedActiveKey || !guidedCompleted[guidedActiveKey])){
     const firstPending=keys.find(k=>!guidedCompleted[k]);
     if(firstPending)guidedActiveKey=firstPending;
