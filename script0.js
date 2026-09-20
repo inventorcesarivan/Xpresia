@@ -6,8 +6,6 @@ const activation=document.getElementById('activation');
 let stream=null,initPromise=null,cameraReady=false,mirror=false,menuOpen=false,paused=false,countdown=false;
 let micStream=null,audioContext=null,audioSource=null,audioGain=null,audioDestination=null,micAnalyser=null,spectrumAnalyser=null,micEnabled=false,volumeLevel=.8,micNoiseFloorRms=.004;
 let musicAudio=new Audio(),musicSource=null,musicGain=null,musicPlayer=new Audio(),recordMusicPlayer=new Audio(),recordAudioContext=null,recordMusicSource=null,recordMusicGain=null,recordMusicAnalyser=null,recordAudioDestination=null,selectedMusic={id:'none',name:'Sin música de fondo',url:''},pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false},pendingMusicObjectUrl=null;
-let karaokeAudioContext=null,karaokeAudioSource=null,karaokeAudioAnalyser=null,karaokeAudioReady=false,karaokeAudioUrl='';
-let karaokeDurationPromise=Promise.resolve(0);
 musicPlayer.crossOrigin='anonymous';recordMusicPlayer.crossOrigin='anonymous';musicPlayer.loop=true;musicPlayer.preload='metadata';
 const musicLibrary={
 'break-dance':{name:'Break dance',url:'assets/bases-laterales/1.mp3'},
@@ -33,8 +31,8 @@ const musicLibrary={
 };
 let mediaRecorder=null,recordedChunks=[],recordedBlob=null,recordedUrl=null,recordingMime='';
 let pose=null,poseReady=false,poseBusy=false,lastPose=0;
-let category='dance',duration=60,userName='',userAge='',evaluationMode='camera',voiceSamplingId=null,selectedCameraDeviceId='';
-let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
+let category='dance',duration=60,userName='',userAge='',evaluationMode='camera',voiceSamplingId=null;
+let guidedStep=0, guidedSkillPanel='guidedPanel';let karaokeVideoId='';let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
 const profiles={
  dance:{name:'Baile / Danza',description:'Prioriza actividad, coordinación, fluidez, variedad y continuidad del movimiento.',weights:{activity:.18,coordination:.25,fluidity:.25,stability:.12,variety:.20}},
  sing:{name:'Canto — voz + expresión',description:'Evalúa afinación, estabilidad vocal, dinámica y expresividad corporal mediante el micrófono y la expresión corporal.',weights:{activity:.10,coordination:.12,fluidity:.13,stability:.10,variety:.10,voice:.45}},
@@ -45,7 +43,6 @@ const profiles={
 };
 let samples=[],prev={},prevDir={},directionChanges=0,lastEnergy=0,evalRunning=false,evalPaused=false,startTime=0,elapsedBeforePause=0,evalTimerId=null,evalFinishGuardId=null,evalFinishing=false,resultImageBlob=null,resultImageUrl=null,shareTarget='image';
 let voiceSamples=[],voicePitchHistory=[],voiceRmsHistory=[],voiceActivitySamples=[],voiceOnsetTimes=[],lastVoiceActive=false,lastVoiceSampleAt=0,lastVoiceAnalysisAt=0,voiceScoreCache=null,karaokeStartAt=0;
-let musicEnergyHistory=[],musicOnsetTimes=[],lastMusicEnergy=0,lastMusicOnsetAt=0,karaokeLyricsText='';
 let readingRecognition=null,readingTranscript='',readingFinalText='',readingStartedAt=0,readingLastSpeechAt=0,readingPauseCount=0,readingRecognitionSupported=false;
 let guideTextWords=[],guideTextType='',guideTextTimer=null,guideTextLineTimer=null,guideTextCurrent=0,guideTextPlaybackActive=false; const GUIDE_WPM=145;
 let textSource='sample',customEvaluationText='';
@@ -59,7 +56,7 @@ function getStageScreenRect(){
   const topEl=document.getElementById('top'), bottomEl=document.getElementById('bottom');
   const tr=topEl?.getBoundingClientRect(), br=bottomEl?.getBoundingClientRect();
   const top=Math.max(8,(tr?.bottom||46)+margin);
-  const bottom=Math.min(innerHeight-8,(br?.top||innerHeight-50)-margin-11);
+  const bottom=Math.min(innerHeight-8,(br?.top||innerHeight-50)-margin);
   const side=8;
   // La cámara/imagen usa el mismo ancho útil que el panel principal de menú.
   // En móvil ocupa todo el ancho disponible; en web respeta el máximo común de 760 px.
@@ -145,7 +142,7 @@ function ensureAudioForMusicSync(){
     return true;
   }catch(e){console.warn('No se pudo preparar el audio para la grabación:',e);return false}
 }
-function resetMusicPlayer(item){try{musicPlayer.pause();musicPlayer.currentTime=0;musicPlayer.onended=null;musicPlayer.onerror=null;const src=item&&item.url?new URL(item.url,document.baseURI).href:'';if(musicPlayer.src!==src){musicPlayer.src=src;musicPlayer.load()}musicPlayer.loop=true;musicPlayer.onended=()=>{if(evalRunning&&!evalPaused&&duration>currentElapsed()){try{musicPlayer.currentTime=0;const p=musicPlayer.play();if(p)p.catch(()=>{})}catch(e){}}};musicPlayer.volume=volumeLevel;return !!src}catch(e){console.warn('No se pudo preparar el reproductor:',e);return false}}
+function resetMusicPlayer(item){try{musicPlayer.pause();musicPlayer.currentTime=0;musicPlayer.onended=null;musicPlayer.onerror=null;const src=item&&item.url?new URL(item.url,document.baseURI).href:'';if(musicPlayer.src!==src){musicPlayer.src=src;musicPlayer.load()}musicPlayer.loop=true;musicPlayer.volume=volumeLevel;return !!src}catch(e){console.warn('No se pudo preparar el reproductor:',e);return false}}
 function prepareMusicForUserGesture(){
   if(!selectedMusic.url)return true;
   try{
@@ -163,7 +160,7 @@ function prepareMusicForUserGesture(){
 }
 function setMusicAudible(){if(!selectedMusic.url)return;try{musicPlayer.volume=volumeLevel;const p=musicPlayer.play();if(p)p.catch(()=>{})}catch(e){console.warn('No se pudo reproducir la música:',e)}}
 function startBackgroundMusic(){if(!selectedMusic.url)return false;try{if(!musicPlayer.src||!musicPlayer.src.includes(selectedMusic.url))resetMusicPlayer(selectedMusic);musicPlayer.volume=volumeLevel;const p=musicPlayer.play();if(p)p.catch(()=>{});return true}catch(e){console.warn('No se pudo iniciar la música:',e);return false}}
-function startRecordingMusic(){if(!selectedMusic.url)return false;try{ensureAudioForMusicSync();if(!recordMusicPlayer.src||!recordMusicPlayer.src.includes(selectedMusic.url)){const src=new URL(selectedMusic.url,document.baseURI).href;recordMusicPlayer.src=src;recordMusicPlayer.load()}recordMusicPlayer.loop=true;recordMusicPlayer.onended=()=>{if(evalRunning&&!evalPaused&&duration>currentElapsed()){try{recordMusicPlayer.currentTime=0;const p=recordMusicPlayer.play();if(p)p.catch(()=>{})}catch(e){}}};recordMusicPlayer.currentTime=0;recordMusicGain.gain.value=volumeLevel;const p=recordMusicPlayer.play();if(p)p.catch(()=>{});return true}catch(e){console.warn('No se pudo iniciar la música de la grabación:',e);return false}}
+function startRecordingMusic(){if(!selectedMusic.url)return false;try{ensureAudioForMusicSync();if(!recordMusicPlayer.src||!recordMusicPlayer.src.includes(selectedMusic.url)){const src=new URL(selectedMusic.url,document.baseURI).href;recordMusicPlayer.src=src;recordMusicPlayer.load()}recordMusicPlayer.loop=true;recordMusicPlayer.currentTime=0;recordMusicGain.gain.value=volumeLevel;const p=recordMusicPlayer.play();if(p)p.catch(()=>{});return true}catch(e){console.warn('No se pudo iniciar la música de la grabación:',e);return false}}
 function stopBackgroundMusic(reset=true){try{musicPlayer.pause();musicPlayer.volume=volumeLevel;if(reset)musicPlayer.currentTime=0}catch(e){}try{recordMusicPlayer.pause();if(reset)recordMusicPlayer.currentTime=0;if(recordMusicGain)recordMusicGain.gain.value=0}catch(e){}}
 function startVideoRecording(){try{if(!window.MediaRecorder||!canvas.captureStream){setTop('La grabación de video no está disponible en este navegador');return false}recordedChunks=[];recordedBlob=null;if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}const cs=canvas.captureStream(30);let recStream=cs;if(selectedMusic.url){ensureAudioForMusicSync();if(recordAudioDestination?.stream?.getAudioTracks?.().length){recordAudioDestination.stream.getAudioTracks().forEach(t=>recStream.addTrack(t))}}recordingMime=getRecordingMime();mediaRecorder=recordingMime?new MediaRecorder(recStream,{mimeType:recordingMime,videoBitsPerSecond:2500000}):new MediaRecorder(recStream,{videoBitsPerSecond:2500000});mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size)recordedChunks.push(e.data)};mediaRecorder.onstop=()=>{recordedBlob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||recordingMime||'video/webm'});recordedUrl=URL.createObjectURL(recordedBlob)};mediaRecorder.start(1000);return true}catch(e){console.error(e);setTop('No se pudo iniciar la grabación de video');return false}}
 function stopVideoRecording(){return new Promise(resolve=>{if(!mediaRecorder||mediaRecorder.state==='inactive'){resolve();return}let done=false;const finish=()=>{if(done)return;done=true;resolve()};mediaRecorder.addEventListener('stop',finish,{once:true});try{mediaRecorder.stop()}catch(e){console.warn('No se pudo detener MediaRecorder:',e);finish()}setTimeout(finish,3500)})}
@@ -285,7 +282,7 @@ function buildResultImage(r){
 async function prepareResultImage(r){const blob=await buildResultImage(r);if(!blob)return;resultImageBlob=blob;if(resultImageUrl)URL.revokeObjectURL(resultImageUrl);resultImageUrl=URL.createObjectURL(blob);document.getElementById('resultImage').src=resultImageUrl;const saveImg=document.getElementById('saveResultImage');if(saveImg)saveImg.src=resultImageUrl}
 function downloadRecordedVideo(){if(!recordedBlob||!recordedUrl){setTop('El video todavía no está disponible.');return}const ext=recordedBlob.type.includes('mp4')?'mp4':'webm';const a=document.createElement('a');a.href=recordedUrl;a.download=`Xpresia_evaluacion_${Math.round(compute()?.score||0)}.${ext}`;document.body.appendChild(a);a.click();a.remove()}
 function downloadResultImage(){if(!resultImageBlob||!resultImageUrl)return;const a=document.createElement('a');a.href=resultImageUrl;a.download=`Xpresia_resultado_${Math.round(compute()?.score||0)}.png`;document.body.appendChild(a);a.click();a.remove()}
-async function initCamera(deviceId=''){if(initPromise)return initPromise;if(stream&&stream.active && (!deviceId || stream.getVideoTracks()[0]?.getSettings?.().deviceId===deviceId))return;initPromise=(async()=>{try{if(stream){try{stream.getTracks().forEach(t=>t.stop())}catch(e){}stream=null;cameraReady=false}const videoConstraints=deviceId?{deviceId:{exact:deviceId}}:{facingMode:'user'};stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints,audio:false});video.srcObject=stream;await video.play();resize();cameraReady=true;updateEvaluationModeUI()}catch(e){console.error(e);cameraReady=false;activation.querySelector('.startHint').textContent='No se pudo acceder a la cámara. Revisa los permisos y toca aquí para reintentar.'}finally{initPromise=null}})();return initPromise}
+async function initCamera(){if(initPromise)return initPromise;if(stream&&stream.active)return;initPromise=(async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});video.srcObject=stream;await video.play();resize();cameraReady=true;updateEvaluationModeUI()}catch(e){console.error(e);activation.querySelector('.startHint').textContent='No se pudo acceder a la cámara. Revisa los permisos y toca aquí para reintentar.'}finally{initPromise=null}})();return initPromise}
 function stopCamera(){try{if(stream){stream.getTracks().forEach(t=>t.stop())}}catch(e){}stream=null;cameraReady=false;try{video.pause()}catch(e){}try{video.srcObject=null}catch(e){}updateEvaluationModeUI()}
 async function setMicrophoneEnabled(enabled){
   if(!enabled){
@@ -335,58 +332,13 @@ async function setMicrophoneEnabled(enabled){
 function stopPreviewMusic(){try{musicPlayer.pause();musicPlayer.currentTime=0}catch(e){}}
 function setMusicStatus(t){document.getElementById('musicPreviewStatus').textContent=t}
 function previewMusic(item){stopPreviewMusic();if(!item||item.id==='none'){setMusicStatus('Sin música de fondo.');return}try{if(!resetMusicPlayer(item))throw new Error('No se pudo preparar el audio');musicPlayer.volume=volumeLevel;const p=musicPlayer.play();if(p)p.then(()=>setMusicStatus('▶ Escuchando vista previa: '+item.name)).catch(()=>setMusicStatus('Toca nuevamente la opción para reproducir la vista previa.'));}catch(e){console.warn('Vista previa:',e);setMusicStatus('No se pudo reproducir esta base.')}}
-function updateSingFreeMusicTextUI(){
-  const wrap=document.getElementById('singFreeTextMusicConfig');
-  const sel=document.getElementById('singFreeTextSource');
-  const customWrap=document.getElementById('singFreeCustomWrap');
-  const area=document.getElementById('singFreeCustomText');
-  const count=document.getElementById('singFreeCustomCount');
-  const show=category==='sing'&&!singImitationMode;
-  if(sel)sel.value=textSource;
-  if(customWrap)customWrap.classList.toggle('show',show&&textSource==='custom');
-  if(area&&area.value!==customEvaluationText)area.value=customEvaluationText;
-  if(count)count.textContent=customEvaluationText.length+' / 3000';
-  if(wrap && !show)wrap.style.display='none';
-}
-function openSingFreeTextPanel(){
-  if(category!=='sing'||singImitationMode)return;
-  updateSingFreeMusicTextUI();
-  const wrap=document.getElementById('singFreeTextMusicConfig');
-  if(wrap)wrap.style.display='block';
-  openPanel('singFreeTextMusicConfig');
-}
-function openIndependentTextPanel(){
-  if(category!=='reading'&&category!=='acting')return;
-  const panel=document.getElementById('textConfigIndependent');if(!panel)return;
-  const sel=document.getElementById('independentTextSource'),wrap=document.getElementById('independentCustomWrap'),area=document.getElementById('independentCustomText'),count=document.getElementById('independentCustomCount');
-  if(sel)sel.value=textSource||'none';if(wrap)wrap.classList.toggle('show',textSource==='custom');if(area)area.value=customEvaluationText||'';if(count)count.textContent=(customEvaluationText||'').length+' / 3000';
-  openPanel('textConfigIndependent');
-}
-function openMusicPanel(){if(evalRunning)return;if(category==='sing'&&(singImitationMode||evaluationMode==='karaoke')){openKaraokeMusicPanel();return}pendingMusic={...selectedMusic};pendingMusicObjectUrl=null;const sel=document.getElementById('musicSelect');sel.value=pendingMusic.id||'none';const isCustom=pendingMusic.id==='custom',isUrl=pendingMusic.id==='url';document.getElementById('musicFileWrap').style.display=isCustom?'block':'none';document.getElementById('musicUrlWrap').style.display=isUrl?'block':'none';updateSingFreeMusicTextUI();document.getElementById('musicFile').value='';document.getElementById('musicUrl').value=isUrl?(pendingMusic.sourceUrl||pendingMusic.url||''):'';setMusicStatus(pendingMusic.id==='none'?'Sin música de fondo.':('Selección actual: '+pendingMusic.name));closePanels();document.getElementById('musicPanel').style.display='block';menuOpen=true}
-function openKaraokeMusicPanel(){
-  if(evalRunning)return;
-  stopPreviewMusic();
-  const kp=document.getElementById('karaokeConfigPanel');
-  if(!kp)return;
-  openPanel('karaokeConfigPanel');
-  kp.style.display='block';
-  const selected=document.getElementById('karaokeSelected');
-  if(karaokeSelectedItem && selected){selected.style.display='block';selected.innerHTML='🎵 Canción seleccionada: <strong>'+escapeHtml(karaokeSelectedItem.title||karaokeSelectedItem.name||'Karaoke')+'</strong>'+(karaokeSelectedItem.artist?' · '+escapeHtml(karaokeSelectedItem.artist):'');}
-  if(!karaokeLibrary.length){
-    const box=document.getElementById('karaokeResults');
-    if(box)box.innerHTML='<div class="karaokeEmpty">🔄 Cargando biblioteca de Xpresia...<br><small>Espera por favor, puede demorar un poco.</small></div>';
-    loadKaraokeLibrary();
-  }else{
-    renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
-  }
-  menuOpen=true;
-}
-function cancelMusicPanel(){stopPreviewMusic();if(pendingMusicObjectUrl){URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=null}if(categoryChosen){updateGuidedPanel();openPanel('guidedPanel');}else{openPanel('evaluationPanel')}}
+function openMusicPanel(){if(evalRunning)return;pendingMusic={...selectedMusic};pendingMusicObjectUrl=null;const sel=document.getElementById('musicSelect');sel.value=pendingMusic.id||'none';const isCustom=pendingMusic.id==='custom',isUrl=pendingMusic.id==='url';document.getElementById('musicFileWrap').style.display=isCustom?'block':'none';document.getElementById('musicUrlWrap').style.display=isUrl?'block':'none';document.getElementById('musicFile').value='';document.getElementById('musicUrl').value=isUrl?(pendingMusic.sourceUrl||pendingMusic.url||''):'';setMusicStatus(pendingMusic.id==='none'?'Sin música de fondo.':('Selección actual: '+pendingMusic.name));closePanels();document.getElementById('musicPanel').style.display='block';menuOpen=true}
+function cancelMusicPanel(){stopPreviewMusic();if(pendingMusicObjectUrl){URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=null}openPanel('evaluationPanel')}
 function updateMusicSelectedStatus(){const e=document.getElementById('musicSelectedStatus');if(e)e.textContent=selectedMusic.url?'🎵 Música configurada: '+selectedMusic.name:'Sin música de fondo seleccionada.'}
 function isYouTubeUrl(url){return /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)/i.test(url)}
 function normalizeAudioUrl(url){try{return new URL(url,document.baseURI).href}catch(e){return ''}}
 function prepareUrlMusic(){const input=document.getElementById('musicUrl');const raw=(input?.value||'').trim();if(!raw){setMusicStatus('Pega primero un enlace de audio.');return false}if(isYouTubeUrl(raw)){setMusicStatus('Los enlaces normales de YouTube no pueden usarse como archivo de audio directamente. Pega el enlace directo al MP3/WAV/OGG alojado en internet.');return false}const url=normalizeAudioUrl(raw);if(!/^https?:|^blob:|^data:|^file:/i.test(url)){setMusicStatus('El enlace no parece válido.');return false}pendingMusic={id:'url',name:'Base desde enlace',url,sourceUrl:raw,objectUrl:false};previewMusic(pendingMusic);return true}
-async function saveMusicSelection(){if(pendingMusic.id==='custom'&&!pendingMusic.url){setMusicStatus('Selecciona primero un archivo de audio.');return}if(pendingMusic.id==='url'&&!pendingMusic.url){if(!prepareUrlMusic())return}selectedMusic={id:pendingMusic.id,name:pendingMusic.name,url:pendingMusic.url,sourceUrl:pendingMusic.sourceUrl||''};stopPreviewMusic();if(pendingMusicObjectUrl){pendingMusicObjectUrl=null}setTop(selectedMusic.url?'Música configurada: '+selectedMusic.name:'Música de fondo desactivada');updateMusicSelectedStatus();if(categoryChosen){guidedCompleted.music=true;const ks=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const mi=ks.indexOf('music');guidedActiveKey=ks[mi+1]||'';updateGuidedPanel();openPanel('guidedPanel');}else{openPanel('evaluationPanel')}}
+async function saveMusicSelection(){if(pendingMusic.id==='custom'&&!pendingMusic.url){setMusicStatus('Selecciona primero un archivo de audio.');return}if(pendingMusic.id==='url'&&!pendingMusic.url){if(!prepareUrlMusic())return}selectedMusic={id:pendingMusic.id,name:pendingMusic.name,url:pendingMusic.url,sourceUrl:pendingMusic.sourceUrl||''};stopPreviewMusic();if(pendingMusicObjectUrl){pendingMusicObjectUrl=null}setTop(selectedMusic.url?'Música configurada: '+selectedMusic.name:'Música de fondo desactivada');updateMusicSelectedStatus();openPanel('evaluationPanel')}
 function parseYouTubeId(url){try{const u=new URL(url);if(u.hostname.includes('youtu.be'))return u.pathname.split('/').filter(Boolean)[0]||'';if(u.hostname.includes('youtube.com')){if(u.pathname==='/watch')return u.searchParams.get('v')||'';if(u.pathname.startsWith('/shorts/'))return u.pathname.split('/')[2]||'';if(u.pathname.startsWith('/embed/'))return u.pathname.split('/')[2]||''}}catch(e){}return ''}
 function parseDriveId(url){try{const u=new URL(url);if(!u.hostname.includes('drive.google.com'))return '';const m=u.pathname.match(/\/file\/d\/([^/]+)/i);if(m)return m[1];return u.searchParams.get('id')||''}catch(e){}return ''}
 const KARAOKE_API_URL = 'https://script.google.com/macros/s/AKfycbxwCLUEeIhVcna-iYUADBjfn9Tf1C9lxvkmCU40EbVO_CiOikETJUT-b-U82HBgn9XeOA/exec';
@@ -551,21 +503,10 @@ async function loadKaraokeLibraryFromAppsScript(){
 }
 async function loadKaraokeLibrary(){
   const box=document.getElementById('karaokeResults');
-  const cacheKey='xpresia_karaoke_library_v2_'+String(karaokeFolderId||DEFAULT_KARAOKE_FOLDER_ID||'default');
-  let usedCache=false;
-  try{
-    const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
-    if(cached&&Array.isArray(cached.songs)&&cached.songs.length){
-      karaokeLibrary=cached.songs;
-      renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
-      usedCache=true;
-    }
-  }catch(e){ console.warn('Caché de biblioteca Xpresia no disponible:',e); }
-  if(box&&!usedCache)box.innerHTML='<div class="karaokeEmpty">🔄 Cargando biblioteca de Xpresia...<br><small>Espera por favor, puede demorar un poco.</small></div>';
+  if(box)box.innerHTML='<div class="karaokeEmpty">🔄 Cargando biblioteca de Google Drive...</div>';
   try{
     const data=await loadKaraokeLibraryFromAppsScript();
     karaokeLibrary=Array.isArray(data)?data:[];
-    try{localStorage.setItem(cacheKey,JSON.stringify({savedAt:Date.now(),songs:karaokeLibrary}));}catch(e){}
     renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
     updateKaraokeFolderStatus('✓ Biblioteca disponible: '+karaokeLibrary.length+' vídeos. Puedes cargar otra biblioteca o un karaoke individual mediante enlace.');
   }catch(err){
@@ -618,68 +559,17 @@ function renderKaraokeLibrary(query=''){
   box.querySelectorAll('.karaokeResult').forEach(btn=>btn.onclick=()=>selectKaraokeLibraryItem(karaokeLibrary[+btn.dataset.kidx]));
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-async function resolveKaraokeDuration(item){
-  const candidates=[item?.durationSeconds,item?.duration,item?.durationSec,item?.duration_seconds,item?.durationMillis!=null?Number(item.durationMillis)/1000:null,item?.videoDuration,item?.lengthSeconds];
-  for(const raw of candidates){
-    const n=Number(raw);
-    if(Number.isFinite(n)&&n>0){
-      duration=Math.max(1,Math.round(n));
-      const d=document.getElementById('duration');if(d)d.value=String(duration);
-      return duration;
-    }
-  }
-  const url=getKaraokeAnalysisUrl(item);
-  const v=document.getElementById('karaokeAudioVideo');
-  if(!url||!v)return 0;
-  return await new Promise(resolve=>{
-    let settled=false;
-    const finish=(value)=>{if(settled)return;settled=true;clearTimeout(timer);v.removeEventListener('loadedmetadata',onMeta);v.removeEventListener('durationchange',onMeta);v.removeEventListener('error',onError);try{v.pause()}catch(e){};try{v.removeAttribute('src');v.load()}catch(e){};if(value>0){duration=Math.max(1,Math.round(value));const d=document.getElementById('duration');if(d)d.value=String(duration)}resolve(value>0?duration:0)};
-    const onMeta=()=>{const n=Number(v.duration);if(Number.isFinite(n)&&n>0)finish(n)};
-    const onError=()=>finish(0);
-    const timer=setTimeout(()=>finish(0),12000);
-    v.preload='metadata';v.muted=true;v.addEventListener('loadedmetadata',onMeta,{once:true});v.addEventListener('durationchange',onMeta);v.addEventListener('error',onError,{once:true});
-    try{v.src=url;v.load()}catch(e){finish(0)}
-  });
-}
-
-// Si el archivo directo de Drive permite cargar el medio oculto, su evento ended
-// puede cerrar la evaluación aunque no podamos leer la duración por CORS.
-const karaokeMetaVideo=document.getElementById('karaokeAudioVideo');
-if(karaokeMetaVideo){karaokeMetaVideo.addEventListener('ended',()=>{
-  if(evalRunning&&evaluationMode==='karaoke'&&!evalPaused) finishEvaluation(true);
-});}
-
 function selectKaraokeLibraryItem(item){
   if(!item)return;
-  // Guardamos la selección ANTES de preparar la previsualización.
-  // loadKaraokeVideo() limpia el estado de carga, por lo que restauramos
-  // explícitamente la canción seleccionada después de cargar el video.
-  const mediaUrl=item.url||item.driveUrl||'';
-  if(mediaUrl){
-    loadKaraokeVideo(mediaUrl,false);
-    karaokeSelectedItem=item;
-    karaokeVideoId=parseYouTubeId(mediaUrl)||parseDriveId(mediaUrl)||karaokeVideoId;
-    karaokeReady=!!karaokeVideoId;
-    evaluationMode='karaoke';
-    karaokeDurationPromise=resolveKaraokeDuration(item).then(sec=>{
-      if(sec>0){
-        const st=document.getElementById('karaokeStatus');
-        if(st)st.textContent='🎵 '+(item.title||'Karaoke')+' · duración detectada: '+formatTime(sec)+'.';
-      }
-      return sec;
-    });
-  }else{
-    karaokeSelectedItem=item;
-  }
-  const input=document.getElementById('karaokeUrl');if(input)input.value=mediaUrl;
+  karaokeSelectedItem=item;
+  const input=document.getElementById('karaokeUrl');if(input)input.value=item.url||item.driveUrl||'';
   const selected=document.getElementById('karaokeSelected');
-  if(selected){selected.style.display='block';selected.innerHTML='🎵 Canción seleccionada: <strong>'+escapeHtml(item.title||item.name||'Karaoke')+'</strong>'+(item.artist?' · '+escapeHtml(item.artist):'')+(item.lyrics||item.lyric||item.text?' · 📝 letras disponibles para análisis':'');}
+  if(selected){selected.style.display='block';selected.innerHTML='🎵 Canción seleccionada: <strong>'+escapeHtml(item.title||item.name||'Karaoke')+'</strong>'+(item.artist?' · '+escapeHtml(item.artist):'');}
   renderKaraokeLibrary(document.getElementById('karaokeSearch')?.value||'');
-  updateEvaluationModeUI();
+  if(item.url||item.driveUrl){loadKaraokeVideo(item.url||item.driveUrl,false);}
 }
 function clearKaraokeSourceState(message='', clearLibrary=true){
-  stopKaraokeAudioAnalysis();
-  karaokeVideoId='';karaokeReady=false;karaokeSelectedItem=null;karaokeLyricsText='';karaokeFolderId=DEFAULT_KARAOKE_FOLDER_ID;karaokeFolderUrl='https://drive.google.com/drive/folders/'+DEFAULT_KARAOKE_FOLDER_ID;karaokeConnectedFolderName='';
+  karaokeVideoId='';karaokeReady=false;karaokeSelectedItem=null;karaokeFolderId=DEFAULT_KARAOKE_FOLDER_ID;karaokeFolderUrl='https://drive.google.com/drive/folders/'+DEFAULT_KARAOKE_FOLDER_ID;karaokeConnectedFolderName='';
   const frame=document.getElementById('karaokeFrame');if(frame)frame.src='';
   const input=document.getElementById('karaokeUrl');if(input)input.value='';
   const selected=document.getElementById('karaokeSelected');if(selected){selected.style.display='none';selected.innerHTML='';}
@@ -689,49 +579,6 @@ function clearKaraokeSourceState(message='', clearLibrary=true){
   evaluationMode='camera';updateEvaluationModeUI();
 }
 
-function stopKaraokeAudioAnalysis(){
-  const v=document.getElementById('karaokeAudioVideo');
-  try{v?.pause()}catch(e){}
-  if(v){try{v.removeAttribute('src');v.load()}catch(e){}}
-  karaokeAudioReady=false;karaokeAudioUrl='';karaokeAudioAnalyser=null;karaokeAudioSource=null;
-  try{karaokeAudioContext?.close()}catch(e){}
-  karaokeAudioContext=null;
-}
-function getKaraokeAnalysisUrl(item){
-  const direct=String(item?.audioUrl||item?.mediaUrl||item?.downloadUrl||'').trim();
-  if(direct && /^(https?:|blob:|data:|file:)/i.test(direct))return direct;
-  const raw=String(item?.url||item?.driveUrl||'').trim();
-  const driveId=parseDriveId(raw)||String(item?.id||'').trim();
-  if(driveId && !/^https?:\/\/.*\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(raw))return 'https://drive.google.com/uc?export=download&id='+encodeURIComponent(driveId);
-  if(raw && /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(raw))return raw;
-  return '';
-}
-async function startKaraokeAudioAnalysis(){
-  stopKaraokeAudioAnalysis();
-  const item=karaokeSelectedItem||{};
-  const url=getKaraokeAnalysisUrl(item);
-  if(!url)return false;
-  const v=document.getElementById('karaokeAudioVideo');
-  if(!v)return false;
-  try{
-    v.crossOrigin='anonymous';v.muted=true;v.volume=0;v.src=url;v.currentTime=0;
-    await v.load();
-    karaokeAudioContext=new (window.AudioContext||window.webkitAudioContext)();
-    if(karaokeAudioContext.state==='suspended')await karaokeAudioContext.resume();
-    karaokeAudioSource=karaokeAudioContext.createMediaElementSource(v);
-    karaokeAudioAnalyser=karaokeAudioContext.createAnalyser();
-    karaokeAudioAnalyser.fftSize=1024;karaokeAudioAnalyser.smoothingTimeConstant=.82;
-    karaokeAudioSource.connect(karaokeAudioAnalyser);
-    /* El elemento está silenciado: se utiliza solamente como fuente de análisis. */
-    karaokeAudioSource.connect(karaokeAudioContext.destination);
-    const p=v.play();if(p)await p;
-    karaokeAudioReady=true;karaokeAudioUrl=url;return true;
-  }catch(e){
-    console.warn('Audio del karaoke no accesible para análisis:',e);
-    stopKaraokeAudioAnalysis();
-    return false;
-  }
-}
 function loadKaraokeVideo(rawInput, replaceLibrary=true){
   const input=document.getElementById('karaokeUrl'),status=document.getElementById('karaokeStatus'),frame=document.getElementById('karaokeFrame');
   const raw=String(rawInput??input?.value??'').trim();
@@ -769,7 +616,7 @@ function loadKaraokeVideo(rawInput, replaceLibrary=true){
       if(origin)params.set('origin',origin);
       frame.src='https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
     }else{
-      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
+      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal&controls=0&toolbar=0';
     }
   }
   if(status){
@@ -812,55 +659,19 @@ function getKaraokePreviewSrc(){
   const driveId=parseDriveId(raw)||karaokeVideoId;
   if(ytId){
     const origin=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'';
-    const params=new URLSearchParams({enablejsapi:'1',playsinline:'1',rel:'0',autoplay:'1',loop:'1',playlist:ytId});
+    const params=new URLSearchParams({enablejsapi:'1',playsinline:'1',rel:'0',autoplay:'1'});
     if(origin)params.set('origin',origin);
     return 'https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
   }
-  if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
+  if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal&controls=0&toolbar=0';
   return '';
 }
 function stopKaraokePreview(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.src='about:blank'}catch(e){try{frame.removeAttribute('src')}catch(_){} }}
-function startKaraokePlayback(){const frame=document.getElementById('karaokeFrame');const src=getKaraokePreviewSrc();if(!frame||!src)return;try{frame.src=src;setTimeout(()=>{try{frame.blur()}catch(e){}},350)}catch(e){}}
+function startKaraokePlayback(){const frame=document.getElementById('karaokeFrame');const src=getKaraokePreviewSrc();if(!frame||!src)return;try{frame.src=src}catch(e){}}
 function playKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame||!karaokeVideoId)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*')}catch(e){} }
 function pauseKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*')}catch(e){}}
 
-const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)cameraModeBtn.onclick=()=>setEvaluationMode('camera');const voiceModeBtn=document.getElementById('voiceModeBtn');if(voiceModeBtn)voiceModeBtn.onclick=()=>setEvaluationMode('voice');const karaokeModeBtn=document.getElementById('karaokeModeBtn');if(karaokeModeBtn)karaokeModeBtn.onclick=()=>setEvaluationMode('karaoke');document.getElementById("karaokeFolderBtn")?.addEventListener("click",promptKaraokeFolder);document.getElementById("karaokeVideoBtn")?.addEventListener("click",promptKaraokeVideo);document.getElementById("karaokeOfficialBtn")?.addEventListener("click",loadOfficialKaraokeLibrary);document.getElementById('karaokeSearch').oninput=e=>renderKaraokeLibrary(e.target.value);document.getElementById('karaokeRefreshBtn').onclick=loadOfficialKaraokeLibrary;loadKaraokeLibrary();document.getElementById('cancelMusic').onclick=()=>cancelMusicPanel();document.getElementById('saveMusic').onclick=()=>saveMusicSelection();document.getElementById('saveKaraokeMusic').onclick=()=>{
-  if(!karaokeSelectedItem){
-    const st=document.getElementById('karaokeStatus');
-    if(st)st.textContent='Selecciona primero una canción de la biblioteca.';
-    return;
-  }
-  // La canción ya fue cargada/previsualizada al seleccionarla.
-  // Guardar no debe volver a llamar a loadKaraokeVideo(), porque esa función
-  // limpia el estado y borra karaokeSelectedItem.
-  evaluationMode='karaoke';
-  karaokeReady=!!karaokeVideoId;
-  const st=document.getElementById('karaokeStatus');
-  if(st)st.textContent='⏳ Guardando selección y detectando duración…';
-  // La selección se confirma inmediatamente. No hacemos esperar al usuario a que
-  // termine la detección de metadatos de Google Drive antes de cerrar el panel.
-  guidedCompleted.music=true;
-  guidedActiveKey='';
-  updateEvaluationModeUI();
-  updateGuidedPanel();
-  openPanel('guidedPanel');
-  const durationPromise=karaokeDurationPromise||Promise.resolve(resolveKaraokeDuration(karaokeSelectedItem));
-  durationPromise.then(sec=>{
-    if(sec>0){
-      const status=document.getElementById('karaokeStatus');
-      if(status)status.textContent='🎵 '+(karaokeSelectedItem?.title||'Karaoke')+' · duración detectada: '+formatTime(sec)+'.';
-    }else{
-      const status=document.getElementById('karaokeStatus');
-      if(status)status.textContent='⚠️ No se pudo detectar todavía la duración. Xpresia seguirá intentando obtenerla al preparar la evaluación.';
-    }
-    updateGuidedPanel();
-  }).catch(e=>{
-    console.warn('Detección de duración del karaoke:',e);
-    const status=document.getElementById('karaokeStatus');
-    if(status)status.textContent='⚠️ No se pudo detectar todavía la duración del karaoke.';
-    updateGuidedPanel();
-  });
-};document.getElementById('cancelKaraokeMusic').onclick=()=>openPanel('guidedPanel');document.getElementById('karaokePanelBack')?.addEventListener('click',()=>openPanel('guidedPanel'));document.getElementById('musicLinkTest').onclick=prepareUrlMusic;document.getElementById('musicSelect').onchange=e=>{const id=e.target.value;document.getElementById('musicFileWrap').style.display=id==='custom'?'block':'none';document.getElementById('musicUrlWrap').style.display=id==='url'?'block':'none';if(id==='none'){pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};previewMusic(pendingMusic);return}if(id==='custom'){pendingMusic={id:'custom',name:'Mi música',url:'',objectUrl:true};setMusicStatus('Selecciona un archivo de audio para escucharlo.');return}if(id==='url'){pendingMusic={id:'url',name:'Base desde enlace',url:'',sourceUrl:'',objectUrl:false};setMusicStatus('Pega un enlace directo a un archivo de audio y pulsa “Probar enlace”.');return}const item=musicLibrary[id];pendingMusic={id,name:item.name,url:item.url,objectUrl:false};previewMusic(pendingMusic)};updateMusicSelectedStatus();document.getElementById('musicFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(pendingMusicObjectUrl)URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=URL.createObjectURL(file);pendingMusic={id:'custom',name:file.name,url:pendingMusicObjectUrl,objectUrl:true};previewMusic(pendingMusic)};document.getElementById('musicUrl').onchange=()=>{if(document.getElementById('musicUrl').value.trim())prepareUrlMusic()};
+const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)cameraModeBtn.onclick=()=>setEvaluationMode('camera');const voiceModeBtn=document.getElementById('voiceModeBtn');if(voiceModeBtn)voiceModeBtn.onclick=()=>setEvaluationMode('voice');const karaokeModeBtn=document.getElementById('karaokeModeBtn');if(karaokeModeBtn)karaokeModeBtn.onclick=()=>setEvaluationMode('karaoke');document.getElementById("karaokeFolderBtn")?.addEventListener("click",promptKaraokeFolder);document.getElementById("karaokeVideoBtn")?.addEventListener("click",promptKaraokeVideo);document.getElementById("karaokeOfficialBtn")?.addEventListener("click",loadOfficialKaraokeLibrary);document.getElementById('karaokeSearch').oninput=e=>renderKaraokeLibrary(e.target.value);document.getElementById('karaokeRefreshBtn').onclick=loadOfficialKaraokeLibrary;loadKaraokeLibrary();document.getElementById('cancelMusic').onclick=()=>{cancelMusicPanel();if(document.getElementById('guidedPanel')?.style.display==='none')openPanel('guidedPanel')};document.getElementById('saveMusic').onclick=()=>{saveMusicSelection();setTimeout(()=>{if(categoryChosen) {updateGuidedPanel();openPanel('guidedPanel')}},50)};document.getElementById('musicLinkTest').onclick=prepareUrlMusic;document.getElementById('musicSelect').onchange=e=>{const id=e.target.value;document.getElementById('musicFileWrap').style.display=id==='custom'?'block':'none';document.getElementById('musicUrlWrap').style.display=id==='url'?'block':'none';if(id==='none'){pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};previewMusic(pendingMusic);return}if(id==='custom'){pendingMusic={id:'custom',name:'Mi música',url:'',objectUrl:true};setMusicStatus('Selecciona un archivo de audio para escucharlo.');return}if(id==='url'){pendingMusic={id:'url',name:'Base desde enlace',url:'',sourceUrl:'',objectUrl:false};setMusicStatus('Pega un enlace directo a un archivo de audio y pulsa “Probar enlace”.');return}const item=musicLibrary[id];pendingMusic={id,name:item.name,url:item.url,objectUrl:false};previewMusic(pendingMusic)};updateMusicSelectedStatus();document.getElementById('musicFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(pendingMusicObjectUrl)URL.revokeObjectURL(pendingMusicObjectUrl);pendingMusicObjectUrl=URL.createObjectURL(file);pendingMusic={id:'custom',name:file.name,url:pendingMusicObjectUrl,objectUrl:true};previewMusic(pendingMusic)};document.getElementById('musicUrl').onchange=()=>{if(document.getElementById('musicUrl').value.trim())prepareUrlMusic()};
 
 let activationOpening=false;
 function enterXpresia(e){
@@ -893,16 +704,9 @@ activation.style.touchAction='manipulation';
 document.getElementById('activationEnter')?.addEventListener('click',enterXpresia,{passive:false});
 document.getElementById('startUserAge')?.addEventListener('keydown',e=>{if(e.key==='Enter')enterXpresia(e)});
 document.getElementById('startUserName')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startUserAge')?.focus()});
-const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','danceImitationPanel','skillHubPanel','guidedPanel','cameraSelectPanel','durationPanel','modePanel','singFreeModePanel','singImitationModePanel','imitationChallengePanel','genericFreeModePanel','genericImitationDevPanel','evaluationPanel','karaokeConfigPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel','singFreeTextMusicConfig','textConfigIndependent'];
-function closePanels(){panels.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});document.querySelectorAll('.panel').forEach(el=>{el.style.display='none'});hideGuideText();menuOpen=false}
-function openPanel(id){
-  // El panel genérico antiguo no debe mostrar configuraciones de texto.
-  closePanels();
-  const el=document.getElementById(id);
-  if(el)el.style.display='block';
-  menuOpen=true;
-  if(id==='evaluationPanel'){updateEvaluationPanelContext();updateGuidePanel();updateTextConfigUI();}
-}
+const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','guidedPanel','durationPanel','modePanel','evaluationPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel'];
+function closePanels(){panels.forEach(id=>document.getElementById(id).style.display='none');hideGuideText();menuOpen=false}
+function openPanel(id){closePanels();const el=document.getElementById(id);if(el)el.style.display='block';menuOpen=true;if(id==='evaluationPanel'){updateEvaluationPanelContext();updateGuidePanel()}}
 function returnToMain(){openPanel('mainMenu')}
 function setTop(t){document.getElementById('topMessage').textContent=t}
 function setTopScore(v){const e=document.getElementById('topScore');e.textContent='Puntuación: '+Math.round(v);e.style.display='inline'}
@@ -914,24 +718,25 @@ function updateEvaluationPanelContext(){
   const title=document.getElementById('evaluationTitle'),sub=document.getElementById('evaluationSubtitle'),ctx=document.getElementById('configContext');
   if(title)title.textContent='Configuración · '+p.name;
   if(sub)sub.textContent=evaluationMode==='karaoke'?'Configura tu experiencia de karaoke.':'Configura únicamente esta experiencia antes de comenzar.';
-  if(ctx)ctx.textContent=(category==='sing'&&singImitationMode?(karaokeWithCamera?'🎭 Modo imitación · Con cámara':'🎭 Modo imitación · Sin cámara'):(evaluationMode==='voice'?'🎙️ Modo libre · Sin cámara':evaluationMode==='karaoke'?'🎵 Modo imitación':'📷 '+p.name))+' · configuración independiente';
+  if(ctx)ctx.textContent=(evaluationMode==='karaoke'?'🎵 Karaoke':evaluationMode==='voice'?'🎙️ Solo voz':'📷 '+p.name)+' · configuración independiente';
 }
 function updateEvaluationModeUI(){
   const chooser=document.getElementById('evalModeChooser'); if(chooser)chooser.style.display='none';
   const karaokeActive=category==='sing'&&evaluationMode==='karaoke';
   const textPanel=document.getElementById('readingPanel');
-  if(textPanel)textPanel.style.display=(!karaokeActive&&(category==='reading'||category==='acting'))?'block':'none';
+  if(textPanel)textPanel.style.display=(!karaokeActive&&(category==='sing'||category==='reading'||category==='acting'))?'block':'none';
+  const kp=document.getElementById('karaokeConfigPanel');if(kp)kp.style.display=karaokeActive?'block':'none';
   const cam=document.getElementById('cameraModeBtn'),voice=document.getElementById('voiceModeBtn'),karaoke=document.getElementById('karaokeModeBtn');
   if(cam)cam.style.display='none';if(voice)voice.style.display='none';if(karaoke)karaoke.style.display='none';
   const solo=document.getElementById('soloVisual'),kv=document.getElementById('karaokeVisual');
   const img=document.getElementById('soloVisualImage'),label=document.getElementById('soloVisualLabel');
-  const cameraShowing=!!((evaluationMode==='camera'||(evaluationMode==='karaoke'&&karaokeWithCamera))&&cameraReady&&video.readyState>=2&&video.videoWidth);
-  const showKaraoke=evalRunning&&evaluationMode==='karaoke'&&!!karaokeVideoId;const miniCam=video; const camToggle=document.getElementById('karaokeCameraToggle'); if(miniCam){miniCam.classList.toggle('karaokeCameraMini',showKaraoke&&karaokeWithCamera);miniCam.classList.toggle('cameraHidden',showKaraoke&&karaokeWithCamera&&karaokeCameraHidden);miniCam.style.display=(showKaraoke&&karaokeWithCamera&&cameraReady&&!karaokeCameraHidden)?'block':'none';} if(camToggle){camToggle.style.display=(showKaraoke&&karaokeWithCamera&&cameraReady)?'block':'none';camToggle.classList.toggle('hidden',karaokeCameraHidden);camToggle.textContent=karaokeCameraHidden?'📷':'✕';camToggle.title=karaokeCameraHidden?'Mostrar cámara':'Ocultar cámara';camToggle.setAttribute('aria-label',camToggle.title)}
+  const cameraShowing=!!(evaluationMode==='camera'&&cameraReady&&video.readyState>=2&&video.videoWidth);
+  const showKaraoke=evalRunning&&evaluationMode==='karaoke'&&!!karaokeVideoId;
   const shouldShowVisual=(evaluationMode==='voice')||(!cameraShowing&&!showKaraoke);
   if(solo){solo.style.display=shouldShowVisual?'block':'none';solo.setAttribute('aria-hidden',shouldShowVisual?'false':'true')}
   if(kv){kv.style.display=showKaraoke?'block':'none';kv.setAttribute('aria-hidden',showKaraoke?'false':'true')}
   if(img){const src=!categoryChosen?DEFAULT_VISUAL_IMAGE:(category==='reading'?'assets/imagenes/eval_lectura.jpg':category==='sing'?'assets/imagenes/eval_canto.jpg':category==='acting'?'assets/imagenes/eval_actuacion.jpg':category==='aura'?'assets/imagenes/eval_presencia.jpg':category==='imitation'?'assets/imagenes/eval_imitacion.jpg':'assets/imagenes/eval_movimiento.jpg');img.src=src;img.alt=!categoryChosen?'Xpresia — Arte y expresión en movimiento':(profiles[category]?.name||'Evaluación Xpresia')}
-  if(label){label.innerHTML='';const topLabel=document.getElementById('evalModeTopLabel');if(topLabel)topLabel.innerHTML='';}
+  if(label){if(!categoryChosen)label.innerHTML='✨ Xpresia<small>Arte y expresión en movimiento</small>';else if(evaluationMode==='karaoke')label.innerHTML='🎵 Modo Karaoke<small>Canta siguiendo el video y las letras</small>';else if(category==='reading')label.innerHTML='📖 Modo solo micrófono<small>Lee con tu voz y deja que tu narración sea la protagonista</small>';else if(category==='sing')label.innerHTML='🎙️ Modo solo micrófono<small>Tu voz es la protagonista</small>';else label.innerHTML='✨ '+(profiles[category]?.name||'Xpresia')+'<small>Descubre y expresa tus habilidades</small>';const topLabel=document.getElementById('evalModeTopLabel');if(topLabel)topLabel.innerHTML=label.innerHTML}
   positionVisualStage();updateLiveGuideVisibility();updateEvaluationPanelContext();
 }
 function positionVisualStage(){
@@ -945,29 +750,12 @@ function positionVisualStage(){
     solo.style.height=r.h+'px';
   }
   if(kv){
-    // El karaoke ocupa el rectángulo principal de evaluación.
+    // El karaoke debe ocupar exactamente el mismo rectángulo visual que la cámara/imagen.
+    // Así ambos modos mantienen la misma composición y no invade el menú inferior.
     kv.style.left=(r.x+r.w/2)+'px';
     kv.style.top=r.y+'px';
     kv.style.width=r.w+'px';
     kv.style.height=r.h+'px';
-  }
-  const miniCam=document.getElementById('video');
-  const camToggle=document.getElementById('karaokeCameraToggle');
-  const miniVisible=!!(evalRunning&&evaluationMode==='karaoke'&&karaokeWithCamera&&cameraReady&&!karaokeCameraHidden);
-  if(miniCam){
-    const isMobile=window.innerWidth<700;
-    const mw=isMobile?Math.min(230,Math.max(190,window.innerWidth*0.52)):Math.min(215,Math.max(145,window.innerWidth*0.32));
-    miniCam.style.width=mw+'px';
-    miniCam.style.left=(r.x+(r.w-mw)/2)+'px';
-    miniCam.style.top=(r.y+4)+'px';
-    miniCam.style.zIndex=25;
-  }
-  if(camToggle){
-    const isMobile=window.innerWidth<700;
-    const mw=isMobile?Math.min(230,Math.max(190,window.innerWidth*0.52)):Math.min(215,Math.max(145,window.innerWidth*0.32));
-    camToggle.style.left=(r.x+(r.w+mw)/2-16)+'px';
-    camToggle.style.top=(r.y+4)+'px';
-    camToggle.style.zIndex=30;
   }
 }
 function updateLiveGuideVisibility(){
@@ -977,7 +765,6 @@ function updateLiveGuideVisibility(){
   const shouldShow=!!(evalRunning&&textSkill&&textSource!=='none'&&evaluationMode!=='karaoke');
   if(shouldShow){
     if(!guideTextType)renderGuideText(category,duration||60);
-    const textBox=document.getElementById('liveTextGuideText');if(textBox)textBox.style.display='';
     guide.classList.add('liveTextGuide');guide.style.setProperty('display','block','important');
   }else if(evalRunning&&categoryChosen){
     guide.classList.add('liveTextGuide');guide.style.setProperty('display','block','important');
@@ -987,30 +774,28 @@ function updateLiveGuideVisibility(){
   }
 }
 
-function setEvaluationMode(mode){if(evalRunning)return;if((category!=='sing'&&category!=='reading')&&(mode==='voice'||mode==='karaoke'))return;if(category!=='sing'&&mode==='karaoke')return;resetEvaluationSelectionState();evaluationMode=mode;if(mode==='voice'||(mode==='karaoke'&&!karaokeWithCamera))stopCamera();updateEvaluationModeUI();updateGuidedPanel();}
+function setEvaluationMode(mode){if(evalRunning)return;if((category!=='sing'&&category!=='reading')&&(mode==='voice'||mode==='karaoke'))return;if(category!=='sing'&&mode==='karaoke')return;if(mode==='karaoke'&&!karaokeVideoId){const st=document.getElementById('karaokeStatus');if(st)st.textContent='Pega y carga primero un enlace de YouTube.'}evaluationMode=mode;if(mode==='voice'||mode==='karaoke')stopCamera();updateEvaluationModeUI();resetScore();}
 function updateGuidePanel(){const show=category==='sing'||category==='acting'||category==='reading';const p=document.getElementById('textGuidePanel');if(!show||!evalRunning||textSource==='none'){hideGuideText();return}renderGuideText(category,duration||60)}
 function updateTextConfigUI(){
-  // El antiguo panel genérico de texto ya no forma parte del flujo visible.
-  // El único panel de configuración de texto permitido es el de Canto + Modo libre.
   const panel=document.getElementById('readingPanel');
   const selector=document.getElementById('textSourceSelect');
   const wrap=document.getElementById('customTextWrap');
   const area=document.getElementById('customText');
   const count=document.getElementById('customTextCount');
-  const show=false;
-  if(panel)panel.style.display='none';
+  const show=category==='sing'||category==='reading'||category==='acting';
+  if(panel)panel.style.display=(show&&evaluationMode!=='karaoke')?'block':'none';
   if(selector)selector.value=textSource;
-  if(wrap)wrap.classList.remove('show');
+  if(wrap)wrap.classList.toggle('show',show&&textSource==='custom');
   if(area&&area.value!==customEvaluationText)area.value=customEvaluationText;
   if(count)count.textContent=(customEvaluationText.length)+' / 3000';
-  updateSingFreeMusicTextUI();
   const header=document.getElementById('textConfigHeader');
   if(header)header.textContent='📝 Texto en pantalla';
+  const kp=document.getElementById('karaokeConfigPanel');if(kp)kp.style.display=category==='sing'?'block':'none';
 }
 const textSourceSelect=document.getElementById('textSourceSelect');
 if(textSourceSelect)textSourceSelect.onchange=e=>{textSource=e.target.value;updateTextConfigUI();};
 const customTextInput=document.getElementById('customText');
-if(customTextInput)customTextInput.oninput=e=>{customEvaluationText=e.target.value;const c=document.getElementById('customTextCount');if(c)c.textContent=customEvaluationText.length+' / 3000';};const singFreeTextSource=document.getElementById('singFreeTextSource');if(singFreeTextSource)singFreeTextSource.onchange=e=>{textSource=e.target.value;updateTextConfigUI();updateSingFreeMusicTextUI();updateGuidedPanel();};const singFreeCustomText=document.getElementById('singFreeCustomText');if(singFreeCustomText)singFreeCustomText.oninput=e=>{customEvaluationText=e.target.value;const c=document.getElementById('singFreeCustomCount');if(c)c.textContent=customEvaluationText.length+' / 3000';const main=document.getElementById('customText');if(main)main.value=customEvaluationText;}; const independentTextSource=document.getElementById('independentTextSource');if(independentTextSource)independentTextSource.onchange=e=>{textSource=e.target.value;const wrap=document.getElementById('independentCustomWrap');if(wrap)wrap.classList.toggle('show',textSource==='custom');updateGuidedPanel();}; const independentCustomText=document.getElementById('independentCustomText');if(independentCustomText)independentCustomText.oninput=e=>{customEvaluationText=e.target.value;const c=document.getElementById('independentCustomCount');if(c)c.textContent=customEvaluationText.length+' / 3000';};
+if(customTextInput)customTextInput.oninput=e=>{customEvaluationText=e.target.value;const c=document.getElementById('customTextCount');if(c)c.textContent=customEvaluationText.length+' / 3000';};
 const categorySelect=document.getElementById('category');if(categorySelect)categorySelect.style.display='none';updateDescription();updateTextConfigUI();updateEvaluationModeUI();hideGuideText();
 function loadPose(){if(poseReady||pose)return;if(typeof Pose==='undefined'){setTop('Cargando detector corporal…');if(window.poseLoading)return;window.poseLoading=true;const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js';s.onload=()=>{window.poseLoading=false;loadPose()};s.onerror=()=>{window.poseLoading=false;setTop('No se pudo cargar el detector corporal')};document.head.appendChild(s);return}pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`});pose.setOptions({modelComplexity:0,smoothLandmarks:true,enableSegmentation:false,minDetectionConfidence:.35,minTrackingConfidence:.35});pose.onResults(onPose);poseReady=true;setTop('Detector corporal listo')}
 function waitForPoseReady(timeout=8000){return new Promise(resolve=>{const started=performance.now();const check=()=>{if(poseReady){resolve(true);return}if(performance.now()-started>=timeout){resolve(false);return}setTimeout(check,100)};check()})}
@@ -1102,45 +887,6 @@ function updateMicNoiseFloor(){
   if(Number.isFinite(rms)) micNoiseFloorRms=micNoiseFloorRms*.92+rms*.08;
 }
 function detectVoicePitch(){if(!micAnalyser||!audioContext)return null;const n=256,buf=new Float32Array(n);micAnalyser.getFloatTimeDomainData(buf);let sum=0;for(let i=0;i<n;i++)sum+=buf[i]*buf[i];const rms=Math.sqrt(sum/n);voiceRmsHistory.push(rms);if(voiceRmsHistory.length>600)voiceRmsHistory.shift();const recent=voiceRmsHistory.slice(-40);const sortedR=[...recent].sort((a,b)=>a-b);const floor=sortedR[Math.floor(sortedR.length*.2)]||0.003;const adaptiveFloor=Math.max(micNoiseFloorRms,floor);const threshold=Math.max(.014,adaptiveFloor*2.8);if(rms<threshold)return null;let bestTau=-1,bestCorr=0;const minTau=Math.max(2,Math.floor(audioContext.sampleRate/1000)),maxTau=Math.min(n-2,Math.floor(audioContext.sampleRate/75));for(let tau=minTau;tau<=maxTau;tau+=2){let corr=0,e1=0,e2=0;for(let i=0;i<n-tau;i+=2){const a=buf[i],b=buf[i+tau];corr+=a*b;e1+=a*a;e2+=b*b}const norm=corr/Math.sqrt((e1*e2)||1);if(norm>bestCorr){bestCorr=norm;bestTau=tau}}if(bestTau<0||bestCorr<.55)return null;const pitch=audioContext.sampleRate/bestTau;if(pitch<75||pitch>1000)return null;return{pitch,rms,confidence:bestCorr}}
-function sampleMusicBeat(now){
-  const analyser=(evaluationMode==='karaoke'&&karaokeAudioAnalyser)?karaokeAudioAnalyser:recordMusicAnalyser;
-  const hasSource=evaluationMode==='karaoke'?!!karaokeAudioAnalyser:!!recordMusicAnalyser&&!!selectedMusic.url;
-  if(!analyser||!hasSource)return;
-  try{
-    const bins=analyser.frequencyBinCount;
-    const data=new Uint8Array(bins);
-    analyser.getByteFrequencyData(data);
-    const end=Math.min(bins,48),start=Math.min(2,Math.max(0,end-1));
-    let sum=0,count=0;
-    for(let i=start;i<end;i++){sum+=data[i];count++}
-    const energy=(sum/Math.max(1,count))/255;
-    musicEnergyHistory.push({t:now,e:energy});
-    if(musicEnergyHistory.length>240)musicEnergyHistory.shift();
-    const recent=musicEnergyHistory.slice(-50).map(x=>x.e).sort((a,b)=>a-b);
-    const baseline=recent[Math.floor(recent.length*.5)]||0;
-    const delta=energy-lastMusicEnergy;
-    const threshold=Math.max(.055,baseline*1.28+.025);
-    if(energy>threshold&&delta>.035&&(now-lastMusicOnsetAt)>180){
-      musicOnsetTimes.push(now);lastMusicOnsetAt=now;
-      if(musicOnsetTimes.length>120)musicOnsetTimes.shift();
-    }
-    lastMusicEnergy=energy;
-  }catch(e){}
-}
-function karaokeLyricMatch(){
-  const expected=normalizeReadingText(karaokeLyricsText);
-  const spoken=normalizeReadingText(readingFinalText||readingTranscript);
-  if(!expected||!spoken)return null;
-  const a=expected.split(' '),b=spoken.split(' ');
-  const elapsed=Math.max(1,currentElapsed());
-  const targetCount=Math.max(1,Math.min(a.length,Math.round((elapsed/60)*125)));
-  const target=a.slice(0,targetCount);
-  const dp=Array.from({length:target.length+1},()=>new Array(b.length+1).fill(0));
-  for(let i=1;i<=target.length;i++)dp[i][0]=i;
-  for(let j=1;j<=b.length;j++)dp[0][j]=j;
-  for(let i=1;i<=target.length;i++)for(let j=1;j<=b.length;j++)dp[i][j]=target[i-1]===b[j-1]?dp[i-1][j-1]:Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+1);
-  return clamp01(1-dp[target.length][b.length]/Math.max(target.length,b.length));
-}
 function sampleVoice(){if(!micEnabled||!micAnalyser)return;const now=performance.now();if(now-lastVoiceSampleAt<100)return;lastVoiceSampleAt=now;
   // Registramos también la envolvente de la voz aunque el detector de tono no encuentre
   // una nota. Esto permite medir presencia, entradas y regularidad rítmica.
@@ -1148,7 +894,6 @@ function sampleVoice(){if(!micEnabled||!micAnalyser)return;const now=performance
   const recent=voiceRmsHistory.slice(-40),sorted=[...recent].sort((a,b)=>a-b);const floor=sorted[Math.floor(sorted.length*.2)]||0.003;const threshold=Math.max(.014,Math.max(micNoiseFloorRms,floor)*2.8);const active=rms>=threshold;
   voiceActivitySamples.push({t:now,rms,active});if(voiceActivitySamples.length>900)voiceActivitySamples.shift();
   if(active&&!lastVoiceActive)voiceOnsetTimes.push(now);if(voiceOnsetTimes.length>120)voiceOnsetTimes.shift();lastVoiceActive=active;
-  sampleMusicBeat(now);
   const v=detectVoicePitch();if(v){voicePitchHistory.push(v.pitch);if(voicePitchHistory.length>600)voicePitchHistory.shift();voiceSamples.push({t:now,pitch:v.pitch,rms:v.rms,confidence:v.confidence});if(voiceSamples.length>600)voiceSamples.shift()}
   if(now-lastVoiceAnalysisAt>=180){lastVoiceAnalysisAt=now;voiceScoreCache=updateVoiceScore()}}
 function updateVoiceScore(){
@@ -1183,23 +928,13 @@ function updateVoiceScore(){
       syncToMusic=count?clamp01(sum/count):0;
     }
   }
-  let musicSync=null;
-  if(evaluationMode!=='karaoke'&&selectedMusic.url&&musicOnsetTimes.length>=3&&onsets.length>=2){
-    let sum=0,count=0;
-    for(const t of onsets){
-      let best=Infinity;
-      for(const mt of musicOnsetTimes)best=Math.min(best,Math.abs(t-mt));
-      if(Number.isFinite(best)&&best<=650){sum+=1-best/650;count++}
-    }
-    if(count>=2)musicSync=clamp01(sum/count);
-  }
-  const rhythmMetric=syncToMusic!=null?syncToMusic:(musicSync!=null?musicSync:rhythmicConsistency);
+  const rhythmMetric=syncToMusic==null?rhythmicConsistency:syncToMusic;
   const score=clamp01(.38*pitchAccuracy+.24*pitchStability+.12*dynamics+.10*pitchRange+.10*presence+.06*rhythmMetric);
   setVoiceMetric('Pitch',pitchAccuracy*100);setVoiceMetric('PitchStability',pitchStability*100);setVoiceMetric('Dynamics',dynamics*100);setVoiceMetric('VoicePresence',presence*100);
-  return{pitchAccuracy,pitchStability,dynamics,pitchRange,presence,activeRatio,rhythmicConsistency,syncToMusic,musicSync,score};
+  return{pitchAccuracy,pitchStability,dynamics,pitchRange,presence,activeRatio,rhythmicConsistency,syncToMusic,score};
 }
 
-function voiceCompute(){const v=voiceScoreCache||(voiceSamples.length?updateVoiceScore():null);if(!v)return null;const rhythm=v.syncToMusic!=null?v.syncToMusic:(v.musicSync!=null?v.musicSync:v.rhythmicConsistency);const lyric=v.lyricMatch!=null?.05*v.lyricMatch:0;const score=clamp01(.36*v.pitchAccuracy+.23*v.pitchStability+.12*v.dynamics+.09*v.pitchRange+.09*v.presence+.06*rhythm+lyric);return{...v,score}}
+function voiceCompute(){const v=voiceScoreCache||(voiceSamples.length?updateVoiceScore():null);if(!v)return null;const rhythm=v.syncToMusic!=null?v.syncToMusic:v.rhythmicConsistency;const score=clamp01(.38*v.pitchAccuracy+.25*v.pitchStability+.13*v.dynamics+.09*v.pitchRange+.09*v.presence+.06*rhythm);return{...v,score}}
 function clamp01(v){return Math.max(0,Math.min(1,Number.isFinite(v)?v:0))}
 function scoreCurve(v,mid=.5,sharp=1.8){
   v=clamp01(v); const z=(v-mid)*sharp; return 1/(1+Math.exp(-z*4));
@@ -1400,17 +1135,6 @@ function readingCompute(voice){
   const expected=normalizeReadingText(document.getElementById('readingText')?.textContent||'');
   const spoken=normalizeReadingText(readingFinalText||readingTranscript);
   const elapsed=Math.max(1,currentElapsed(),duration>0?duration:0);
-  if(textSource==='none'){
-    const voiceQuality=voice?clamp01(.30*(voice.dynamics??0)+.25*(voice.pitchStability??0)+.20*(voice.pitchRange??0)+.15*(voice.presence??0)+.10*(voice.rhythmicConsistency??0)):0;
-    const rhythm=voice?.rhythmicConsistency??0;
-    const dynamics=voice?.dynamics??0;
-    const confidence=clamp01((voice?.activeRatio??0)*.75+Math.min(1,elapsed/12)*.25);
-    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=Math.round(clamp01(v)*100)};
-    set('mReadAccuracy',0);set('mReadFluency',rhythm);set('mReadPauses',dynamics);set('mReadVoice',voiceQuality);
-    const st=document.getElementById('readingStatus');
-    if(st)st.textContent='🎙️ Lectura sin texto · se evalúan voz, fluidez, pausas y expresión vocal.';
-    return{accuracy:0,fluency:rhythm,pauses:dynamics,voice:voiceQuality,coverage:0,confidence,score:clamp01(.72*voiceQuality+.16*rhythm+.12*dynamics)};
-  }
   const words=spoken?spoken.split(' ').filter(Boolean).length:0;
   const targetWpm=145;
   const wpm=words/elapsed*60;
@@ -1434,7 +1158,7 @@ function readingCompute(voice){
   const expectedPauseRate=elapsed<15?.8:elapsed<40?1.5:2.5;
   const pauseRate=readingPauseCount/Math.max(.25,elapsed/60);
   const pauseQuality=words?Math.max(0,1-Math.min(1,Math.abs(pauseRate-expectedPauseRate)/Math.max(2.5,expectedPauseRate*1.8))):.05;
-  const voiceQuality=voice?clamp01(.30*(voice.dynamics??0)+.25*(voice.pitchStability??0)+.20*(voice.pitchRange??0)+.15*(voice.presence??0)+.10*(voice.rhythmicConsistency??0)):.05;
+  const voiceQuality=voice?voice.score:.05;
   const spokenCoverage=expected?Math.min(1,words/Math.max(1,Math.min(expected.split(' ').length,Math.round((elapsed/60)*targetWpm)))):0;
   const dataConfidence=clamp01(.55*spokenCoverage+.45*Math.min(1,elapsed/30));
   const score=clamp01(.34*accuracy+.24*fluencySpeed+.14*pauseQuality+.18*voiceQuality+.10*dataConfidence);
@@ -1454,7 +1178,7 @@ function weightedBodyScore(r,profile){
   return clamp01(r.activity*w.activity+r.coordination*w.coordination+r.fluidity*w.fluidity+r.stability*w.stability+r.variety*w.variety);
 }
 function compute(){
-  const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));
+  const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||evaluationMode==='karaoke');
   const elapsed=Math.max(.5,currentElapsed());
   if(soloVoice){
     const voice=(micEnabled?voiceCompute():null);
@@ -1462,12 +1186,10 @@ function compute(){
     if(category==='sing'){
       const q=voice?.score??0;
       const confidence=clamp01((voice?.activeRatio??0)*.7+Math.min(1,elapsed/12)*.3);
-      const adjusted=clamp01(q*(.88+.12*confidence));
-      return{score:adjusted*100,activity:0,coordination:0,fluidity:0,stability:0,variety:0,voice:q*100,duration:elapsed,sampleCount:voiceSamples.length,confidence,soloVoice:true};
+      return{score:q*100,activity:0,coordination:0,fluidity:0,stability:0,variety:0,voice:q*100,duration:elapsed,sampleCount:voiceSamples.length,confidence,soloVoice:true};
     }
     const q=reading?.score??0;
-    const adjusted=clamp01(q*(.88+.12*(reading?.confidence??0)));
-    return{score:adjusted*100,activity:0,coordination:0,fluidity:0,stability:0,variety:0,voice:voice?voice.score*100:null,reading:q*100,duration:elapsed,sampleCount:voiceSamples.length,confidence:reading?.confidence??0,soloVoice:true};
+    return{score:q*100,activity:0,coordination:0,fluidity:0,stability:0,variety:0,voice:voice?voice.score*100:null,reading:q*100,duration:elapsed,sampleCount:voiceSamples.length,confidence:reading?.confidence??0,soloVoice:true};
   }
   if(!samples.length)return null;
   const n=samples.length;
@@ -1510,46 +1232,13 @@ function setMetric(name,v){const m=document.getElementById('m'+name),f=document.
 function setVoiceMetric(name,v){const e=document.getElementById('m'+name);if(e)e.textContent=Math.round(v)}
 function updateScore(){const r=compute();if(!r)return;const scoreEl=document.getElementById('score');if(scoreEl)scoreEl.textContent=Math.round(r.score);setMetric('Activity',r.activity);setMetric('Coordination',r.coordination);setMetric('Fluidity',r.fluidity);setMetric('Stability',r.stability);setMetric('Variety',r.variety);setTopScore(r.score);if(evalRunning)document.getElementById('topTimer').textContent=duration>0?formatTime(Math.max(0,duration-currentElapsed())):formatTime(currentElapsed());document.getElementById('topTimer').style.display='inline'}
 function resetReading(){readingTranscript='';readingFinalText='';readingStartedAt=0;readingLastSpeechAt=0;readingPauseCount=0;try{readingRecognition?.stop()}catch(e){}readingRecognition=null;const st=document.getElementById('readingStatus');if(st)st.textContent='Para esta habilidad se necesita el micrófono. Si el navegador lo permite, Xpresia comparará tu lectura con el texto.';['ReadAccuracy','ReadFluency','ReadPauses','ReadVoice'].forEach(x=>{const e=document.getElementById('m'+x);if(e)e.textContent='--'})}
-function resetEvaluationSelectionState(){
-  guidedCompleted={};
-  guidedActiveKey='';
-  // Cada cambio de modalidad inicia una configuración limpia. El perfil del
-  // usuario (nombre y edad) se conserva, pero no arrastramos música, karaoke
-  // ni texto de una modalidad anterior.
-  try{stopBackgroundMusic()}catch(e){}
-  try{stopKaraokePlayback(true)}catch(e){}
-  hideGuideText();
-  textSource='sample';
-  customEvaluationText='';
-  selectedMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};
-  pendingMusic={...selectedMusic};
-  karaokeSelectedItem=null;
-  karaokeLyricsText='';
-  karaokeVideoId='';
-  karaokeReady=false;
-  karaokeCameraHidden=false;
-  karaokeStartAt=0;
-  const ks=document.getElementById('karaokeSelected');if(ks)ks.style.display='none';
-  const kf=document.getElementById('karaokeFrame');if(kf)kf.src='';
-  const ku=document.getElementById('karaokeUrl');if(ku)ku.value='';
-  const ts=document.getElementById('textSourceSelect');if(ts)ts.value='sample';
-  const st=document.getElementById('singFreeTextSource');if(st)st.value='sample';
-  const ct=document.getElementById('customText');if(ct)ct.value='';
-  const sct=document.getElementById('singFreeCustomText');if(sct)sct.value='';const its=document.getElementById('independentTextSource');if(its)its.value='sample';const ict=document.getElementById('independentCustomText');if(ict)ict.value='';const icc=document.getElementById('independentCustomCount');if(icc)icc.textContent='0 / 3000';
-  const cc=document.getElementById('customTextCount');if(cc)cc.textContent='0 / 3000';
-  const scc=document.getElementById('singFreeCustomCount');if(scc)scc.textContent='0 / 3000';
-  updateTextConfigUI();
-  updateSingFreeMusicTextUI();
-  resetScore();
-}
-
-function resetScore(){karaokeCameraHidden=false;finalEvaluationResult=null;resetReading();if(!evalRunning)hideGuideText();if(resultImageUrl){URL.revokeObjectURL(resultImageUrl);resultImageUrl=null}resultImageBlob=null;document.getElementById('sharePanel').style.display='none';samples=[];prev={};prevDir={};directionChanges=0;lastEnergy=0;voiceSamples=[];voicePitchHistory=[];voiceRmsHistory=[];voiceActivitySamples=[];voiceOnsetTimes=[];lastVoiceActive=false;lastVoiceSampleAt=0;lastVoiceAnalysisAt=0;voiceScoreCache=null;karaokeStartAt=0;musicEnergyHistory=[];musicOnsetTimes=[];lastMusicEnergy=0;lastMusicOnsetAt=0;musicEnergyHistory=[];musicOnsetTimes=[];lastMusicEnergy=0;lastMusicOnsetAt=0;['Pitch','PitchStability','Dynamics','VoicePresence'].forEach(x=>setVoiceMetric(x,0));const scoreEl=document.getElementById('score');if(scoreEl)scoreEl.textContent='--';['Activity','Coordination','Fluidity','Stability','Variety'].forEach(x=>setMetric(x,0));document.getElementById('topScore').style.display='none';document.getElementById('topTimer').style.display='none'}
+function resetScore(){finalEvaluationResult=null;resetReading();if(!evalRunning)hideGuideText();if(resultImageUrl){URL.revokeObjectURL(resultImageUrl);resultImageUrl=null}resultImageBlob=null;document.getElementById('sharePanel').style.display='none';samples=[];prev={};prevDir={};directionChanges=0;lastEnergy=0;voiceSamples=[];voicePitchHistory=[];voiceRmsHistory=[];voiceActivitySamples=[];voiceOnsetTimes=[];lastVoiceActive=false;lastVoiceSampleAt=0;lastVoiceAnalysisAt=0;voiceScoreCache=null;karaokeStartAt=0;['Pitch','PitchStability','Dynamics','VoicePresence'].forEach(x=>setVoiceMetric(x,0));const scoreEl=document.getElementById('score');if(scoreEl)scoreEl.textContent='--';['Activity','Coordination','Fluidity','Stability','Variety'].forEach(x=>setMetric(x,0));document.getElementById('topScore').style.display='none';document.getElementById('topTimer').style.display='none'}
 function currentElapsed(){if(!evalRunning)return elapsedBeforePause;return elapsedBeforePause+(performance.now()-startTime)/1000}
 function startEvaluationTimer(){if(evalTimerId)clearInterval(evalTimerId);if(evalFinishGuardId)clearTimeout(evalFinishGuardId);if(duration<=0)return;const tick=()=>{if(!evalRunning||evalPaused)return;const elapsed=currentElapsed();document.getElementById('topTimer').textContent=formatTime(Math.max(0,duration-elapsed));if(elapsed>=duration){if(evalTimerId){clearInterval(evalTimerId);evalTimerId=null}finishEvaluation(true)}};evalTimerId=setInterval(tick,200);evalFinishGuardId=setTimeout(()=>{if(evalRunning&&!evalPaused&&currentElapsed()>=duration)finishEvaluation(true)},Math.max(500,duration*1000+500))}
 async function countdownStart(){if(countdown||evalRunning)return;if(!userName){setTop('Primero completa tus datos de inicio.');return}
   if((category==='sing'||category==='reading'||category==='acting')&&textSource==='custom'&&!customEvaluationText.trim()){const area=document.getElementById('customText');if(area)area.focus();setTop('Escribe o pega un texto para continuar.');return}
   prepareMusicForUserGesture();
-  const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));
+  const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||evaluationMode==='karaoke');
   if(!soloVoice){await initCamera();if(!cameraReady){setTop('Necesitamos acceso a la cámara para evaluar');return}}
   activation.style.display='none';
   // El micrófono es parte estructural de Xpresia: todas las evaluaciones lo usan.
@@ -1558,39 +1247,26 @@ async function countdownStart(){if(countdown||evalRunning)return;if(!userName){s
   if(!micOk){setTop('No se pudo activar el micrófono. Concede el permiso del navegador para continuar.');return}
   if(!soloVoice){loadPose();setTop('Preparando el detector corporal…');const poseOk=await waitForPoseReady(8000);if(!poseOk){setTop('No se pudo preparar el detector corporal. Revisa tu conexión e inténtalo nuevamente.');return}}
   countdown=true;if(evaluationMode==='karaoke'&&karaokeVideoId)stopKaraokePreview();closePanels();const box=document.getElementById('countdown'),title=document.getElementById('countdownTitle'),text=document.getElementById('countdownText');box.style.display='flex';title.textContent=evaluationMode==='karaoke'?'Prepárate para cantar con el karaoke.':(soloVoice?'Prepárate para usar tu voz.':'Prepárate, ahora evaluaremos tu desempeño.');text.textContent='';await new Promise(r=>setTimeout(r,1800));title.textContent='Evaluando en';for(const n of [3,2,1]){text.textContent=n;await new Promise(r=>setTimeout(r,700))}title.textContent='¡Comenzamos!';text.textContent='';await new Promise(r=>setTimeout(r,450));box.style.display='none';countdown=false;startEvaluation()}
-async function startEvaluation(){if(category==='sing'&&((evaluationMode==='camera')||(evaluationMode==='karaoke'&&karaokeWithCamera))&&!cameraReady){try{await initCamera(selectedCameraDeviceId||'')}catch(e){console.warn('Cámara:',e)}}const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));if(!soloVoice&&!poseReady){setTop('El detector corporal todavía no está listo.');return}resetScore();duration=+document.getElementById('duration').value;
-  if(evaluationMode==='karaoke'&&karaokeSelectedItem&&duration<=0){
-    // Si Drive no expone los metadatos de duración al navegador, permitimos iniciar
-    // igualmente y dejamos que el medio oculto determine el final cuando sea posible.
-    duration=0;
-  }
-  evalRunning=true;karaokeStartAt=evaluationMode==='karaoke'?performance.now():0;if(evaluationMode==='karaoke'&&karaokeVideoId){startKaraokePlayback();startKaraokeAudioAnalysis().then(ok=>{
-      const kv=document.getElementById('karaokeAudioVideo');
-      if(kv&&duration<=0){try{const p=kv.play();if(p)p.catch(()=>{})}catch(e){}}if(ok)setTop('Evaluando: voz + audio del karaoke');else setTop('Evaluando: voz · el audio del karaoke no pudo ser analizado desde esta fuente');})}if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:30);if(!soloVoice)startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled&&textSource!=='none')startReadingRecognition();
-  if(category==='sing'&&evaluationMode==='karaoke'&&karaokeLyricsText&&micEnabled)startReadingRecognition();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();startRecordingMusic()}evalPaused=false;startTime=performance.now();elapsedBeforePause=0;setTop('Evaluando: '+profiles[category].name+(category==='imitation'?' · '+(document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Desafío') :''));document.getElementById('start').textContent='Evaluación en curso';document.getElementById('start').disabled=true;document.getElementById('pause').style.display='block';document.getElementById('finish').style.display='block';document.getElementById('topEvalControls').style.display='flex';document.getElementById('pauseTopBtn').textContent='⏸';document.getElementById('topTimer').style.display='inline';document.getElementById('topTimer').textContent=duration>0?formatTime(duration):'00:00';updateLiveMusicControls();startEvaluationTimer();if(poseReady===false)loadPose()}
+async function startEvaluation(){const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||evaluationMode==='karaoke');if(!soloVoice&&!poseReady){setTop('El detector corporal todavía no está listo.');return}resetScore();duration=+document.getElementById('duration').value;evalRunning=true;karaokeStartAt=evaluationMode==='karaoke'?performance.now():0;if(evaluationMode==='karaoke'&&karaokeVideoId){startKaraokePlayback()}if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:60);if(!soloVoice)startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled)startReadingRecognition();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();startRecordingMusic()}evalPaused=false;startTime=performance.now();elapsedBeforePause=0;setTop('Evaluando: '+profiles[category].name+(category==='imitation'?' · '+(document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Desafío') :''));document.getElementById('start').textContent='Evaluación en curso';document.getElementById('start').disabled=true;document.getElementById('pause').style.display='block';document.getElementById('finish').style.display='block';document.getElementById('topEvalControls').style.display='flex';document.getElementById('pauseTopBtn').textContent='⏸';document.getElementById('topTimer').style.display='inline';document.getElementById('topTimer').textContent=duration>0?formatTime(duration):'00:00';updateLiveMusicControls();startEvaluationTimer();if(poseReady===false)loadPose()}
 function stopKaraokePlayback(clearFrame=true){
   try{pauseKaraoke()}catch(e){}
   if(clearFrame)stopKaraokePreview();
 }
-function pauseEvaluation(){if(!evalRunning)return;if(!evalPaused){elapsedBeforePause=currentElapsed();evalPaused=true;if(mediaRecorder&&mediaRecorder.state==='recording'&&mediaRecorder.pause)mediaRecorder.pause();if(selectedMusic.url&&evaluationMode!=='karaoke'){musicPlayer.pause();recordMusicPlayer.pause();if(recordMusicGain)recordMusicGain.gain.value=0}if(evaluationMode==='karaoke'){pauseKaraoke();try{document.getElementById('karaokeAudioVideo')?.pause()}catch(e){}}setTop('Evaluación pausada')}else{startTime=performance.now();evalPaused=false;if(duration>0){if(evalFinishGuardId)clearTimeout(evalFinishGuardId);evalFinishGuardId=setTimeout(()=>{if(evalRunning&&!evalPaused&&currentElapsed()>=duration)finishEvaluation(true)},Math.max(250,duration*1000-currentElapsed()*1000+500))}if(mediaRecorder&&mediaRecorder.state==='paused'&&mediaRecorder.resume)mediaRecorder.resume();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();if(recordMusicGain)recordMusicGain.gain.value=volumeLevel;const p=recordMusicPlayer.play();if(p)p.catch(()=>{})}if(evaluationMode==='karaoke'){playKaraoke();try{const kv=document.getElementById('karaokeAudioVideo');if(kv){const p=kv.play();if(p)p.catch(()=>{})}}catch(e){}}setTop('Evaluando: '+profiles[category].name)}document.getElementById('pause').textContent=evalPaused?'Continuar evaluación':'Pausar evaluación';document.getElementById('pauseTopBtn').textContent=evalPaused?'▶':'⏸';updateLiveMusicControls();}
+function pauseEvaluation(){if(!evalRunning)return;if(!evalPaused){elapsedBeforePause=currentElapsed();evalPaused=true;if(mediaRecorder&&mediaRecorder.state==='recording'&&mediaRecorder.pause)mediaRecorder.pause();if(selectedMusic.url&&evaluationMode!=='karaoke'){musicPlayer.pause();recordMusicPlayer.pause();if(recordMusicGain)recordMusicGain.gain.value=0}if(evaluationMode==='karaoke')pauseKaraoke();setTop('Evaluación pausada')}else{startTime=performance.now();evalPaused=false;if(duration>0){if(evalFinishGuardId)clearTimeout(evalFinishGuardId);evalFinishGuardId=setTimeout(()=>{if(evalRunning&&!evalPaused&&currentElapsed()>=duration)finishEvaluation(true)},Math.max(250,duration*1000-currentElapsed()*1000+500))}if(mediaRecorder&&mediaRecorder.state==='paused'&&mediaRecorder.resume)mediaRecorder.resume();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();if(recordMusicGain)recordMusicGain.gain.value=volumeLevel;const p=recordMusicPlayer.play();if(p)p.catch(()=>{})}if(evaluationMode==='karaoke')playKaraoke();setTop('Evaluando: '+profiles[category].name)}document.getElementById('pause').textContent=evalPaused?'Continuar evaluación':'Pausar evaluación';document.getElementById('pauseTopBtn').textContent=evalPaused?'▶':'⏸';updateLiveMusicControls();}
 function resetAppAfterEvaluation(){
   // Limpieza total de una evaluación terminada: evita que cámara, habilidad o texto
   // de la sesión anterior queden activos al comenzar la siguiente.
   stopCamera();
-  stopKaraokeAudioAnalysis();
   stopReadingRecognition();
   hideGuideText();
   evalRunning=false; evalPaused=false; countdown=false; evaluationMode='camera'; karaokeVideoId=''; karaokeReady=false; const kf=document.getElementById('karaokeFrame'); if(kf)kf.src=''; const ku=document.getElementById('karaokeUrl'); if(ku)ku.value=''; karaokeSelectedItem=null; const ks=document.getElementById('karaokeSelected'); if(ks)ks.style.display='none';
   category='dance'; categoryChosen=false; textSource='sample'; customEvaluationText=''; imitationType='airguitar';
   selectedMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false};
   pendingMusic={...selectedMusic};
-  const name=document.getElementById('userName'); if(name)name.value=userName;
-  const hiddenAge=document.getElementById('userAge'); if(hiddenAge)hiddenAge.value=userAge;
+  const name=document.getElementById('userName'); if(name)name.value='';
   const cat=document.getElementById('category'); if(cat)cat.value='dance';
   const dur=document.getElementById('duration'); if(dur)dur.value='60';
   const textSel=document.getElementById('textSourceSelect'); if(textSel)textSel.value='sample';
-  const singTextSel=document.getElementById('singFreeTextSource'); if(singTextSel)singTextSel.value='sample';
-  const independentTextSel=document.getElementById('independentTextSource'); if(independentTextSel)independentTextSel.value='sample';
   const custom=document.getElementById('customText'); if(custom)custom.value='';
   const count=document.getElementById('customTextCount'); if(count)count.textContent='0 / 3000';
   const modeChooser=document.getElementById('evalModeChooser'); if(modeChooser)modeChooser.classList.remove('visible');
@@ -1615,11 +1291,8 @@ async function finishEvaluation(auto=false){
   if(!auto){openStopConfirm();return}
   evalFinishing=true;
   hideGuideText();
-  // Congelar el tiempo real antes de cerrar evalRunning. De este modo el motor
-  // usa la duración realmente transcurrida, tanto al finalizar automáticamente
-  // como al finalizar manualmente.
-  const measuredElapsed=currentElapsed();
-  elapsedBeforePause=measuredElapsed;
+  // Cierre del estado de evaluación ANTES de cualquier cálculo. Esto evita que
+  // un error de una habilidad, del micrófono o del render impida finalizar.
   evalRunning=false;
   if(evaluationMode==='karaoke')stopKaraokePlayback(true);
   clearGuideTimers();
@@ -1666,7 +1339,7 @@ async function finishEvaluation(auto=false){
 }
 function openStopConfirm(){document.getElementById('stopConfirm').style.display='flex'}
 function closeStopConfirm(){document.getElementById('stopConfirm').style.display='none'}
-async function abortEvaluation(){closeStopConfirm();hideGuideText();if(evaluationMode==='karaoke')stopKaraokePlayback(true);stopBackgroundMusic();stopReadingRecognition();if(evalTimerId){clearInterval(evalTimerId);evalTimerId=null}evalRunning=false;evalPaused=false;stopReadingRecognition();const mr=mediaRecorder;if(mr&&mr.state!=='inactive'){try{mr.ondataavailable=null;mr.onstop=null;mr.stop()}catch(e){}}mediaRecorder=null;recordedChunks=[];recordedBlob=null;if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}document.getElementById('start').disabled=false;document.getElementById('start').textContent='Comenzar evaluación';document.getElementById('pause').style.display='none';document.getElementById('finish').style.display='none';document.getElementById('topEvalControls').style.display='none';updateLiveMusicControls();resetScore();resetAppAfterEvaluation();openPanel('mainMenu');setTop('Bienvenidos a Xpresia')}
+async function abortEvaluation(){closeStopConfirm();hideGuideText();if(evaluationMode==='karaoke')stopKaraokePlayback(true);stopBackgroundMusic();stopReadingRecognition();if(evalTimerId){clearInterval(evalTimerId);evalTimerId=null}evalRunning=false;evalPaused=false;stopReadingRecognition();const mr=mediaRecorder;if(mr&&mr.state!=='inactive'){try{mr.ondataavailable=null;mr.onstop=null;mr.stop()}catch(e){}}mediaRecorder=null;recordedChunks=[];recordedBlob=null;if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}document.getElementById('start').disabled=false;document.getElementById('start').textContent='Comenzar evaluación';document.getElementById('pause').style.display='none';document.getElementById('finish').style.display='none';document.getElementById('topEvalControls').style.display='none';updateLiveMusicControls();resetScore();setTop('Evaluación detenida. No se generó resultado final.')}
 async function showFinal(r,auto=false){
   // Mostrar el resultado primero: ninguna operación de imagen, video o almacenamiento puede retrasarlo.
   document.getElementById('finalScore').textContent='0';
@@ -1688,7 +1361,7 @@ function updateLiveMusicControls(){const box=document.getElementById('liveMusicC
 function toggleLiveMusic(){if(!evalRunning||!selectedMusic.url)return;if(musicPlayer.paused){startBackgroundMusic()}else{musicPlayer.pause()}updateLiveMusicControls()}
 document.getElementById('start').onclick=()=>countdownStart();document.getElementById('pause').onclick=pauseEvaluation;document.getElementById('finish').onclick=()=>finishEvaluation();
 document.getElementById('finalShareChoice').onclick=()=>openResultPanel('share');
-document.getElementById('shareImageBtn').onclick=()=>nativeShare('image');document.getElementById('viewVideoBtn').onclick=()=>openResultPanel('video');document.getElementById('saveVideoBtn').onclick=downloadRecordedVideo;document.getElementById('karaokeCameraToggle')?.addEventListener('click',()=>{karaokeCameraHidden=!karaokeCameraHidden;updateEvaluationModeUI();positionVisualStage();});
+document.getElementById('shareImageBtn').onclick=()=>nativeShare('image');document.getElementById('viewVideoBtn').onclick=()=>openResultPanel('video');document.getElementById('saveVideoBtn').onclick=downloadRecordedVideo;
 document.getElementById('nativeShare').onclick=nativeShare;document.getElementById('closeShare').onclick=closeSharePanel;document.getElementById('closeVideo').onclick=closeVideoPanel;document.getElementById('closeSharePopup').onclick=closeSharePopup;
 document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>platformShare(b.dataset.share));
 document.getElementById('finalClose').onclick=()=>{closeResultPanels();document.getElementById('final').style.display='none';openPanel('mainMenu');};
@@ -1696,251 +1369,40 @@ function animateScore(target){const el=document.getElementById('finalScore');con
 function celebrate(){const box=document.getElementById('celebration');box.innerHTML='<div class="celebrationBurst">🎉</div>';box.style.display='block';const pieces=['#ff3b81','#00e5ff','#ffd166','#7cff6b','#b36bff','#ff8c42','#ffffff'];for(let i=0;i<72;i++){const c=document.createElement('div');c.className='confetti';const angle=Math.random()*Math.PI*2,distance=18+Math.random()*58;c.style.left='50vw';c.style.top='42vh';c.style.background=pieces[Math.floor(Math.random()*pieces.length)];c.style.width=(6+Math.random()*7)+'px';c.style.height=(9+Math.random()*12)+'px';c.style.setProperty('--dx',Math.cos(angle)*distance+'vw');c.style.setProperty('--dy',Math.sin(angle)*distance+'vh');c.style.animationDuration=(1.8+Math.random()*1.8)+'s';c.style.animationDelay=(Math.random()*.15)+'s';c.style.transform='rotate('+Math.random()*360+'deg)';box.appendChild(c)}setTimeout(()=>{box.style.display='none';box.innerHTML=''},3900)}
 function skillTitle(cat){return profiles[cat]?.name||({dance:'Baile / Danza',sing:'Canto',reading:'Lectura',acting:'Actuación',aura:'Farmear Aura',imitation:'Imitación'}[cat]||'Xpresia')}
 function openGuidedPanel(cat){
-  category=cat; categoryChosen=true;
+  category=cat; categoryChosen=true; evaluationMode='camera'; guidedStep=0;
   const panel=document.getElementById('guidedPanel'); if(!panel)return;
   const isVoice=cat==='sing'||cat==='reading';
   const isImitation=cat==='imitation';
   const steps=[];
-  // En Canto/Karaoke el flujo queda reducido a 3 pasos obligatorios:
-  // 1) cámara o sin cámara, 2) duración, 3) karaoke.
-  if(cat==='sing'){
-    // En Canto/Karaoke la duración se obtiene automáticamente del video seleccionado.
-    steps.push({n:1,icon:'🎯',title:'Selecciona cámara o sin cámara',value:modeLabel(),key:'mode'});
-    if(evaluationMode==='camera'||(evaluationMode==='karaoke'&&karaokeWithCamera)) steps.push({n:2,icon:'📷',title:'Selecciona la cámara que prefieras',value:selectedCameraDeviceId?'Cámara seleccionada':'Selecciona una cámara',key:'camera'});
-    steps.push({n:steps.length+1,icon:'🎵',title:'Selecciona tu karaoke',value:karaokeSelectedItem?.title||'Selecciona una canción',key:'music'});
-  }else{
-    // Orden visual de configuración: 1) modo de evaluación, 2) tiempo, y luego las demás opciones.
-    steps.push({n:1,icon:'🎯',title:'Selecciona el modo de evaluación',value:modeLabel(),key:'mode'});
-    steps.push({n:2,icon:'⏱️',title:'Selecciona el tiempo de tu evaluación',value:durationLabel(),key:'duration'});
-    if(!isVoice || cat==='sing' || cat==='reading') steps.push({n:3,icon:'🎵',title:'Selecciona la música',value:selectedMusic.name||'Sin música de fondo',key:'music'});
-    const textAvailable=(cat==='reading'||cat==='acting'||(cat==='sing'&&!singImitationMode));
-    if(textAvailable){ const n=steps.length+1; steps.push({n,icon:'📝',title:'Agrega texto en pantalla',value:textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo',key:'text'}); }
-    if(isImitation) steps.push({n:steps.length+1,icon:'🎭',title:'Elige tu desafío',value:document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible',key:'imitation'});
-  }
-  // Al abrir por primera vez, el primer paso es el que late. Al regresar de una selección,
-  // guidedCompleted/guidedActiveKey conservan el progreso.
-  if(!guidedActiveKey)guidedActiveKey=steps[0]?.key||'';
-  const stepHtml=steps.map(st=>{
-    const done=!!guidedCompleted[st.key];
-    const active=cat==='sing' && guidedActiveKey===st.key && !done;
-    return '<div class="guidedStepWrap '+(done?'completed':'')+'" data-step-wrap="'+st.key+'"><button class="guidedStep '+(done?'completed ':'')+(active?'active':'')+'" type="button" data-step-key="'+st.key+'" aria-label="'+st.title+' · '+st.value+'" title="'+st.title+' · '+st.value+'"><span class="stepNum" aria-hidden="true">'+st.n+'</span><span class="stepText" aria-hidden="true"><strong>'+st.icon+' PASO '+st.n+' · '+st.title+'</strong><small id="guidedValue-'+st.key+'">'+st.value+'</small></span></button><div class="guidedCompletion" aria-live="polite"><span class="okHand">👌</span><span>Listo, paso configurado</span></div></div>';
-  }).join('');
-  panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+(cat==='sing'?'Canto / Karaoke':skillTitle(cat))+'</h2><p class="guidedIntro">'+(cat==='sing'?'Configura tu karaoke paso a paso para comenzar la evaluación.':'Para evaluar tu habilidad primero debes elegir algunas opciones.')+'</p><div class="guidedSteps">'+stepHtml+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
-  const guidedImages={mode:'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
-  panel.querySelectorAll('.guidedStep').forEach(b=>{const url=guidedImages[b.dataset.stepKey];if(url)b.style.backgroundImage='url("'+url+'")';});
+  steps.push({n:1,icon:'⏱️',title:'Selecciona el tiempo de tu evaluación',value:durationLabel(),key:'duration'});
+  steps.push({n:2,icon:'🎯',title:'Selecciona el modo de evaluación',value:modeLabel(),key:'mode'});
+  if(!isVoice || cat==='sing') steps.push({n:3,icon:'🎵',title:'Selecciona la música',value:selectedMusic.name||'Sin música de fondo',key:'music'});
+  if(cat==='reading') steps.push({n:3,icon:'📖',title:'Selecciona el texto de apoyo',value:textSource==='none'?'Sin texto':'Texto de ejemplo',key:'text'});
+  if(isImitation) steps.push({n:3,icon:'🎭',title:'Elige tu desafío',value:document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible',key:'imitation'});
+  panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+skillTitle(cat)+'</h2><p class="guidedIntro">Para evaluar tu habilidad primero debes elegir algunas opciones.</p><div class="guidedSteps">'+steps.map(st=>'<button class="guidedStep" type="button" data-step-key="'+st.key+'"><span class="stepNum">'+st.n+'</span><span class="stepText"><strong>'+st.icon+' PASO '+st.n+' · '+st.title+'</strong><small id="guidedValue-'+st.key+'">'+st.value+'</small></span></button>').join('')+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
   panel.querySelector('#guidedBack').onclick=returnToMain;
   panel.querySelectorAll('.guidedStep').forEach(b=>b.onclick=()=>guidedStepAction(b.dataset.stepKey));
   panel.querySelector('#guidedStart').onclick=()=>openEvaluationForGuided();
   updateGuidedPanel(); openPanel('guidedPanel');
 }
 function durationLabel(){return duration===0?'Libre':duration<60?duration+' segundos':(duration/60)+' minuto'+(duration===60?'':'s')}
-function modeLabel(){if(category==='dance'&&evaluationMode==='camera')return 'Modo libre';if(category==='sing'&&singImitationMode)return 'Modo imitación (Karaoke)';return evaluationMode==='voice'?'Modo libre · Sin cámara':evaluationMode==='karaoke'?(category==='sing'?'Modo imitación (Karaoke)':'Modo imitación'):'Modo libre · Con cámara'}
+function modeLabel(){return category==='dance'&&evaluationMode==='camera'?'Modo libre':evaluationMode==='voice'?'Solo voz':evaluationMode==='karaoke'?'Karaoke':'Cámara'}
 function guidedStepAction(key){
-  if(category==='sing'){
-    // Canto/Karaoke usa únicamente cámara/sin cámara, duración y biblioteca de karaoke.
-    if(key==='mode'){
-      openSingModeSubpanel('imitation');
-      return;
-    }
-    if(key==='camera'){
-      openCameraSelectPanel();
-      return;
-    }
-    if(key==='duration'){
-      openDurationPanel();
-      return;
-    }
-    if(key==='music'){
-      openKaraokeMusicPanel();
-      return;
-    }
-    return;
-  }
   if(key==='duration')openDurationPanel();
   else if(key==='mode')openModePanel();
-  else if(key==='music'){
-    if(category==='sing' && singImitationMode){ openKaraokeMusicPanel(); }
-    else { openMusicPanel(); }
-  }
-  else if(key==='text'){
-     if(category==='sing'&&!singImitationMode) openSingFreeTextPanel();
-     else if(category==='reading'||category==='acting') openIndependentTextPanel();
-     else updateGuidedPanel();
-   }
-  else if(key==='imitation'){openImitationChallengePanel();}
+  else if(key==='music')openMusicPanel();
+  else if(key==='text'){openPanel('evaluationPanel'); updateEvaluationPanelContext(); document.getElementById('textSourceSelect')?.focus();}
+  else if(key==='imitation'){openPanel('evaluationPanel'); updateEvaluationPanelContext(); document.getElementById('imitationType')?.focus();}
 }
-async function openCameraSelectPanel(){
-  if(category!=='sing'){openPanel('guidedPanel');return;}
-  const panel=document.getElementById('cameraSelectPanel'),box=document.getElementById('cameraChoices'),status=document.getElementById('cameraSelectStatus');
-  if(!panel||!box)return;openPanel('cameraSelectPanel');
-  box.innerHTML='<div class="choiceButton">📷 Preparando cámaras…<small>Si el navegador lo solicita, permite el acceso a la cámara para ver las opciones disponibles.</small></div>';
-  if(status)status.textContent='';
-  try{
-    await initCamera(selectedCameraDeviceId||'');
-    let devices=await navigator.mediaDevices.enumerateDevices();devices=devices.filter(d=>d.kind==='videoinput');
-    if(!devices.length)throw new Error('No hay cámaras disponibles');
-    box.innerHTML=devices.map((d,i)=>{const selected=selectedCameraDeviceId&&d.deviceId===selectedCameraDeviceId;const label=(d.label||'').trim()||('Cámara '+(i+1));const lower=label.toLowerCase();const hint=/front|frontal|user|selfie/.test(lower)?'📱 Frontal':/back|rear|trasera|environment/.test(lower)?'📱 Trasera':'';return '<button type="button" class="choiceButton cameraChoice '+(selected?'selected':'')+'" data-device-id="'+String(d.deviceId||'').replace(/"/g,'&quot;')+'"><span class="cameraBadge">'+(hint||'📷')+'</span>📷 '+label+(selected?'<span class="cameraCheck">✓ Cámara seleccionada</span>':'<small>Disponible para Xpresia</small>')+'</button>';}).join('');
-    box.querySelectorAll('.cameraChoice').forEach(btn=>btn.onclick=async()=>{const id=btn.dataset.deviceId;if(!id)return;selectedCameraDeviceId=id;try{await initCamera(id)}catch(e){console.warn('No se pudo abrir la cámara seleccionada',e)}guidedCompleted.camera=true;const keys=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const i=keys.indexOf('camera');guidedActiveKey=keys[i+1]||'';updateGuidedPanel();openPanel('guidedPanel');});
-    if(status)status.textContent=devices.length===1?'Se encontró 1 cámara disponible.':'Selecciona la cámara que prefieras para continuar.';
-  }catch(e){console.warn('No se pudieron enumerar las cámaras',e);box.innerHTML='<button type="button" class="choiceButton" id="cameraRetry">📷 Reintentar<small>No se pudieron obtener las cámaras disponibles. Revisa el permiso de cámara del navegador.</small></button>';document.getElementById('cameraRetry')?.addEventListener('click',openCameraSelectPanel);if(status)status.textContent='Necesitamos permiso para mostrar las cámaras disponibles.';}
-  document.getElementById('cameraSelectBack').onclick=()=>openPanel('guidedPanel');
-}
-function openImitationChallengePanel(){
-  const sel=document.getElementById('imitationChallengeSelect');
-  if(!sel)return;
-  sel.value=imitationType||'airguitar';
-  const back=document.getElementById('imitationChallengeBack');
-  const save=document.getElementById('imitationChallengeSave');
-  if(back)back.onclick=()=>openPanel('guidedPanel');
-  if(save)save.onclick=()=>{ imitationType=sel.value; const old=document.getElementById('imitationType'); if(old)old.value=imitationType; guidedCompleted.imitation=true;guidedActiveKey='';updateImitationUI(); updateGuidedPanel(); openPanel('guidedPanel'); };
-  openPanel('imitationChallengePanel');
-}
-function openDurationPanel(){const box=document.getElementById('durationChoices'); if(!box)return; const opts=[[60,'1 minuto'],[120,'2 minutos'],[180,'3 minutos'],[240,'4 minutos'],[300,'5 minutos']]; box.innerHTML=opts.map(([v,t])=>'<button class="choiceButton" data-v="'+v+'">⏱️ '+t+'</button>').join(''); box.querySelectorAll('button').forEach(b=>b.onclick=()=>{duration=+b.dataset.v;document.getElementById('duration').value=String(duration);guidedCompleted.duration=true;const ks=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const i=ks.indexOf('duration');guidedActiveKey=ks[i+1]||'';updateGuidedPanel();openPanel('guidedPanel')}); document.getElementById('durationBack').onclick=()=>openPanel('guidedPanel');openPanel('durationPanel')}
-function openModePanel(){
-  if(category==='sing'){openSingModeSubpanel('imitation');return;}
-  const box=document.getElementById('modeChoices');if(!box)return;
-  const imitationTitle=category==='sing'?'🎭 Modo imitación <span class="modeKaraokeHighlight">(Karaoke)</span>':'🎭 Modo imitación';
-  const imitationDescription=category==='sing'?'Realiza la evaluación tomando como referencia un karaoke.':'Realiza la evaluación tomando como referencia un video de referencia.';
-  const opts=[['free','🎤 Modo libre','Realiza la evaluación sin comparar tus movimientos o interpretación con un video de referencia.'],['imitation',imitationTitle,imitationDescription]];
-  const modeImages={dance:{free:'assets/imagenes/modo_baile_libre.jpg',imitation:'assets/imagenes/modo_baile_imitacion.jpg'},sing:{free:'assets/imagenes/modo_canto_libre.jpg',imitation:'assets/imagenes/modo_canto_imitacion.jpg'},reading:{free:'assets/imagenes/modo_lectura_libre.jpg',imitation:'assets/imagenes/modo_lectura_imitacion.jpg'},acting:{free:'assets/imagenes/modo_actuacion_libre.jpg',imitation:'assets/imagenes/modo_actuacion_imitacion.jpg'},aura:{free:'assets/imagenes/modo_aura_libre.jpg',imitation:'assets/imagenes/modo_aura_imitacion.jpg'},imitation:{free:'assets/imagenes/modo_imitacion_libre.jpg',imitation:'assets/imagenes/modo_imitacion_imitacion.jpg'}};
-  box.innerHTML=opts.map(o=>'<button class="choiceButton modeChoice '+(o[0]==='free'?'modeFree':'modeImitation')+'" data-v="'+o[0]+'" data-category="'+category+'">'+o[1]+'<small>'+o[2]+'</small></button>').join('');
-  box.querySelectorAll('button.modeChoice').forEach(b=>{const img=modeImages[b.dataset.category]?.[b.dataset.v];if(img)b.style.setProperty('--mode-bg',"url('"+img+"')");b.onclick=()=>{
-  const v=b.dataset.v;
-    if(v==='free'){
-      singImitationMode=false; karaokeWithCamera=false;
-      // Actuación, Farmear Aura e Imitación requieren cámara obligatoriamente:
-      // no deben mostrar el subpanel de elección entre cámara y sin cámara.
-      if(!['sing','reading'].includes(category)){
-        resetEvaluationSelectionState();
-        evaluationMode='camera';
-        guidedCompleted.mode=true;guidedActiveKey='duration';
-        updateEvaluationModeUI();
-        openGuidedPanel(category);
-        return;
-      }
-      if(category==='sing'){openSingModeSubpanel('free');return}
-      openGenericFreeModeSubpanel();return;
-    }
-    if(v==='imitation'){
-      if(category==='sing'){singImitationMode=true;openSingModeSubpanel('imitation');return}
-      if(category==='dance'){guidedCompleted.mode=true;guidedActiveKey='duration';openPanel('danceImitationPanel');return}
-      guidedCompleted.mode=true;guidedActiveKey='duration';openGenericImitationDevPanel();return;
-    }
-  };
-  });
-  document.getElementById('modeBack').onclick=()=>openPanel('guidedPanel');
-  const danceBack=document.getElementById('danceImitationBack');if(danceBack)danceBack.onclick=()=>openPanel('modePanel');
-  const genericBack=document.getElementById('genericImitationDevBack');if(genericBack)genericBack.onclick=()=>{closePanels();openPanel('modePanel');};
-  openPanel('modePanel');
-}
-function openGenericFreeModeSubpanel(){
-  const id='genericFreeModePanel';
-  let panel=document.getElementById(id);
-  if(!panel){
-    panel=document.createElement('div');panel.className='panel choicePanel';panel.id=id;panel.style.display='none';
-    panel.innerHTML='<button class="returnMainButton" id="genericFreeModeBack"><span>↩</span> VOLVER</button><h2>🎤 Modo libre</h2><p class="panelSubtitle">Elige cómo quieres realizar tu evaluación.</p><div class="choiceGrid" id="genericFreeModeChoices"></div>';
-    document.body.appendChild(panel);
-  }
-  const box=panel.querySelector('#genericFreeModeChoices');
-  const opts=[['camera','📷 Evaluación con cámara','Evaluaremos tu desempeño frente a la cámara.','camera','./assets/imagenes/evaluacion_con_camara.jpg'],['voice','🎙️ Evaluación sin cámara','Evaluaremos tu desempeño sin necesidad de utilizar la cámara.','voice','./assets/imagenes/evaluacion_sin_camara.jpg']];
-  box.className='evalChoiceGrid';
-  box.innerHTML=opts.map(o=>'<button type="button" class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" data-bg="'+o[4]+'" aria-label="'+o[1].replace(/^[^A-Za-zÁÉÍÓÚáéíóúÑñ]+/,'')+'"></button>').join('');box.querySelectorAll('.evalChoiceCard').forEach((card)=>{const bg=card.dataset.bg;if(bg)card.style.backgroundImage='url("'+bg+'")';});
-  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{resetEvaluationSelectionState();singImitationMode=false;karaokeWithCamera=false;evaluationMode=b.dataset.v;guidedCompleted.mode=true;guidedActiveKey='duration';updateEvaluationModeUI();openGuidedPanel(category)});
-  panel.querySelector('#genericFreeModeBack').onclick=()=>openPanel('modePanel');
-  openPanel(id);
-}
-function openGenericImitationDevPanel(){
-  const panel=document.getElementById('genericImitationDevPanel');if(!panel)return;
-  const sub=document.getElementById('genericImitationDevSubtitle');
-  if(sub)sub.textContent='Esta modalidad estará disponible próximamente para esta habilidad.';
-  openPanel('genericImitationDevPanel');
-}
-function openSingModeSubpanel(kind){
-  const id=kind==='free'?'singFreeModePanel':'singImitationModePanel';
-  const box=document.getElementById(kind==='free'?'singFreeModeChoices':'singImitationModeChoices');if(!box)return;
-  const opts=[['camera','📷 Evaluación con cámara','Evaluaremos tu desempeño cantando y expresándote frente a la cámara.','camera','./assets/imagenes/evaluacion_con_camara.jpg'],['voice','🎙️ Evaluación sin cámara','Evaluaremos tu desempeño cantando, sin necesidad de expresarte frente a la cámara.','voice','./assets/imagenes/evaluacion_sin_camara.jpg']];
-  box.className='evalChoiceGrid';
-  box.innerHTML=opts.map(o=>'<button type="button" class="evalChoiceCard '+o[3]+'" data-v="'+o[0]+'" data-bg="'+o[4]+'" aria-label="'+o[1].replace(/^[^A-Za-zÁÉÍÓÚáéíóúÑñ]+/,'')+'"></button>').join('');box.querySelectorAll('.evalChoiceCard').forEach((card)=>{const bg=card.dataset.bg;if(bg)card.style.backgroundImage='url("'+bg+'")';});
-  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    const v=b.dataset.v;
-    resetEvaluationSelectionState();
-    if(kind==='imitation'){
-      evaluationMode='karaoke';
-      karaokeWithCamera=(v==='camera');
-      if(v!=='camera')selectedCameraDeviceId='';
-      singImitationMode=true;
-      guidedCompleted.mode=true;
-      guidedActiveKey='duration';
-    }else{
-      evaluationMode=v;
-      karaokeWithCamera=false;
-      singImitationMode=false;
-      if(v!=='camera')selectedCameraDeviceId='';
-    }
-    updateEvaluationModeUI();
-    openGuidedPanel(category);
-    if(v==='camera'){setTimeout(openCameraSelectPanel,0);}
-  });
-  const back=document.getElementById(kind==='free'?'singFreeModeBack':'singImitationModeBack');if(back)back.onclick=()=>openPanel('guidedPanel');
-  openPanel(id);
-}
-function updateGuidedPanel(){
-  const p=document.getElementById('guidedPanel');if(!p)return;
-  const values=p.querySelectorAll('[id^="guidedValue-"]');
-  values.forEach(v=>{
-    const key=v.id.replace('guidedValue-','');
-    if(key==='duration')v.textContent=durationLabel();
-    if(key==='mode')v.textContent=category==='sing'?(evaluationMode==='karaoke'?(karaokeWithCamera?'Con cámara':'Sin cámara'):(evaluationMode==='camera'?'Con cámara':'Sin cámara')):modeLabel();
-    if(key==='camera')v.textContent=selectedCameraDeviceId?'Cámara seleccionada':'Selecciona una cámara';
-    if(key==='music')v.textContent=category==='sing'?(karaokeSelectedItem?.title?(karaokeSelectedItem.title+' · '+(duration>0?formatTime(duration):'duración automática')):'Selecciona una canción'):(selectedMusic.name||'Sin música de fondo');
-    if(key==='text')v.textContent=textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo';
-    if(key==='imitation')v.textContent=document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible';
-  });
-  const buttons=Array.from(p.querySelectorAll('.guidedStep'));
-  const keys=buttons.map(b=>b.dataset.stepKey);
-  const allDone=keys.length>0 && keys.every(k=>!!guidedCompleted[k]);
-  const karaokeDurationReady=category!=='sing' || !!karaokeSelectedItem;
-  const canStart=allDone && karaokeDurationReady;
-  const start=p.querySelector('#guidedStart');
-  if(start){start.disabled=!canStart;start.classList.toggle('active',canStart);start.textContent='▶ COMENZAR EVALUACIÓN';}
-  if(!allDone && (!guidedActiveKey || !guidedCompleted[guidedActiveKey])){
-    const firstPending=keys.find(k=>!guidedCompleted[k]);
-    if(firstPending)guidedActiveKey=firstPending;
-  }
-  buttons.forEach(b=>{
-    const key=b.dataset.stepKey,done=!!guidedCompleted[key],active=!done&&guidedActiveKey===key;
-    b.classList.toggle('completed',done);b.classList.toggle('done',done);b.classList.toggle('active',active);
-    const wrap=b.closest('.guidedStepWrap');if(wrap)wrap.classList.toggle('completed',done);
-  });
-}
-function openEvaluationForGuided(){updateDescription();updateTextConfigUI();updateEvaluationModeUI();hideGuideText();setMicrophoneEnabled(true).catch(e=>console.warn('Micrófono:',e));countdownStart()}
+function openDurationPanel(){const box=document.getElementById('durationChoices'); if(!box)return; const opts=[[60,'1 minuto'],[120,'2 minutos'],[180,'3 minutos'],[240,'4 minutos'],[300,'5 minutos']]; box.innerHTML=opts.map(([v,t])=>'<button class="choiceButton" data-v="'+v+'">⏱️ '+t+'</button>').join(''); box.querySelectorAll('button').forEach(b=>b.onclick=()=>{duration=+b.dataset.v;document.getElementById('duration').value=String(duration);updateGuidedPanel();openPanel('guidedPanel')}); document.getElementById('durationBack').onclick=()=>openPanel('guidedPanel');openPanel('durationPanel')}
+function openModePanel(){const box=document.getElementById('modeChoices');if(!box)return;let opts=[];if(category==='dance')opts=[['camera','💃 Modo libre','Evaluaremos tu desempeño bailando libremente frente a la cámara.'],['imitationInfo','🎭 Modo imitación','Evaluaremos tu desempeño frente a la cámara, comparando tus movimientos con los de un video de fondo.']];else if(category==='sing')opts=[['camera','📷 Cámara','Evalúa voz + expresión corporal.'],['voice','🎙️ Solo voz','Evalúa principalmente tu voz.'],['karaoke','🎵 Karaoke','Canta siguiendo el video.']];else if(category==='reading')opts=[['voice','🎙️ Solo voz','Lee y trabaja voz, fluidez y expresión.']];else opts=[['camera','📷 Cámara','Evalúa movimiento y expresividad.']];box.innerHTML=opts.map(o=>'<button class="choiceButton" data-v="'+o[0]+'">'+o[1]+'<small>'+o[2]+'</small></button>').join('');box.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='imitationInfo'){openPanel('danceImitationPanel');return}evaluationMode=b.dataset.v;updateGuidedPanel();if(evaluationMode==='karaoke'){openPanel('evaluationPanel');updateEvaluationPanelContext();return}openPanel('guidedPanel')});document.getElementById('modeBack').onclick=()=>openPanel('guidedPanel');const danceBack=document.getElementById('danceImitationBack');if(danceBack)danceBack.onclick=()=>openPanel('modePanel');openPanel('modePanel')}
+function updateGuidedPanel(){const p=document.getElementById('guidedPanel');if(!p)return;const values=p.querySelectorAll('[id^="guidedValue-"]');values.forEach(v=>{const key=v.id.replace('guidedValue-','');if(key==='duration')v.textContent=durationLabel();if(key==='mode')v.textContent=modeLabel();if(key==='music')v.textContent=selectedMusic.name||'Sin música de fondo';if(key==='text')v.textContent=textSource==='none'?'Sin texto':textSource==='custom'?'Texto propio':'Texto de ejemplo';if(key==='imitation')v.textContent=document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Guitarra invisible'});const start=p.querySelector('#guidedStart');if(start){const needsMusic=Array.from(p.querySelectorAll('[data-step-key]')).some(x=>x.dataset.stepKey==='music');const ok=duration!==null&&duration!==undefined&&(!needsMusic||true)&&evaluationMode!=='karaoke';start.disabled=false;start.textContent='▶ COMENZAR EVALUACIÓN';}p.querySelectorAll('.guidedStep').forEach((b,i)=>{const key=b.dataset.stepKey;let done=false;if(key==='duration')done=true;if(key==='mode')done=true;if(key==='music')done=!!selectedMusic.name;if(key==='text')done=true;if(key==='imitation')done=true;b.classList.toggle('done',done)})}
+function openEvaluationForGuided(){updateDescription();updateTextConfigUI();updateEvaluationModeUI();openPanel('evaluationPanel');hideGuideText();setMicrophoneEnabled(true).catch(e=>console.warn('Micrófono:',e))}
 
-function openSkillHub(cat){if(evalRunning)return;resetEvaluationSelectionState();category=cat;categoryChosen=true;guidedCompleted={};guidedActiveKey=cat==='sing'?'mode':'';selectedCameraDeviceId='';if(cat==='sing'){duration=0;const d=document.getElementById('duration');if(d)d.value='0';} ['dance','sing','reading','acting','aura','imitation'].forEach(c=>document.getElementById('skillHubPanel')?.classList.remove('hub-'+c));document.getElementById('skillHubPanel')?.classList.add('hub-'+cat);evaluationMode='camera';singImitationMode=false;karaokeWithCamera=false;guidedStep=0;const t=document.getElementById('skillHubTitle');if(t)t.textContent=cat==='sing'?'🎤 CANTO / KARAOKE':'✨ '+skillTitle(cat);const hubLabels={dance:{eval:'Evalúa tu desempeño Bailando',learn:'Aprende a Bailar'},sing:{eval:'Evalúa tu desempeño Cantando Karaoke',learn:'Aprende a Cantar'},reading:{eval:'Evalúa tu desempeño Leyendo',learn:'Aprende a Leer'},acting:{eval:'Evalúa tu desempeño Actuando',learn:'Aprende a Actuar'},aura:{eval:'Evalúa tu desempeño Farmeando Aura',learn:'Aprende a Farmear Aura'},imitation:{eval:'Evalúa tu desempeño Imitando',learn:'Aprende a Imitar'}};const labels=hubLabels[cat]||{eval:'Evalúa tu desempeño',learn:'Aprende habilidades'};const eb=document.querySelector('#skillHubEvaluate strong');if(eb)eb.textContent=labels.eval;const lb=document.querySelector('#skillHubLearn strong');if(lb)lb.textContent=labels.learn;const actionImageNames={dance:{evaluar:'accion_evaluar_baile.jpg',aprender:'accion_aprender_baile.jpg',competir:'accion_competir_baile.jpg'},sing:{evaluar:'accion_evaluar_canto.jpg',aprender:'accion_aprender_canto.jpg',competir:'accion_competir_canto.jpg'},acting:{evaluar:'accion_evaluar_actuacion.jpg',aprender:'accion_aprender_actuacion.jpg',competir:'accion_competir_actuacion.jpg'},reading:{evaluar:'accion_evaluar_lectura.jpg',aprender:'accion_aprender_lectura.jpg',competir:'accion_competir_lectura.jpg'},aura:{evaluar:'accion_evaluar_aura.jpg',aprender:'accion_aprender_aura.jpg',competir:'accion_competir_aura.jpg'},imitation:{evaluar:'accion_evaluar_imitacion.jpg',aprender:'accion_aprender_imitacion.jpg',competir:'accion_competir_imitacion.jpg'}};const actionImages=Object.fromEntries(Object.entries(actionImageNames[cat]||{}).map(([k,v])=>[k,'./assets/imagenes/'+v]));const actionButtons=[['skillHubEvaluate','evaluar'],['skillHubLearn','aprender'],['skillHubCompete','competir']];actionButtons.forEach(([id,key])=>{const b=document.getElementById(id);if(b){const url=actionImages[key];b.dataset.bg=url;b.style.setProperty('background-image','url(\"'+url+'\")','important');}});openPanel('skillHubPanel');hideGuideText()}
-document.getElementById('skillHubBack').onclick=returnToMain;document.getElementById('skillHubEvaluate').onclick=()=>openGuidedPanel(category);document.getElementById('skillHubLearn').onclick=()=>openPanel('learningPanel');document.getElementById('skillHubCompete').onclick=()=>openPanel('competitionPanel');
-// Navegación robusta de paneles: todos los botones VOLVER de configuración tienen una ruta explícita.
-document.getElementById('danceImitationBack')?.addEventListener('click',()=>openPanel('modePanel'));
-document.getElementById('durationBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('modeBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('imitationChallengeBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('singFreeModeBack')?.addEventListener('click',()=>openPanel('modePanel'));
-document.getElementById('singImitationModeBack')?.addEventListener('click',()=>openPanel('modePanel'));
-document.getElementById('genericImitationDevBack')?.addEventListener('click',()=>openPanel('modePanel'));
-document.getElementById('musicBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('singFreeTextBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('textConfigIndependentBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.getElementById('karaokePanelBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
-document.querySelectorAll('.skillCard,.secondarySkills button[data-category]').forEach(btn=>btn.onclick=()=>openSkillHub(btn.dataset.category));
+document.querySelectorAll('.skillCard,.secondarySkills button[data-category]').forEach(btn=>btn.onclick=()=>{if(evalRunning)return;const cat=btn.dataset.category;category=cat;categoryChosen=true;evaluationMode='camera';guidedStep=0;resetScore();updateDescription();updateTextConfigUI();updateEvaluationModeUI();openGuidedPanel(cat);hideGuideText();});
 document.querySelectorAll('[data-skill-return]').forEach(btn=>btn.onclick=returnToMain);
-document.getElementById('learnAccess')?.addEventListener('click',()=>openPanel('learningPanel'));document.getElementById('contactAccess')?.addEventListener('click',()=>openPanel('contactPanel'));document.getElementById('collabAccess')?.addEventListener('click',()=>openPanel('collabPanel'));document.getElementById('competitionAccess')?.addEventListener('click',()=>openPanel('competitionPanel'));
-document.getElementById('mainClose')?.addEventListener('click',closePanels);document.getElementById('musicBack')?.addEventListener('click',()=>openPanel('guidedPanel'));document.getElementById('singFreeTextBack')?.addEventListener('click',()=>openPanel('guidedPanel'));document.getElementById('singFreeTextSave')?.addEventListener('click',()=>{updateSingFreeMusicTextUI();updateGuidedPanel();openPanel('guidedPanel')});document.getElementById('textConfigIndependentBack')?.addEventListener('click',()=>openPanel('guidedPanel'));document.getElementById('independentTextSave')?.addEventListener('click',()=>{
-  const sel=document.getElementById('independentTextSource');
-  const area=document.getElementById('independentCustomText');
-  if(sel)textSource=sel.value;
-  if(area)customEvaluationText=area.value||'';
-  guidedCompleted.text=true;const ks=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const ti=ks.indexOf('text');guidedActiveKey=ks[ti+1]||'';
-  updateGuidedPanel();
-  openPanel('guidedPanel');
-});document.getElementById('evaluationClose')?.addEventListener('click',()=>{if(!evalRunning&&document.getElementById('guidedPanel')?.style.display!=='none')openPanel('guidedPanel');else returnToMain});document.getElementById('learningClose')?.addEventListener('click',returnToMain);document.getElementById('contactClose')?.addEventListener('click',returnToMain);document.getElementById('collabClose')?.addEventListener('click',returnToMain);document.getElementById('competitionClose')?.addEventListener('click',returnToMain);
+document.getElementById('learnAccess').onclick=()=>openPanel('learningPanel');document.getElementById('contactAccess').onclick=()=>openPanel('contactPanel');document.getElementById('collabAccess').onclick=()=>openPanel('collabPanel');document.getElementById('competitionAccess').onclick=()=>openPanel('competitionPanel');
+document.getElementById('mainClose').onclick=closePanels;document.getElementById('evaluationClose').onclick=returnToMain;document.getElementById('learningClose').onclick=returnToMain;document.getElementById('contactClose').onclick=returnToMain;document.getElementById('collabClose').onclick=returnToMain;document.getElementById('competitionClose').onclick=returnToMain;
 document.getElementById('menuBtn').onclick=()=>{if(menuOpen)closePanels();else openPanel('mainMenu')};document.getElementById('liveMusicVolume').oninput=e=>{volumeLevel=parseFloat(e.target.value);if(musicGain)musicGain.gain.value=volumeLevel;if(recordMusicGain)recordMusicGain.gain.value=volumeLevel;musicPlayer.volume=volumeLevel;musicAudio.volume=volumeLevel;const vs=document.getElementById('volumeSlider');if(vs)vs.value=volumeLevel};document.getElementById('pauseTopBtn').onclick=()=>{if(evalRunning)pauseEvaluation()};document.getElementById('stopTopBtn').onclick=()=>{if(evalRunning)openStopConfirm()};document.getElementById('cancelStop').onclick=closeStopConfirm;document.getElementById('confirmStop').onclick=abortEvaluation;document.getElementById('orientationClose').onclick=()=>document.getElementById('orientationOverlay').style.display='none';
 const initialVolumeValue=document.getElementById('volumeValue');if(initialVolumeValue)initialVolumeValue.textContent=Math.round(volumeLevel*100)+'%';
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,150));
