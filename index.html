@@ -275,7 +275,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .guidedStep.done{border-color:#20e889;box-shadow:0 0 22px rgba(32,232,137,.22)}.guidedStep.done .stepNum{border-color:#20e889;color:#65f5ad;background:rgba(4,28,22,.78)}
 @media(max-width:700px){.guidedSteps{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}.guidedStep{max-width:205px;width:100%;justify-self:center;border-radius:17px}.guidedStep .stepNum{width:34px;height:34px;border-radius:11px;left:8px;top:8px}.guidedStep .stepText{padding:42px 10px 10px}.guidedStep strong{font-size:12px}.guidedStep small{font-size:9px}}
 .guidedStart{margin-top:8px}.guidedStart:disabled{opacity:.42;cursor:not-allowed}.guidedStart.active{animation:xpresiaGuidedBeat 1.25s ease-in-out infinite;box-shadow:0 0 24px rgba(0,229,255,.35)}
-.choicePanel{text-align:center}.choiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}.choiceButton{min-height:86px;padding:14px;border:2px solid #00e5ff;border-radius:15px;background:#07152e;color:#fff;font-weight:800;cursor:pointer}.choiceButton:hover{border-color:#fff}.choiceButton small{display:block;margin-top:5px;color:#bfefff;font-weight:500;font-size:10px}.cameraChoice{position:relative;min-height:96px}.cameraChoice.selected{border-color:#20e889;box-shadow:0 0 22px rgba(32,232,137,.25)}.cameraChoice .cameraCheck{display:block;margin-top:7px;color:#65f5ad;font-size:11px}.cameraChoice .cameraBadge{position:absolute;top:8px;right:8px;font-size:18px} .mediaChoiceTitle{grid-column:1/-1;width:100%;font-size:14px;font-weight:900;color:#dffcff;text-align:center;margin:2px 0 -6px;text-shadow:0 0 8px rgba(0,229,255,.35)}.mediaChoiceTitle small{display:block;margin-top:3px;font-size:10px;color:#8feeff;font-weight:600}
+.choicePanel{text-align:center}.choiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}.choiceButton{min-height:86px;padding:14px;border:2px solid #00e5ff;border-radius:15px;background:#07152e;color:#fff;font-weight:800;cursor:pointer}.choiceButton:hover{border-color:#fff}.choiceButton small{display:block;margin-top:5px;color:#bfefff;font-weight:500;font-size:10px}
 /* Selector visual de evaluación: cámara / sin cámara */
 .evalChoiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,285px));justify-content:center;gap:18px;margin:18px 0}.evalChoiceCard{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;width:100%;max-width:285px;aspect-ratio:1/1;padding:18px;border:2px solid rgba(0,229,255,.7);border-radius:22px;overflow:hidden;background-size:cover;background-position:center;color:#fff;text-align:center;cursor:pointer;box-shadow:0 0 20px rgba(0,229,255,.12),inset 0 -90px 100px rgba(0,0,0,.45);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.evalChoiceCard::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,5,20,0) 35%,rgba(3,5,20,.18) 100%);pointer-events:none}.evalChoiceCard:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 0 30px rgba(0,229,255,.25),0 0 55px rgba(255,0,223,.12)}.evalChoiceCard.camera{border-color:#ff00df;box-shadow:0 0 24px rgba(255,0,223,.18),inset 0 -90px 100px rgba(0,0,0,.45)}.evalChoiceCard.voice{border-color:#00e5ff}.evalChoiceCard .evalChoiceContent{display:none}.evalChoiceCard strong{display:block;font-size:clamp(18px,2.2vw,28px);line-height:1.08;text-shadow:0 2px 8px #000,0 0 12px rgba(255,255,255,.18)}.evalChoiceCard small{display:block;margin-top:8px;color:#fff;font-size:clamp(11px,1.2vw,14px);line-height:1.35;font-weight:700;text-shadow:0 2px 7px #000}.evalChoiceCard .evalChoiceArrow{display:inline-flex;align-items:center;justify-content:center;margin:12px auto 0;width:44px;height:44px;border-radius:50%;font-size:24px;background:rgba(3,8,24,.68);border:1px solid rgba(255,255,255,.65);box-shadow:0 0 14px rgba(0,229,255,.22)}
 @media(max-width:700px){.evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.evalChoiceCard{min-height:0;width:100%;max-width:205px;justify-self:center;padding:10px;border-radius:17px}.evalChoiceCard strong{font-size:15px}.evalChoiceCard small{font-size:9px;margin-top:5px}.evalChoiceCard .evalChoiceArrow{width:34px;height:34px;font-size:18px;margin-top:7px}.evalChoiceCard::after{background:linear-gradient(180deg,rgba(3,5,20,0) 30%,rgba(3,5,20,.12) 100%)}}
@@ -491,7 +491,6 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <div class="panel choicePanel" id="imitationChallengePanel" style="display:none"><button class="returnMainButton" id="imitationChallengeBack"><span>↩</span> VOLVER</button><h2>🎭 Desafío de imitación</h2><p class="panelSubtitle">Selecciona el desafío que quieres realizar.</p><div class="menuSection"><label>🎭 Elige tu desafío</label><select id="imitationChallengeSelect"><option value="airguitar">🎸 Guitarra invisible</option><option value="airdrums">🥁 Batería invisible</option><option value="airbass">🎸 Bajo invisible</option><option value="lipsync">🎤 Lip sync / artista</option><option value="character">🎭 Personaje</option><option value="sound">🔊 Sonido o situación</option><option value="free">✨ Libre / inventa tu propio desafío</option></select></div><button class="primary" id="imitationChallengeSave" type="button">✓ GUARDAR SELECCIÓN</button></div>
 <div class="panel choicePanel" id="singFreeModePanel" style="display:none"><button class="returnMainButton" id="singFreeModeBack"><span>↩</span> VOLVER</button><h2>🎤 Modo libre</h2><p class="panelSubtitle">Elige cómo quieres realizar tu evaluación de canto.</p><div class="choiceGrid" id="singFreeModeChoices"></div></div>
 <div class="panel choicePanel" id="singImitationModePanel" style="display:none"><button class="returnMainButton" id="singImitationModeBack"><span>↩</span> VOLVER</button><h2>🎤 Evaluación Karaoke</h2><p class="panelSubtitle">Elige cómo quieres realizar el karaoke: con cámara o sin cámara.</p><div class="choiceGrid" id="singImitationModeChoices"></div></div>
-<div class="panel choicePanel" id="cameraSelectPanel" style="display:none"><button class="returnMainButton" id="cameraSelectBack"><span>↩</span> VOLVER</button><h2>🎛️ Selecciona tus dispositivos</h2><p class="panelSubtitle">Elige cámara y micrófono cuando haya más de una opción disponible.</p><div id="cameraChoices" class="choiceGrid"></div><div id="microphoneChoices" class="choiceGrid"></div><div id="cameraSelectStatus" style="margin:10px 0;color:#bfefff;font-weight:700"></div><button class="primary" id="cameraSelectContinue" type="button" style="display:none;margin-top:10px">✓ CONTINUAR</button></div>
 <div class="panel choicePanel" id="genericImitationDevPanel" style="display:none"><button class="returnMainButton" id="genericImitationDevBack"><span>↩</span> VOLVER</button><h2>🎭 Modo imitación</h2><p class="panelSubtitle" id="genericImitationDevSubtitle">Esta función se encuentra en desarrollo.</p><div class="learningMessage"><div class="learningIcon">🚧</div><p><b>Esta función se encuentra en desarrollo.</b></p><p>Estamos trabajando para incorporar esta modalidad a Xpresia. Si quieres ayudarnos a hacerla realidad, puedes colaborar con el proyecto.</p></div><div class="learningSupportTitle">💛 AYUDA A HACER CRECER XPRESIA</div><div class="donations learningDonations"><a href="https://www.paypal.com/ncp/payment/PTRWET3UWGEY8" rel="noopener" target="_blank"><img alt="PayPal" src="assets/imagenes/paypal.png"/><span>Colaborar con PayPal</span></a><a href="https://link.mercadopago.com.ar/ajetrez" rel="noopener" target="_blank"><img alt="Mercado Pago" src="assets/imagenes/mercadopago.jpg"/><span>Colaborar con Mercado Pago</span></a></div></div>
 <div class="panel" id="evaluationPanel">
 <button class="returnMainButton" id="evaluationClose"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button>
@@ -628,7 +627,7 @@ const musicLibrary={
 let mediaRecorder=null,recordedChunks=[],recordedBlob=null,recordedUrl=null,recordingMime='';
 let pose=null,poseReady=false,poseBusy=false,lastPose=0;
 let category='dance',duration=60,userName='',userAge='',evaluationMode='camera',voiceSamplingId=null;
-let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey='';let selectedCameraDeviceId='';let selectedMicrophoneDeviceId='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
+let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
 const profiles={
  dance:{name:'Baile / Danza',description:'Prioriza actividad, coordinación, fluidez, variedad y continuidad del movimiento.',weights:{activity:.18,coordination:.25,fluidity:.25,stability:.12,variety:.20}},
  sing:{name:'Canto — voz + expresión',description:'Evalúa afinación, estabilidad vocal, dinámica y expresividad corporal mediante el micrófono y la expresión corporal.',weights:{activity:.10,coordination:.12,fluidity:.13,stability:.10,variety:.10,voice:.45}},
@@ -879,9 +878,9 @@ function buildResultImage(r){
 async function prepareResultImage(r){const blob=await buildResultImage(r);if(!blob)return;resultImageBlob=blob;if(resultImageUrl)URL.revokeObjectURL(resultImageUrl);resultImageUrl=URL.createObjectURL(blob);document.getElementById('resultImage').src=resultImageUrl;const saveImg=document.getElementById('saveResultImage');if(saveImg)saveImg.src=resultImageUrl}
 function downloadRecordedVideo(){if(!recordedBlob||!recordedUrl){setTop('El video todavía no está disponible.');return}const ext=recordedBlob.type.includes('mp4')?'mp4':'webm';const a=document.createElement('a');a.href=recordedUrl;a.download=`Xpresia_evaluacion_${Math.round(compute()?.score||0)}.${ext}`;document.body.appendChild(a);a.click();a.remove()}
 function downloadResultImage(){if(!resultImageBlob||!resultImageUrl)return;const a=document.createElement('a');a.href=resultImageUrl;a.download=`Xpresia_resultado_${Math.round(compute()?.score||0)}.png`;document.body.appendChild(a);a.click();a.remove()}
-async function initCamera(deviceId=''){if(initPromise)return initPromise;if(stream&&stream.active&&(!deviceId||selectedCameraDeviceId===deviceId))return;initPromise=(async()=>{try{if(stream&&stream.active){try{stream.getTracks().forEach(t=>t.stop())}catch(e){}stream=null;cameraReady=false}const videoConstraint=deviceId?{deviceId:{exact:deviceId}}:{facingMode:'user'};stream=await navigator.mediaDevices.getUserMedia({video:videoConstraint,audio:false});video.srcObject=stream;await video.play();resize();cameraReady=true;updateEvaluationModeUI()}catch(e){console.error(e);cameraReady=false;activation.querySelector('.startHint').textContent='No se pudo acceder a la cámara. Revisa los permisos y toca aquí para reintentar.'}finally{initPromise=null}})();return initPromise}
+async function initCamera(){if(initPromise)return initPromise;if(stream&&stream.active)return;initPromise=(async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});video.srcObject=stream;await video.play();resize();cameraReady=true;updateEvaluationModeUI()}catch(e){console.error(e);activation.querySelector('.startHint').textContent='No se pudo acceder a la cámara. Revisa los permisos y toca aquí para reintentar.'}finally{initPromise=null}})();return initPromise}
 function stopCamera(){try{if(stream){stream.getTracks().forEach(t=>t.stop())}}catch(e){}stream=null;cameraReady=false;try{video.pause()}catch(e){}try{video.srcObject=null}catch(e){}updateEvaluationModeUI()}
-async function setMicrophoneEnabled(enabled,deviceId=''){
+async function setMicrophoneEnabled(enabled){
   if(!enabled){
     micEnabled=false;
     if(micStream)micStream.getTracks().forEach(t=>t.stop());
@@ -897,8 +896,7 @@ async function setMicrophoneEnabled(enabled,deviceId=''){
   }
   let newStream=null;
   try{
-    const audioConstraint=deviceId?{deviceId:{exact:deviceId},echoCancellation:true,noiseSuppression:true,autoGainControl:true}:{echoCancellation:true,noiseSuppression:true,autoGainControl:true};
-    newStream=await navigator.mediaDevices.getUserMedia({audio:audioConstraint});
+    newStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
     if(audioContext.state==='suspended')await audioContext.resume();
     const source=audioContext.createMediaStreamSource(newStream);
@@ -1488,7 +1486,7 @@ activation.style.touchAction='manipulation';
 document.getElementById('activationEnter')?.addEventListener('click',enterXpresia,{passive:false});
 document.getElementById('startUserAge')?.addEventListener('keydown',e=>{if(e.key==='Enter')enterXpresia(e)});
 document.getElementById('startUserName')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startUserAge')?.focus()});
-const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','danceImitationPanel','skillHubPanel','guidedPanel','durationPanel','modePanel','cameraSelectPanel','singFreeModePanel','singImitationModePanel','imitationChallengePanel','genericFreeModePanel','genericImitationDevPanel','evaluationPanel','karaokeConfigPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel','singFreeTextMusicConfig','textConfigIndependent'];
+const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','danceImitationPanel','skillHubPanel','guidedPanel','durationPanel','modePanel','singFreeModePanel','singImitationModePanel','imitationChallengePanel','genericFreeModePanel','genericImitationDevPanel','evaluationPanel','karaokeConfigPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel','singFreeTextMusicConfig','textConfigIndependent'];
 function closePanels(){panels.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});document.querySelectorAll('.panel').forEach(el=>{el.style.display='none'});hideGuideText();menuOpen=false}
 function openPanel(id){
   // El panel genérico antiguo no debe mostrar configuraciones de texto.
@@ -2145,7 +2143,7 @@ async function countdownStart(){if(countdown||evalRunning)return;if(!userName){s
   if((category==='sing'||category==='reading'||category==='acting')&&textSource==='custom'&&!customEvaluationText.trim()){const area=document.getElementById('customText');if(area)area.focus();setTop('Escribe o pega un texto para continuar.');return}
   prepareMusicForUserGesture();
   const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));
-  if(!soloVoice){await initCamera(category==='sing'?selectedCameraDeviceId:'');if(!cameraReady){setTop('Necesitamos acceso a la cámara para evaluar');return}}
+  if(!soloVoice){await initCamera();if(!cameraReady){setTop('Necesitamos acceso a la cámara para evaluar');return}}
   activation.style.display='none';
   // El micrófono es parte estructural de Xpresia: todas las evaluaciones lo usan.
   // La solicitud ocurre aquí, tras una acción del usuario, para respetar las políticas del navegador.
@@ -2153,7 +2151,7 @@ async function countdownStart(){if(countdown||evalRunning)return;if(!userName){s
   if(!micOk){setTop('No se pudo activar el micrófono. Concede el permiso del navegador para continuar.');return}
   if(!soloVoice){loadPose();setTop('Preparando el detector corporal…');const poseOk=await waitForPoseReady(8000);if(!poseOk){setTop('No se pudo preparar el detector corporal. Revisa tu conexión e inténtalo nuevamente.');return}}
   countdown=true;if(evaluationMode==='karaoke'&&karaokeVideoId)stopKaraokePreview();closePanels();const box=document.getElementById('countdown'),title=document.getElementById('countdownTitle'),text=document.getElementById('countdownText');box.style.display='flex';title.textContent=evaluationMode==='karaoke'?'Prepárate para cantar con el karaoke.':(soloVoice?'Prepárate para usar tu voz.':'Prepárate, ahora evaluaremos tu desempeño.');text.textContent='';await new Promise(r=>setTimeout(r,1800));title.textContent='Evaluando en';for(const n of [3,2,1]){text.textContent=n;await new Promise(r=>setTimeout(r,700))}title.textContent='¡Comenzamos!';text.textContent='';await new Promise(r=>setTimeout(r,450));box.style.display='none';countdown=false;startEvaluation()}
-async function startEvaluation(){if(category==='sing'&&evaluationMode==='karaoke'&&karaokeWithCamera&&!cameraReady){try{await initCamera(selectedCameraDeviceId)}catch(e){console.warn('Cámara:',e)}}const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));if(!soloVoice&&!poseReady){setTop('El detector corporal todavía no está listo.');return}resetScore();duration=+document.getElementById('duration').value;
+async function startEvaluation(){if(category==='sing'&&evaluationMode==='karaoke'&&karaokeWithCamera&&!cameraReady){try{await initCamera()}catch(e){console.warn('Cámara:',e)}}const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));if(!soloVoice&&!poseReady){setTop('El detector corporal todavía no está listo.');return}resetScore();duration=+document.getElementById('duration').value;
   if(evaluationMode==='karaoke'&&karaokeSelectedItem&&duration<=0){
     // Si Drive no expone los metadatos de duración al navegador, permitimos iniciar
     // igualmente y dejamos que el medio oculto determine el final cuando sea posible.
@@ -2442,109 +2440,17 @@ function openSingModeSubpanel(kind){
       evaluationMode='karaoke';
       karaokeWithCamera=(v==='camera');
       singImitationMode=true;
-      if(v==='camera'){
-        openCameraSelectPanel('karaoke');
-      }else{
-        guidedCompleted.mode=true;guidedActiveKey='music';updateEvaluationModeUI();openGuidedPanel(category);
-      }
+      guidedCompleted.mode=true;
+      guidedActiveKey='duration';
     }else{
-      evaluationMode=v;karaokeWithCamera=false;singImitationMode=false;
-      if(v==='camera'){
-        openCameraSelectPanel('voice');
-      }else{
-        guidedCompleted.mode=true;guidedActiveKey='music';updateEvaluationModeUI();openGuidedPanel(category);
-      }
+      evaluationMode=v;
+      karaokeWithCamera=false;
+      singImitationMode=false;
     }
+    updateEvaluationModeUI();openGuidedPanel(category);
   });
   const back=document.getElementById(kind==='free'?'singFreeModeBack':'singImitationModeBack');if(back)back.onclick=()=>openPanel('guidedPanel');
   openPanel(id);
-}
-async function openCameraSelectPanel(returnMode='karaoke'){
-  const panel=document.getElementById('cameraSelectPanel');
-  const camBox=document.getElementById('cameraChoices');
-  const micBox=document.getElementById('microphoneChoices');
-  const status=document.getElementById('cameraSelectStatus');
-  const cont=document.getElementById('cameraSelectContinue');
-  if(!panel||!camBox||!micBox)return;
-  panel.dataset.returnMode=returnMode;
-  openPanel('cameraSelectPanel');
-  camBox.innerHTML='<div class="choiceButton">📷 Preparando dispositivos…<small>Si el navegador lo solicita, permite el acceso para detectar cámara y micrófono.</small></div>';
-  micBox.innerHTML='';
-  if(status)status.textContent='';
-  if(cont)cont.style.display='none';
-  try{
-    // Pedimos permiso de audio además del de cámara para que el navegador
-    // revele los nombres reales de los micrófonos en enumerateDevices().
-    await initCamera(selectedCameraDeviceId||'');
-    try{
-      const tmp=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-      tmp.getTracks().forEach(t=>t.stop());
-    }catch(e){ console.warn('No se pudo solicitar permiso de micrófono:',e); }
-    const devices=await navigator.mediaDevices.enumerateDevices();
-    const cameras=devices.filter(d=>d.kind==='videoinput');
-    const microphones=devices.filter(d=>d.kind==='audioinput');
-    if(!cameras.length)throw new Error('No hay cámaras disponibles');
-
-    // Si solo hay una cámara o un micrófono, se selecciona automáticamente.
-    if(cameras.length===1)selectedCameraDeviceId=cameras[0].deviceId;
-    if(microphones.length===1)selectedMicrophoneDeviceId=microphones[0].deviceId;
-
-    const cameraNeedsChoice=cameras.length>1;
-    const micNeedsChoice=microphones.length>1;
-    if(!cameraNeedsChoice && !micNeedsChoice){
-      // No mostramos el panel si no hay nada que elegir.
-      guidedCompleted.mode=true;guidedActiveKey='music';
-      updateEvaluationModeUI();openGuidedPanel(category);return;
-    }
-
-    camBox.innerHTML=cameraNeedsChoice?'<div class="mediaChoiceTitle">📷 CÁMARA</div>'+cameras.map((d,i)=>{
-      const selected=selectedCameraDeviceId===d.deviceId;
-      const label=(d.label||'').trim()||('Cámara '+(i+1));
-      return '<button type="button" class="choiceButton cameraChoice '+(selected?'selected':'')+'" data-device-id="'+String(d.deviceId||'').replace(/"/g,'&quot;')+'"><span class="cameraBadge">📷</span>'+label+(selected?'<span class="cameraCheck">✓ Seleccionada</span>':'<small>Seleccionar esta cámara</small>')+'</button>';
-    }).join('') : '';
-
-    micBox.innerHTML=micNeedsChoice?'<div class="mediaChoiceTitle">🎙️ MICRÓFONO</div>'+microphones.map((d,i)=>{
-      const selected=selectedMicrophoneDeviceId===d.deviceId;
-      const label=(d.label||'').trim()||('Micrófono '+(i+1));
-      return '<button type="button" class="choiceButton cameraChoice '+(selected?'selected':'')+'" data-mic-id="'+String(d.deviceId||'').replace(/"/g,'&quot;')+'"><span class="cameraBadge">🎙️</span>'+label+(selected?'<span class="cameraCheck">✓ Seleccionado</span>':'<small>Seleccionar este micrófono</small>')+'</button>';
-    }).join('') : '';
-
-    const refreshContinue=()=>{
-      const camOk=!cameraNeedsChoice||!!selectedCameraDeviceId;
-      const micOk=!micNeedsChoice||!!selectedMicrophoneDeviceId;
-      if(cont){cont.style.display='block';cont.disabled=!(camOk&&micOk);cont.classList.toggle('active',camOk&&micOk);}
-      if(status)status.textContent=camNeedsChoice&&micNeedsChoice?'Selecciona una cámara y un micrófono.':cameraNeedsChoice?'Selecciona la cámara que prefieras.':'Selecciona el micrófono que prefieras.';
-    };
-    camBox.querySelectorAll('[data-device-id]').forEach(btn=>btn.onclick=async()=>{
-      const id=btn.dataset.deviceId;if(!id)return;
-      try{await initCamera(id);selectedCameraDeviceId=id;}catch(e){console.warn('No se pudo abrir la cámara seleccionada',e);return;}
-      camBox.querySelectorAll('[data-device-id]').forEach(b=>b.classList.toggle('selected',b.dataset.deviceId===id));
-      refreshContinue();
-    });
-    micBox.querySelectorAll('[data-mic-id]').forEach(btn=>btn.onclick=async()=>{
-      const id=btn.dataset.micId;if(!id)return;
-      selectedMicrophoneDeviceId=id;
-      micBox.querySelectorAll('[data-mic-id]').forEach(b=>b.classList.toggle('selected',b.dataset.micId===id));
-      refreshContinue();
-    });
-    if(cont)cont.onclick=async()=>{
-      if(cont.disabled)return;
-      if(selectedMicrophoneDeviceId){
-        const ok=await setMicrophoneEnabled(true,selectedMicrophoneDeviceId);
-        if(!ok){if(status)status.textContent='No se pudo activar ese micrófono. Elige otro o revisa los permisos.';return;}
-      }
-      guidedCompleted.mode=true;guidedActiveKey='music';
-      updateEvaluationModeUI();openGuidedPanel(category);
-    };
-    refreshContinue();
-  }catch(e){
-    console.warn('No se pudieron enumerar los dispositivos:',e);
-    camBox.innerHTML='<button type="button" class="choiceButton" id="cameraRetry">📷 Reintentar<small>Revisa los permisos de cámara y micrófono del navegador.</small></button>';
-    micBox.innerHTML='';
-    if(status)status.textContent='Necesitamos permiso para mostrar los dispositivos disponibles.';
-    document.getElementById('cameraRetry')?.addEventListener('click',()=>openCameraSelectPanel(returnMode));
-  }
-  document.getElementById('cameraSelectBack').onclick=()=>openPanel(returnMode==='voice'?'singFreeModePanel':'singImitationModePanel');
 }
 function updateGuidedPanel(){
   const p=document.getElementById('guidedPanel');if(!p)return;
@@ -2576,7 +2482,7 @@ function updateGuidedPanel(){
 }
 function openEvaluationForGuided(){updateDescription();updateTextConfigUI();updateEvaluationModeUI();hideGuideText();setMicrophoneEnabled(true).catch(e=>console.warn('Micrófono:',e));countdownStart()}
 
-function openSkillHub(cat){if(evalRunning)return;resetEvaluationSelectionState();category=cat;categoryChosen=true;guidedCompleted={};guidedActiveKey=cat==='sing'?'mode':'';selectedCameraDeviceId='';selectedMicrophoneDeviceId='';if(cat==='sing'){duration=0;const d=document.getElementById('duration');if(d)d.value='0';} ['dance','sing','reading','acting','aura','imitation'].forEach(c=>document.getElementById('skillHubPanel')?.classList.remove('hub-'+c));document.getElementById('skillHubPanel')?.classList.add('hub-'+cat);evaluationMode='camera';singImitationMode=false;karaokeWithCamera=false;guidedStep=0;const t=document.getElementById('skillHubTitle');if(t)t.textContent=cat==='sing'?'🎤 CANTO / KARAOKE':'✨ '+skillTitle(cat);const hubLabels={dance:{eval:'Evalúa tu desempeño Bailando',learn:'Aprende a Bailar'},sing:{eval:'Evalúa tu desempeño Cantando Karaoke',learn:'Aprende a Cantar'},reading:{eval:'Evalúa tu desempeño Leyendo',learn:'Aprende a Leer'},acting:{eval:'Evalúa tu desempeño Actuando',learn:'Aprende a Actuar'},aura:{eval:'Evalúa tu desempeño Farmeando Aura',learn:'Aprende a Farmear Aura'},imitation:{eval:'Evalúa tu desempeño Imitando',learn:'Aprende a Imitar'}};const labels=hubLabels[cat]||{eval:'Evalúa tu desempeño',learn:'Aprende habilidades'};const eb=document.querySelector('#skillHubEvaluate strong');if(eb)eb.textContent=labels.eval;const lb=document.querySelector('#skillHubLearn strong');if(lb)lb.textContent=labels.learn;const actionImageNames={dance:{evaluar:'accion_evaluar_baile.jpg',aprender:'accion_aprender_baile.jpg',competir:'accion_competir_baile.jpg'},sing:{evaluar:'accion_evaluar_canto.jpg',aprender:'accion_aprender_canto.jpg',competir:'accion_competir_canto.jpg'},acting:{evaluar:'accion_evaluar_actuacion.jpg',aprender:'accion_aprender_actuacion.jpg',competir:'accion_competir_actuacion.jpg'},reading:{evaluar:'accion_evaluar_lectura.jpg',aprender:'accion_aprender_lectura.jpg',competir:'accion_competir_lectura.jpg'},aura:{evaluar:'accion_evaluar_aura.jpg',aprender:'accion_aprender_aura.jpg',competir:'accion_competir_aura.jpg'},imitation:{evaluar:'accion_evaluar_imitacion.jpg',aprender:'accion_aprender_imitacion.jpg',competir:'accion_competir_imitacion.jpg'}};const actionImages=Object.fromEntries(Object.entries(actionImageNames[cat]||{}).map(([k,v])=>[k,'./assets/imagenes/'+v]));const actionButtons=[['skillHubEvaluate','evaluar'],['skillHubLearn','aprender'],['skillHubCompete','competir']];actionButtons.forEach(([id,key])=>{const b=document.getElementById(id);if(b){const url=actionImages[key];b.dataset.bg=url;b.style.setProperty('background-image','url(\"'+url+'\")','important');}});openPanel('skillHubPanel');hideGuideText()}
+function openSkillHub(cat){if(evalRunning)return;resetEvaluationSelectionState();category=cat;categoryChosen=true;guidedCompleted={};guidedActiveKey=cat==='sing'?'mode':'';if(cat==='sing'){duration=0;const d=document.getElementById('duration');if(d)d.value='0';} ['dance','sing','reading','acting','aura','imitation'].forEach(c=>document.getElementById('skillHubPanel')?.classList.remove('hub-'+c));document.getElementById('skillHubPanel')?.classList.add('hub-'+cat);evaluationMode='camera';singImitationMode=false;karaokeWithCamera=false;guidedStep=0;const t=document.getElementById('skillHubTitle');if(t)t.textContent=cat==='sing'?'🎤 CANTO / KARAOKE':'✨ '+skillTitle(cat);const hubLabels={dance:{eval:'Evalúa tu desempeño Bailando',learn:'Aprende a Bailar'},sing:{eval:'Evalúa tu desempeño Cantando Karaoke',learn:'Aprende a Cantar'},reading:{eval:'Evalúa tu desempeño Leyendo',learn:'Aprende a Leer'},acting:{eval:'Evalúa tu desempeño Actuando',learn:'Aprende a Actuar'},aura:{eval:'Evalúa tu desempeño Farmeando Aura',learn:'Aprende a Farmear Aura'},imitation:{eval:'Evalúa tu desempeño Imitando',learn:'Aprende a Imitar'}};const labels=hubLabels[cat]||{eval:'Evalúa tu desempeño',learn:'Aprende habilidades'};const eb=document.querySelector('#skillHubEvaluate strong');if(eb)eb.textContent=labels.eval;const lb=document.querySelector('#skillHubLearn strong');if(lb)lb.textContent=labels.learn;const actionImageNames={dance:{evaluar:'accion_evaluar_baile.jpg',aprender:'accion_aprender_baile.jpg',competir:'accion_competir_baile.jpg'},sing:{evaluar:'accion_evaluar_canto.jpg',aprender:'accion_aprender_canto.jpg',competir:'accion_competir_canto.jpg'},acting:{evaluar:'accion_evaluar_actuacion.jpg',aprender:'accion_aprender_actuacion.jpg',competir:'accion_competir_actuacion.jpg'},reading:{evaluar:'accion_evaluar_lectura.jpg',aprender:'accion_aprender_lectura.jpg',competir:'accion_competir_lectura.jpg'},aura:{evaluar:'accion_evaluar_aura.jpg',aprender:'accion_aprender_aura.jpg',competir:'accion_competir_aura.jpg'},imitation:{evaluar:'accion_evaluar_imitacion.jpg',aprender:'accion_aprender_imitacion.jpg',competir:'accion_competir_imitacion.jpg'}};const actionImages=Object.fromEntries(Object.entries(actionImageNames[cat]||{}).map(([k,v])=>[k,'./assets/imagenes/'+v]));const actionButtons=[['skillHubEvaluate','evaluar'],['skillHubLearn','aprender'],['skillHubCompete','competir']];actionButtons.forEach(([id,key])=>{const b=document.getElementById(id);if(b){const url=actionImages[key];b.dataset.bg=url;b.style.setProperty('background-image','url(\"'+url+'\")','important');}});openPanel('skillHubPanel');hideGuideText()}
 document.getElementById('skillHubBack').onclick=returnToMain;document.getElementById('skillHubEvaluate').onclick=()=>openGuidedPanel(category);document.getElementById('skillHubLearn').onclick=()=>openPanel('learningPanel');document.getElementById('skillHubCompete').onclick=()=>openPanel('competitionPanel');
 // Navegación robusta de paneles: todos los botones VOLVER de configuración tienen una ruta explícita.
 document.getElementById('danceImitationBack')?.addEventListener('click',()=>openPanel('modePanel'));
@@ -2585,7 +2491,6 @@ document.getElementById('modeBack')?.addEventListener('click',()=>openPanel('gui
 document.getElementById('imitationChallengeBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
 document.getElementById('singFreeModeBack')?.addEventListener('click',()=>openPanel('modePanel'));
 document.getElementById('singImitationModeBack')?.addEventListener('click',()=>openPanel('modePanel'));
-document.getElementById('cameraSelectBack')?.addEventListener('click',()=>openPanel('singImitationModePanel'));
 document.getElementById('genericImitationDevBack')?.addEventListener('click',()=>openPanel('modePanel'));
 document.getElementById('musicBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
 document.getElementById('singFreeTextBack')?.addEventListener('click',()=>openPanel('guidedPanel'));
