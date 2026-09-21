@@ -43,6 +43,19 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .finalChoices{display:grid;grid-template-columns:1fr;gap:10px;margin:18px auto 0;max-width:360px}.finalChoices button{font-size:14px;padding:13px 10px;width:100%;margin:0 auto}.finalChoices .shareChoice{border-color:#ff00ff;box-shadow:0 0 16px rgba(255,0,255,.25)}#finalClose{margin-top:16px}
 .resultActionPanel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:600;width:min(480px,90vw);max-height:min(82dvh,680px);overflow:auto;padding:20px;border:2px solid #00e5ff;border-radius:24px;background:#071225;box-shadow:0 0 45px rgba(0,229,255,.45),0 0 90px rgba(255,0,255,.18),0 0 0 100vmax rgba(0,0,0,.78);text-align:left}.resultActionPanel h3{text-align:center;margin:0 0 7px;color:#e0c3ff}.resultActionPanel p{text-align:center;margin:0 0 12px;font-size:12px;color:#bfefff;line-height:1.4}.mediaPreview{display:none;margin:10px 0}.mediaPreview img,.mediaPreview video{display:block;width:100%;max-height:32dvh;object-fit:contain;border:1px solid rgba(0,229,255,.55);border-radius:14px;background:#000}.mediaLabel{text-align:center;color:#8feeff;font-size:12px;margin:7px 0 4px}.mediaAction{width:100%;margin-top:7px}.videoViewBtn{margin-top:12px}.sharePopup{position:fixed;inset:0;z-index:450;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:18px}.sharePopupCard{width:min(430px,94vw);max-height:90dvh;overflow:auto;scrollbar-width:thin;scrollbar-color:#ff00ff #071225;padding:20px;border:2px solid #ff00ff;border-radius:24px;background:#071225;box-shadow:0 0 35px rgba(255,0,255,.35);text-align:center}.sharePopupCard h3{margin:0 0 7px;color:#e0c3ff}.sharePopupCard p{font-size:12px;line-height:1.45;color:#bfefff;margin:0 0 14px}.popupTarget{font-weight:900;color:#fff;font-size:16px;margin-bottom:12px}.socialGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.socialGrid button{padding:9px 5px;font-size:11px}.socialGrid .wide{grid-column:span 3}.socialIcon{display:block;font-size:23px;line-height:1;margin-bottom:4px}.saveGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.saveGrid button{width:100%}.backResult{width:100%;margin-top:10px}.topBack{margin:0 0 12px}
 #liveMusicControls{display:none;align-items:center;gap:7px;font-size:11px;padding:0;margin:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none}#liveMusicControls button{padding:7px 9px;font-size:11px}#liveMusicControls label{display:flex;align-items:center;gap:5px;color:#bfefff;margin:0}#liveMusicControls input[type=range]{width:82px;accent-color:#00e5ff}
+
+/* === Xpresia TV / pantalla grande === */
+#tvShareBtn{position:fixed;z-index:340;left:10px;bottom:max(54px,calc(env(safe-area-inset-bottom) + 52px));padding:8px 12px;border:1px solid rgba(255,0,223,.72);border-radius:13px;background:rgba(5,11,24,.94);color:#fff;box-shadow:0 0 14px rgba(255,0,223,.18);font-size:11px;font-weight:900;cursor:pointer}
+#tvShareBtn:hover{border-color:#ff65ec;box-shadow:0 0 18px rgba(255,0,223,.32)}
+#tvSharePanel{display:none;position:fixed;inset:0;z-index:680;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:18px}
+#tvShareCard{width:min(500px,94vw);max-height:min(84dvh,720px);overflow:auto;padding:22px;border:2px solid #ff00df;border-radius:24px;background:linear-gradient(145deg,#071225,#10051b);box-shadow:0 0 35px rgba(255,0,223,.32),0 0 70px rgba(0,229,255,.12);text-align:center;color:#fff}
+#tvShareCard h3{margin:0 0 7px;color:#ffd8fb;font-size:21px;text-shadow:0 0 12px rgba(255,0,223,.35)}
+#tvShareStatus{margin:8px 0 14px;padding:10px;border-radius:12px;border:1px solid rgba(0,229,255,.35);background:rgba(0,229,255,.04);color:#bfefff;font-size:12px;line-height:1.45}
+.tvMethod{margin:10px 0;padding:12px;border:1px solid rgba(0,229,255,.28);border-radius:15px;background:rgba(0,0,0,.16);text-align:left}
+.tvMethod strong{display:block;color:#8ff7ff;margin-bottom:4px}.tvMethod small{display:block;color:#bfefff;line-height:1.4;font-size:11px}
+.tvActions{display:grid;gap:8px;margin-top:12px}.tvActions button{width:100%;padding:11px 10px}.tvPrimary{border-color:#ff00df!important;box-shadow:0 0 14px rgba(255,0,223,.2)}
+.tvDetected{color:#9dffcf!important}.tvUnavailable{color:#ffccd9!important}
+@media(max-width:700px){#tvShareBtn{left:8px;bottom:max(54px,calc(env(safe-area-inset-bottom) + 52px));font-size:10px;padding:8px 10px}#tvShareCard{padding:17px}}
 #externalMusicControl{position:fixed;z-index:339;right:10px;bottom:max(54px,calc(env(safe-area-inset-bottom) + 52px));display:block}#externalMusicBtn{padding:8px 11px;border:1px solid rgba(0,229,255,.65);border-radius:13px;background:rgba(5,11,24,.92);color:#e9fbff;box-shadow:0 0 14px rgba(0,229,255,.16);font-size:11px}#externalMusicBtn.active{border-color:#00e5ff;box-shadow:0 0 16px rgba(0,229,255,.3)}
 .musicPanel{z-index:120}.musicOptions{display:grid;gap:8px;margin:12px 0}.musicOptions select{width:100%;padding:11px;border-radius:10px;background:#102a55;color:#fff;border:1px solid #00e5ff}.musicPreviewStatus{min-height:34px;padding:9px 10px;border:1px solid rgba(0,229,255,.35);border-radius:11px;background:rgba(0,0,0,.18);font-size:12px;color:#bfefff;text-align:center;line-height:1.35}.musicFileWrap{display:none;margin-top:10px}.musicFileWrap input,.musicUrlWrap input{width:100%;padding:10px;border-radius:10px;background:#102a55;color:#fff;border:1px solid #00e5ff;font-size:12px;box-sizing:border-box}.musicUrlWrap{display:none;margin-top:10px}.musicHelp{margin:7px 0 8px;color:#9edbea;font-size:11px;line-height:1.4}.musicLinkTest{width:100%;margin-top:2px}.musicActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.musicActions button{width:100%}.audioControls{padding:13px;border:1px solid rgba(0,229,255,.5);border-radius:17px;background:rgba(0,0,0,.18)}.audioRow{display:flex;align-items:center;gap:9px}.audioRow label{margin:0!important;flex:1}.audioRow input[type=range]{flex:1;accent-color:#00e5ff}.stopConfirm{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:18px}.stopConfirmCard{width:min(430px,94vw);padding:22px;border:2px solid #ff00ff;border-radius:24px;background:#071225;box-shadow:0 0 35px rgba(255,0,255,.35);text-align:center}.stopConfirmCard h3{margin:0 0 10px;color:#e0c3ff}.stopConfirmCard p{margin:0 0 16px;color:#dffcff;line-height:1.5;font-size:14px}.stopConfirmActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}#celebration{position:fixed;inset:0;z-index:305;pointer-events:none;display:none;overflow:hidden}.confetti{position:absolute;width:9px;height:18px;opacity:.98;animation:confettiFall linear forwards;border-radius:2px;box-shadow:0 0 5px rgba(255,255,255,.35)}.celebrationBurst{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:clamp(52px,14vw,120px);animation:burst .9s ease-out forwards;text-shadow:0 0 25px #00e5ff,0 0 45px #ff00ff}@keyframes confettiFall{0%{transform:translate3d(0,0,0) rotate(0deg) scale(.45);opacity:0}12%{opacity:1}55%{transform:translate3d(calc(var(--dx)*.75),calc(var(--dy)*.55 + 16vh),0) rotate(430deg) scale(1)}100%{transform:translate3d(var(--dx),calc(var(--dy) + 62vh),0) rotate(820deg) scale(.9);opacity:0}}@keyframes burst{0%{transform:translate(-50%,-50%) scale(.35);opacity:0}45%{transform:translate(-50%,-50%) scale(1.15);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
 @media (orientation:landscape) and (max-width:900px){#orientationOverlay{display:none}}@media(min-width:701px){#bottom{bottom:8px}}@media(max-width:700px){#finalCard{height:min(81.2dvh,687px);max-height:min(81.2dvh,687px)}.finalChoices{grid-template-columns:1fr}.socialGrid{grid-template-columns:repeat(2,1fr)}.socialGrid .wide{grid-column:span 2}.finalChoices button{padding:12px 9px}.resultActionPanel{padding:12px}#top{min-height:38px;font-size:11px;gap:7px;padding:5px 9px}.panel{padding:18px;max-height:81.2dvh;width:var(--xpresia-content-width)!important;max-width:var(--xpresia-content-width)!important}.panel h2{font-size:22px}.mainButtons button{font-size:14px;padding:12px}.card{padding:14px}.activationPromo{width:min(96vw,900px);padding:8px}.activationPromo img{max-height:76vh;border-radius:14px}.card h1{font-size:34px}}
@@ -435,7 +448,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <div id="activation"><div class="card activationPromo"><img alt="Xpresia — Arte y expresión en movimiento" src="assets/imagenes/Xpresia.jpg"/><div class="activationForm"><label for="startUserName">Tu nombre</label><input autocomplete="name" id="startUserName" maxlength="40" placeholder="Ej.: Daniela" type="text"/><div class="ageRow"><div><label for="startUserAge">Tu edad</label><input id="startUserAge" inputmode="numeric" max="120" min="1" placeholder="Ej.: 25" type="number"/></div><div style="display:flex;align-items:end"><div style="width:100%"><label style="visibility:hidden">Continuar</label><button class="primary activationEnter" id="activationEnter" type="button">ENTRAR A XPRESIA →</button></div></div></div><div class="activationError" id="activationError"></div></div></div></div>
 <div id="top"><span id="topMessage">Bienvenidos a Xpresia</span><span id="topTimer"></span><span id="topScore"></span><div class="topEvalControls" id="topEvalControls"><div aria-label="Control de volumen de música" id="liveMusicControls"><label>🔊 <input aria-label="Volumen de música" id="liveMusicVolume" max="1" min="0" step="0.05" type="range" value="0.8"/></label></div><button id="pauseTopBtn">⏸</button><button id="stopTopBtn">⏹</button></div></div>
 <div aria-label="Niveles de audio" id="topSpectrumMini"><canvas id="miniSpectrumCanvas"></canvas><span class="miniSpectrumLegend"><i class="micDot"></i>MIC <i class="musicDot"></i>BASE</span></div>
-<div id="bottom"><button id="menuBtn">MENÚ</button></div>
+<div id="bottom"><button id="menuBtn">MENÚ</button></div><button id="tvShareBtn" type="button" aria-label="Compartir Xpresia en TV">📺 TV</button>
+<div id="tvSharePanel" role="dialog" aria-modal="true" aria-labelledby="tvShareTitle"><div id="tvShareCard"><h3 id="tvShareTitle">📺 Compartir Xpresia en TV</h3><div id="tvShareStatus">Buscando la mejor forma disponible para conectar este dispositivo con una pantalla grande...</div><div class="tvMethod" id="tvCastMethod"><strong>1. Google Cast / Chromecast / Google TV</strong><small id="tvCastInfo">Xpresia puede preparar la conexión Cast cuando el navegador y el dispositivo lo permiten.</small></div><div class="tvMethod"><strong>2. Samsung / LG / otros Smart TV</strong><small>La duplicación de pantalla de estos televisores normalmente la controla el sistema del teléfono (Smart View, AirPlay, Miracast, Screen Share, etc.). Una página web no puede activar de forma universal esos protocolos privados.</small></div><div class="tvMethod"><strong>3. Experiencia Xpresia</strong><small>La idea es mantener cámara, micrófono y controles en el teléfono y utilizar el TV como pantalla grande, especialmente para Karaoke y Baile.</small></div><div class="tvActions"><button class="tvPrimary" id="tvTryConnect" type="button">📡 Intentar conexión automática</button><button id="tvHelpMirror" type="button">📱 Cómo duplicar mi pantalla</button><button id="tvClose" type="button">Cerrar</button></div></div></div>
 <div class="panel xpresiaDashboard" id="mainMenu">
 <div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
 <div class="dashboardIntro"><h2>ELIGE TU EXPERIENCIA</h2><p>Explora tus capacidades artísticas y descubre nuevas formas de expresarte.</p></div>
@@ -1487,7 +1501,7 @@ activation.style.touchAction='manipulation';
 document.getElementById('activationEnter')?.addEventListener('click',enterXpresia,{passive:false});
 document.getElementById('startUserAge')?.addEventListener('keydown',e=>{if(e.key==='Enter')enterXpresia(e)});
 document.getElementById('startUserName')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('startUserAge')?.focus()});
-const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','danceImitationPanel','skillHubPanel','guidedPanel','durationPanel','modePanel','singFreeModePanel','singImitationModePanel','imitationChallengePanel','genericFreeModePanel','genericImitationDevPanel','evaluationPanel','karaokeConfigPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel','singFreeTextMusicConfig','textConfigIndependent'];
+const panels=['mainMenu','dancePanel','singPanel','readingCategoryPanel','actingPanel','auraPanel','imitationPanel','danceImitationPanel','skillHubPanel','guidedPanel','durationPanel','modePanel','singFreeModePanel','singImitationModePanel','imitationChallengePanel','genericFreeModePanel','genericImitationDevPanel','evaluationPanel','karaokeConfigPanel','learningPanel','contactPanel','collabPanel','competitionPanel','musicPanel','singFreeTextMusicConfig','textConfigIndependent','tvSharePanel'];
 function closePanels(){panels.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});document.querySelectorAll('.panel').forEach(el=>{el.style.display='none'});hideGuideText();menuOpen=false}
 function openPanel(id){
   // El panel genérico antiguo no debe mostrar configuraciones de texto.
@@ -2554,6 +2568,64 @@ try{
 spectrumLoop();
 </script>
 
+<script id="xpresia-tv-share">
+(function(){
+  const panel=document.getElementById('tvSharePanel'),btn=document.getElementById('tvShareBtn'),close=document.getElementById('tvClose'),tryBtn=document.getElementById('tvTryConnect'),help=document.getElementById('tvHelpMirror'),status=document.getElementById('tvShareStatus'),castInfo=document.getElementById('tvCastInfo');
+  if(!panel||!btn)return;
+  let presentationConnection=null;
+  function ua(){return (navigator.userAgent||'').toLowerCase()}
+  function deviceName(){const u=ua();if(/iphone|ipad|ipod/.test(u))return 'iPhone / iPad';if(/samsung/.test(u))return 'Samsung / Android';if(/android/.test(u))return 'Android';return 'este dispositivo'}
+  function setStatus(t,cls=''){if(status){status.textContent=t;status.className=cls?cls:''}}
+  function open(){panel.style.display='flex';refreshStatus()}
+  function shut(){panel.style.display='none'}
+  function hasPresentation(){return typeof window.PresentationRequest==='function' || !!navigator.presentation}
+  async function tryPresentation(){
+    if(!hasPresentation()) return false;
+    try{
+      const url=new URL('./tv.html',location.href).href;
+      const req=new PresentationRequest([url]);
+      presentationConnection=await req.start();
+      setStatus('✓ Pantalla conectada. Xpresia está preparando el modo TV.','tvDetected');
+      try{presentationConnection.addEventListener('close',()=>setStatus('La conexión con la pantalla se cerró.'));}catch(e){}
+      try{presentationConnection.addEventListener('terminate',()=>setStatus('La conexión con la pantalla terminó.'));}catch(e){}
+      try{presentationConnection.send(JSON.stringify({type:'xpresia-tv-init',title:'Xpresia',url:location.href}));}catch(e){}
+      return true;
+    }catch(e){console.warn('Xpresia Presentation API:',e);return false;}
+  }
+  function castAvailable(){return !!(window.cast&&window.cast.framework&&window.chrome&&window.chrome.cast)}
+  function refreshStatus(){
+    const https=location.protocol==='https:';
+    const presentation=hasPresentation();
+    const cast=castAvailable();
+    if(castInfo)castInfo.textContent=cast?'✓ Este navegador tiene disponible la API de Google Cast.':'La API Cast no está disponible en este momento. En Chrome/Android puede aparecer al utilizar un dispositivo Cast compatible.';
+    if(cast){setStatus('✓ Google Cast está disponible en este navegador. Puedes intentar la conexión.','tvDetected');return}
+    if(presentation){setStatus('✓ El navegador ofrece una API de presentación. Xpresia puede intentar abrir su modo TV.','tvDetected');return}
+    if(!https){setStatus('Para conexiones web modernas, Xpresia debe ejecutarse mediante HTTPS. La versión publicada en Netlify ya cumple este requisito.','tvUnavailable');return}
+    setStatus('No hay un protocolo de TV controlable directamente por esta página. Puedes usar la duplicación de pantalla del teléfono: Smart View, AirPlay, Miracast o Screen Share, según el equipo.');
+  }
+  btn.addEventListener('click',open);close?.addEventListener('click',shut);
+  panel.addEventListener('click',e=>{if(e.target===panel)shut()});
+  tryBtn?.addEventListener('click',async()=>{
+    setStatus('Buscando una pantalla compatible...');
+    const ok=await tryPresentation();
+    if(!ok){
+      if(castAvailable())setStatus('Google Cast está disponible, pero la versión web actual todavía necesita un receptor Xpresia registrado para enviar la interfaz completa. Se mantiene la opción de duplicación de pantalla del sistema como respaldo.','tvUnavailable');
+      else setStatus('No fue posible iniciar una conexión web automática. Usa la duplicación de pantalla del teléfono para este TV.','tvUnavailable');
+    }
+  });
+  help?.addEventListener('click',()=>{
+    const d=deviceName();
+    let text='';
+    if(/iPhone|iPad/.test(d)) text='En iPhone/iPad: abre el Centro de control → Duplicar pantalla (AirPlay) → selecciona tu TV. El TV y el teléfono deben estar en la misma Wi‑Fi.';
+    else if(/Samsung/.test(d)) text='En Samsung Galaxy: abre los ajustes rápidos → Smart View → selecciona tu TV Samsung. El TV y el teléfono deben estar en la misma Wi‑Fi.';
+    else if(/Android/.test(d)) text='En Android: busca en los ajustes rápidos una opción como Transmitir, Compartir pantalla, Smart View, Cast o Proyección y selecciona el TV. Ambos deben estar en la misma Wi‑Fi.';
+    else text='En tu teléfono busca la función del sistema para Duplicar pantalla / Transmitir / Smart View / AirPlay / Miracast y selecciona el TV. Ambos deben estar en la misma Wi‑Fi.';
+    setStatus(text);
+  });
+  refreshStatus();
+  window.XpresiaTV={open,close:shut,tryPresentation,refreshStatus,get connection(){return presentationConnection}};
+})();
+</script>
 <script id="xpresia-pwa-install">
 (function(){
   const overlay=document.getElementById('xpresiaInstallOverlay');
