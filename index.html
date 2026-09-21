@@ -264,6 +264,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .guidedPanel{text-align:center}
 .guidedIntro{margin:10px auto 16px;color:#dffcff;line-height:1.5}
 .guidedSteps{display:grid;grid-template-columns:repeat(3,minmax(0,285px));justify-content:center;gap:12px;margin:20px 0}
+.guidedSteps.guidedTwoSteps{grid-template-columns:repeat(2,minmax(0,285px));justify-content:center}
 .guidedStep{position:relative;width:100%;max-width:285px;aspect-ratio:1/1;min-height:0;display:flex;align-items:flex-end;justify-content:stretch;text-align:left;padding:0;overflow:hidden;border:2px solid rgba(0,229,255,.65);border-radius:20px;background-color:#071225;background-size:cover;background-position:center;color:#fff;cursor:pointer;box-shadow:0 0 18px rgba(0,229,255,.14);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 /* Las imágenes de los pasos ya contienen su propio texto: no agregar texto ni oscurecerlas. */
 .guidedStep::before{display:none!important}
@@ -2319,6 +2320,8 @@ function openGuidedPanel(cat){
   }).join('');
   panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+(cat==='sing'?'Canto / Karaoke':skillTitle(cat))+'</h2><p class="guidedIntro">'+(cat==='sing'?'Configura tu karaoke paso a paso para comenzar la evaluación.':'Para evaluar tu habilidad primero debes elegir algunas opciones.')+'</p><div class="guidedSteps">'+stepHtml+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
   const guidedImages={mode:'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
+  const guidedStepsBox=panel.querySelector('.guidedSteps');
+  if(guidedStepsBox) guidedStepsBox.classList.toggle('guidedTwoSteps',cat==='sing');
   panel.querySelectorAll('.guidedStep').forEach(b=>{const url=guidedImages[b.dataset.stepKey];if(url)b.style.backgroundImage='url("'+url+'")';});
   panel.querySelector('#guidedBack').onclick=returnToMain;
   panel.querySelectorAll('.guidedStep').forEach(b=>b.onclick=()=>guidedStepAction(b.dataset.stepKey));
@@ -2369,6 +2372,9 @@ function openImitationChallengePanel(){
 }
 function openDurationPanel(){const box=document.getElementById('durationChoices'); if(!box)return; const opts=[[60,'1 minuto'],[120,'2 minutos'],[180,'3 minutos'],[240,'4 minutos'],[300,'5 minutos']]; box.innerHTML=opts.map(([v,t])=>'<button class="choiceButton" data-v="'+v+'">⏱️ '+t+'</button>').join(''); box.querySelectorAll('button').forEach(b=>b.onclick=()=>{duration=+b.dataset.v;document.getElementById('duration').value=String(duration);guidedCompleted.duration=true;const ks=Array.from(document.querySelectorAll('#guidedPanel [data-step-key]')).map(x=>x.dataset.stepKey);const i=ks.indexOf('duration');guidedActiveKey=ks[i+1]||'';updateGuidedPanel();openPanel('guidedPanel')}); document.getElementById('durationBack').onclick=()=>openPanel('guidedPanel');openPanel('durationPanel')}
 function openModePanel(){
+  // Lectura, al igual que Canto/Karaoke, no muestra el selector Modo libre/Modo imitación.
+  // Su botón "Modo de evaluación" abre directamente las opciones con cámara/sin cámara.
+  if(category==='reading'){openGenericFreeModeSubpanel();return;}
   if(category==='sing'){openSingModeSubpanel('imitation');return;}
   const box=document.getElementById('modeChoices');if(!box)return;
   const imitationTitle=category==='sing'?'🎭 Modo imitación <span class="modeKaraokeHighlight">(Karaoke)</span>':'🎭 Modo imitación';
@@ -2410,9 +2416,13 @@ function openGenericFreeModeSubpanel(){
   let panel=document.getElementById(id);
   if(!panel){
     panel=document.createElement('div');panel.className='panel choicePanel';panel.id=id;panel.style.display='none';
-    panel.innerHTML='<button class="returnMainButton" id="genericFreeModeBack"><span>↩</span> VOLVER</button><h2>🎤 Modo libre</h2><p class="panelSubtitle">Elige cómo quieres realizar tu evaluación.</p><div class="choiceGrid" id="genericFreeModeChoices"></div>';
+    panel.innerHTML='<button class="returnMainButton" id="genericFreeModeBack"><span>↩</span> VOLVER</button><h2 id="genericFreeModeTitle">🎯 Modo de evaluación</h2><p class="panelSubtitle" id="genericFreeModeSubtitle">Elige cómo quieres realizar tu evaluación.</p><div class="choiceGrid" id="genericFreeModeChoices"></div>';
     document.body.appendChild(panel);
   }
+  const title=panel.querySelector('#genericFreeModeTitle');
+  const subtitle=panel.querySelector('#genericFreeModeSubtitle');
+  if(title) title.textContent=category==='reading'?'🎯 Modo de evaluación':'🎤 Modo libre';
+  if(subtitle) subtitle.textContent=category==='reading'?'Elige cómo quieres realizar tu evaluación de lectura.':'Elige cómo quieres realizar tu evaluación.';
   const box=panel.querySelector('#genericFreeModeChoices');
   const opts=[['camera','📷 Evaluación con cámara','Evaluaremos tu desempeño frente a la cámara.','camera','./assets/imagenes/evaluacion_con_camara.jpg'],['voice','🎙️ Evaluación sin cámara','Evaluaremos tu desempeño sin necesidad de utilizar la cámara.','voice','./assets/imagenes/evaluacion_sin_camara.jpg']];
   box.className='evalChoiceGrid';
