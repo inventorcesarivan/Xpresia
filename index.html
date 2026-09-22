@@ -493,8 +493,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <div id="bottom"><button id="menuBtn">MENÚ</button></div><button id="floatingStartEval" class="floatingStartEval" type="button" aria-label="Comenzar evaluación">▶ <span>COMENZAR EVALUACIÓN</span><small>¡Demuestra tu talento!</small></button>
 <div id="tvSharePanel" role="dialog" aria-modal="true" aria-labelledby="tvShareTitle"><div id="tvShareCard"><h3 id="tvShareTitle">📺 Compartir Xpresia en TV</h3><div id="tvShareStatus">Buscando la mejor forma disponible para conectar este dispositivo con una pantalla grande...</div><div class="tvMethod" id="tvCastMethod"><strong>1. Google Cast / Chromecast / Google TV</strong><small id="tvCastInfo">Xpresia puede preparar la conexión Cast cuando el navegador y el dispositivo lo permiten.</small></div><div class="tvMethod"><strong>2. Samsung / LG / otros Smart TV</strong><small>La duplicación de pantalla de estos televisores normalmente la controla el sistema del teléfono (Smart View, AirPlay, Miracast, Screen Share, etc.). Una página web no puede activar de forma universal esos protocolos privados.</small></div><div class="tvMethod"><strong>3. Experiencia Xpresia</strong><small>La idea es mantener cámara, micrófono y controles en el teléfono y utilizar el TV como pantalla grande, especialmente para Karaoke y Baile.</small></div><div class="tvActions"><button class="tvPrimary" id="tvTryConnect" type="button">📡 Intentar conexión automática</button><button id="tvHelpMirror" type="button">📱 Cómo duplicar mi pantalla</button><button id="tvClose" type="button">Cerrar</button></div></div></div>
 <div class="panel xpresiaDashboard" id="mainMenu">
-<div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="visitCounterRow"><span class="visitCounterLabel">Visitas</span><div class="visitCounter" id="visitCounter" aria-label="Contador de visitas"></div></div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
-<button id="tvShareBtn" type="button" aria-label="Compartir Xpresia en TV">📺 TV</button><div class="dashboardIntro"><h2>ELIGE TU EXPERIENCIA</h2><p>Explora tus capacidades artísticas y descubre nuevas formas de expresarte.</p></div>
+<div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="visitCounterRow" id="visitCounterFloating"><span class="visitCounterLabel">Visitas</span><img class="visitCounterImage" id="visitCounter" src="https://contador-de-visitas.com/c/xpresia.netlify.app.svg?style=neon&amp;digits=6&amp;theme=dark&amp;start=693" alt="contador de visitas"><button class="visitCounterClose" id="visitCounterClose" type="button" aria-label="Cerrar contador">×</button></div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
+<button id="tvShareBtn" type="button" aria-label="Compartir Xpresia en TV">📺 Transmitir a Tv</button><div class="dashboardIntro"><h2>ELIGE TU EXPERIENCIA</h2><p>Explora tus capacidades artísticas y descubre nuevas formas de expresarte.</p></div>
 <div aria-label="Habilidades de evaluación" class="skillCards">
 <button class="skillCard skillSing" data-category="sing" type="button"><span class="skillImage"></span><span class="skillOverlay"></span><span class="skillContent"><b>🎤 CANTO <span class="karaokeSkillTitle">/ KARAOKE</span></b><small>Voz + expresión · afinación y presencia</small><em>INICIAR →</em></span></button>
 <button class="skillCard skillDance" data-category="dance" id="evalAccess" type="button"><span class="skillImage"></span><span class="skillOverlay"></span><span class="skillContent"><b>💃 BAILE / DANZA</b><small>Ritmo, coordinación, fluidez y expresividad en el movimiento</small><em>INICIAR →</em></span></button>
@@ -2969,23 +2969,103 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 
 </script>
 
-<script id="xpresiaVisitCounterLoader">
+
+
+
+
+
+<style id="xpresia-counter-position-clean">
+/* Contador: dentro del panel principal, alineado a la derecha */
+#mainMenu #visitCounterFloating{
+  position:absolute !important;
+  top:10px !important;
+  right:14px !important;
+  left:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  z-index:2147483646 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:auto !important;
+  min-width:0 !important;
+  max-width:calc(100% - 28px) !important;
+  height:auto !important;
+  padding:4px 7px !important;
+  margin:0 !important;
+  gap:5px !important;
+  box-sizing:border-box !important;
+  background:rgba(9,9,11,.96) !important;
+  border:1px solid rgba(0,229,255,.65) !important;
+  border-radius:9px !important;
+  box-shadow:0 0 16px rgba(0,229,255,.30) !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  overflow:visible !important;
+}
+#mainMenu #visitCounterFloating .visitCounterImage{
+  display:block !important;
+  width:82px !important;
+  min-width:82px !important;
+  max-width:82px !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  object-fit:contain !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  flex:0 0 82px !important;
+}
+#mainMenu #visitCounterFloating .visitCounterLabel{
+  display:inline-block !important;
+  width:auto !important; min-width:0 !important; max-width:none !important;
+  margin:0 !important; padding:0 !important; color:#fff !important;
+  font-size:10px !important; line-height:1 !important; font-weight:900 !important;
+  white-space:nowrap !important;
+}
+#mainMenu #visitCounterFloating .visitCounterClose{
+  display:block !important; width:auto !important; min-width:0 !important;
+  margin:0 !important; padding:0 1px !important; border:0 !important;
+  background:transparent !important; color:#fff !important; font-size:14px !important;
+  line-height:1 !important; cursor:pointer !important;
+}
+/* TV: centrado real dentro del panel */
+#mainMenu #tvShareBtn{
+  position:absolute !important; left:50% !important; right:auto !important; top:10px !important; bottom:auto !important;
+  transform:translateX(-50%) !important; margin:0 !important; z-index:2147483645 !important; white-space:nowrap !important;
+}
+@media(max-width:700px){
+  #mainMenu #visitCounterFloating{top:9px !important; right:10px !important; padding:3px 6px !important; gap:4px !important; max-width:calc(100% - 20px) !important;}
+  #mainMenu #visitCounterFloating .visitCounterImage{width:74px !important; min-width:74px !important; max-width:74px !important; flex-basis:74px !important;}
+  #mainMenu #visitCounterFloating .visitCounterLabel{font-size:9px !important}
+  #mainMenu #visitCounterFloating .visitCounterClose{font-size:13px !important}
+  #mainMenu #tvShareBtn{top:9px !important;font-size:10px !important;padding:7px 10px !important}
+}
+</style>
+<script id="xpresia-counter-position-clean">
 (function(){
-  function loadXpresiaVisitCounter(){
-    var box=document.getElementById('visitCounter');
-    if(!box || box.getAttribute('data-loaded')==='1') return;
-    box.setAttribute('data-loaded','1');
-    var s=document.createElement('script');
-    s.type='text/javascript';
-    s.src='https://counter.websiteout.com/js/2/0/963/0';
-    s.async=false;
-    box.appendChild(s);
+  function placeCounter(){
+    var r=document.getElementById('visitCounterFloating');
+    var menu=document.getElementById('mainMenu');
+    if(!r || !menu) return;
+    if(r.parentNode!==menu) menu.appendChild(r);
+    r.style.setProperty('position','absolute','important');
+    r.style.setProperty('right','14px','important');
+    r.style.setProperty('left','auto','important');
+    r.style.setProperty('top','10px','important');
+    r.style.setProperty('bottom','auto','important');
+    r.style.setProperty('transform','none','important');
   }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',loadXpresiaVisitCounter);
-  }else{
-    loadXpresiaVisitCounter();
+  function init(){
+    placeCounter();
+    setTimeout(placeCounter,100);
+    setTimeout(placeCounter,500);
   }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+  window.addEventListener('resize',placeCounter);
 })();
 </script>
 </body>
@@ -3093,62 +3173,4 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 
 </style>
 
-<style id="xpresia-unified-square-buttons">
-/* Xpresia — tamaño único para todas las tarjetas/botones cuadrados.
-   La referencia es la altura de las tarjetas de habilidades del menú inicial. */
-:root{--xpresia-square-size:clamp(220px,27vh,285px)}
-.guidedSteps{grid-template-columns:repeat(3,minmax(0,var(--xpresia-square-size)))}
-.guidedStep{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
-.guidedStepWrap{width:var(--xpresia-square-size);max-width:var(--xpresia-square-size)}
-.evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
-.evalChoiceCard{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
-.modeChoice{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
-.skillHubOptions{grid-template-columns:repeat(3,minmax(0,var(--xpresia-square-size)))}
-.skillHubCard{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
-@media(max-width:1050px) and (min-width:701px){
-  :root{--xpresia-square-size:220px}
-}
-@media(max-width:700px){
-  :root{--xpresia-square-size:205px}
-  .guidedSteps{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
-  .evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
-  .skillHubOptions{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
-}
-@media(max-width:390px){
-  .guidedSteps,.evalChoiceGrid,.skillHubOptions{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap{width:100%!important;max-width:100%!important}
-}
 
-/* Xpresia — panel inicial de cada habilidad: distribución triangular.
-   1ª opción arriba centrada; 2ª y 3ª abajo, izquierda y derecha.
-   Se aplica por igual a todas las habilidades. */
-.skillHubOptions{
-  grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size))) !important;
-  justify-content:center;
-  align-items:start;
-  column-gap:14px;
-  row-gap:14px;
-}
-#skillHubEvaluate{
-  grid-column:1 / -1 !important;
-  grid-row:1 !important;
-  justify-self:center !important;
-}
-#skillHubLearn{
-  grid-column:1 !important;
-  grid-row:2 !important;
-  justify-self:center !important;
-}
-#skillHubCompete{
-  grid-column:2 !important;
-  grid-row:2 !important;
-  justify-self:center !important;
-}
-@media(max-width:390px){
-  .skillHubOptions{
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    column-gap:9px;
-    row-gap:9px;
-  }
-}
-</style>
