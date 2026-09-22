@@ -3148,6 +3148,29 @@ spectrumLoop();
   }
 }
 
+
+/* Xpresia: unificación de paneles en móvil con el marco visual de la portada */
+@media(max-width:700px){
+  .panel{
+    width:calc(100vw - 16px)!important;
+    max-width:calc(100vw - 16px)!important;
+    height:auto!important;
+    aspect-ratio:16/9!important;
+    max-height:calc(100dvh - 170px)!important;
+    top:calc(50% + 16px)!important;
+    padding:13px 11px!important;
+    box-sizing:border-box!important;
+    overflow:auto!important;
+  }
+  .panel.xpresiaDashboard{
+    width:calc(100vw - 16px)!important;
+    max-width:calc(100vw - 16px)!important;
+    height:auto!important;
+    aspect-ratio:16/9!important;
+    max-height:calc(100dvh - 170px)!important;
+    top:calc(50% + 16px)!important;
+  }
+}
 </style>
 
 
