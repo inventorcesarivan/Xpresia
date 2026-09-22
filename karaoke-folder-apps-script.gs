@@ -14,6 +14,23 @@
 
 const DEFAULT_FOLDER_ID = '1bCMFbQS5FFu9Ot65MCbNDgmY2z27WpUm';
 
+function doPost(e) {
+  try {
+    const params = e && e.parameter ? e.parameter : {};
+    const action = String(params.action || '').trim().toLowerCase();
+
+    if (action === 'feedback-submit') {
+      const rating = Number(params.rating || 0);
+      const comment = String(params.comment || '').trim();
+      return output_(JSON.stringify(submitFeedback_(rating, comment)), '');
+    }
+
+    return output_(JSON.stringify({ ok: false, error: 'Acción POST no válida.' }), '');
+  } catch (err) {
+    return output_(JSON.stringify({ ok: false, error: String(err && err.message || err) }), '');
+  }
+}
+
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
   const mode = String(params.mode || '').trim().toLowerCase();
