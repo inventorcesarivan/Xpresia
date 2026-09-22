@@ -134,6 +134,26 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .evalModeIcon{display:block;font-size:24px;margin-bottom:4px}.evalModeCard strong{display:block;font-size:13px}.evalModeCard small{display:block;margin-top:3px;color:#bfefff;font-size:10px;line-height:1.25}
 .karaokeVisual{display:none;position:fixed;z-index:18;left:50%;top:0;transform:translateX(-50%);width:min(760px,calc(100vw - 16px));height:min(620px,calc(100dvh - 80px));min-height:480px;border:2px solid #00e5ff;border-radius:24px;overflow:hidden;background:#050815;box-shadow:0 0 30px rgba(0,229,255,.22),0 0 70px rgba(255,0,223,.08)}.karaokeVisual iframe{position:absolute;left:0;top:0;width:100%;height:calc(100% + 110px);border:0;display:block;pointer-events:none}.karaokeControlsMask{display:none;position:absolute;left:0;right:0;bottom:0;height:0;background:#000;z-index:6;pointer-events:none}.karaokeCameraMini{display:none;position:fixed;z-index:25;width:min(215px,32vw);height:auto;aspect-ratio:16/9;object-fit:cover;border:2px solid #ff00df;border-radius:10px;box-shadow:0 0 18px rgba(255,0,223,.35);background:#000;transform:scaleX(-1);transition:opacity .18s ease,transform .18s ease}.karaokeCameraToggle{display:none;position:fixed;z-index:30;min-width:28px;height:28px;padding:0 8px;border:1px solid rgba(255,0,223,.8);border-radius:9px;background:rgba(3,8,24,.9);color:#fff;font-size:12px;font-weight:900;line-height:26px;cursor:pointer;box-shadow:0 0 12px rgba(255,0,223,.25)}.karaokeCameraToggle.hidden{background:rgba(0,229,255,.15);border-color:rgba(0,229,255,.7);color:#dffcff}.karaokeCameraMini.cameraHidden{display:none!important}.karaokeVisual .karaokeBadge{position:absolute;z-index:3;left:50%;top:10px;transform:translateX(-50%);padding:5px 9px;border-radius:9px;background:rgba(3,8,24,.82);border:1px solid rgba(0,229,255,.55);color:#dffcff;font-size:10px;font-weight:900;letter-spacing:.6px;pointer-events:none;text-shadow:0 0 8px rgba(0,229,255,.5)}.karaokeUrlWrap{display:none;margin-top:8px;padding:10px;border:1px solid rgba(0,229,255,.32);border-radius:12px;background:rgba(0,0,0,.16)}.karaokeUrlWrap.show{display:block}.karaokeUrlWrap input{width:100%;box-sizing:border-box;padding:9px 10px;border-radius:9px;background:#050815;color:#fff;border:1px solid rgba(0,229,255,.55);outline:none}.karaokeUrlActions{display:flex;gap:7px;margin-top:7px}.karaokeUrlActions button{flex:1;min-height:36px;padding:7px 10px}.karaokeStatus{text-align:center;margin:6px 0 0;color:#bfefff;font-size:10px;line-height:1.35}.karaokeNote{text-align:center;margin:7px 0 0;color:#8feeff;font-size:9px;line-height:1.35}@media(max-width:700px){.karaokeVisual{width:calc(100vw - 16px);height:min(560px,calc(100dvh - 80px));min-height:400px;border-radius:18px}.karaokeVisual iframe{height:calc(100% + 190px)}.karaokeVisual .karaokeControlsMask{display:block;height:128px}}.karaokeVisual .karaokeBadge{font-size:9px}.karaokeUrlActions button{min-height:34px}}
 
+
+/* Control propio del video Karaoke: para archivos de Drive usamos el elemento
+   <video> local, lo que permite pausar/reanudar y controlar el volumen de forma fiable. */
+.karaokeVisibleVideo{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;border:0;z-index:1}
+.karaokeVisual.driveVideoMode .karaokeVisibleVideo{display:block}
+.karaokeVisual.driveVideoMode #karaokeFrame{display:none}
+.karaokeVolumeControl{position:absolute;z-index:12;right:5px;top:50%;transform:translateY(-50%);height:190px;width:34px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:7px 3px;border-radius:14px;background:rgba(3,8,24,.82);border:1px solid rgba(0,229,255,.55);box-shadow:0 0 14px rgba(0,229,255,.18);backdrop-filter:blur(5px)}
+.karaokeVisual.showKaraokeVolume .karaokeVolumeControl{display:flex}
+.karaokeVolumeIcon{font-size:15px;line-height:1}
+#karaokeVolumeSlider{appearance:none;-webkit-appearance:none;width:145px;height:6px;margin:0;transform:rotate(-90deg);transform-origin:center center;cursor:pointer;accent-color:#00e5ff}
+#karaokeVolumeSlider::-webkit-slider-runnable-track{height:5px;border-radius:5px;background:rgba(255,255,255,.25)}
+#karaokeVolumeSlider::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:#00e5ff;border:2px solid #fff;box-shadow:0 0 8px rgba(0,229,255,.7)}
+#karaokeVolumeSlider::-moz-range-track{height:5px;border-radius:5px;background:rgba(255,255,255,.25)}
+#karaokeVolumeSlider::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#00e5ff;border:2px solid #fff}
+.karaokeVolumeValue{font-size:8px;font-weight:900;color:#dffcff;line-height:1}
+@media(max-width:700px){
+  .karaokeVolumeControl{right:3px;height:170px;width:31px;padding:6px 2px}
+  #karaokeVolumeSlider{width:125px}
+}
+
 /* Biblioteca de Karaoke */
 .karaokeLibrary{margin-top:8px;padding:10px;border:1px solid rgba(0,229,255,.32);border-radius:12px;background:rgba(0,0,0,.16)}
 .karaokeSearchRow{display:flex;gap:7px;align-items:center}.karaokeSearchRow input{flex:1;box-sizing:border-box;padding:9px 10px;border-radius:9px;background:#050815;color:#fff;border:1px solid rgba(0,229,255,.55);outline:none}.karaokeSearchRow button{min-height:36px;padding:7px 10px}.karaokeResults{margin-top:8px;max-height:210px;overflow:auto;display:grid;gap:6px}.karaokeResult{width:100%;text-align:left;padding:9px 10px;border:1px solid rgba(0,229,255,.28);border-radius:10px;background:linear-gradient(145deg,rgba(8,24,52,.86),rgba(7,6,30,.86));color:#fff;cursor:pointer}.karaokeResult:hover{border-color:#ff00df;box-shadow:0 0 12px rgba(255,0,223,.15)}.karaokeResult.selected{border-color:#ff00df;background:linear-gradient(135deg,rgba(112,18,130,.98),rgba(16,47,97,.98));box-shadow:0 0 16px rgba(255,0,223,.34),inset 0 0 16px rgba(0,229,255,.08);transform:translateY(-1px)}.karaokeResult.selected strong{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.25)}.karaokeResult.selected small{color:#dffcff}.karaokeResult strong{display:block;font-size:12px}.karaokeResult small{display:block;margin-top:2px;color:#9eefff;font-size:10px}.karaokeEmpty{text-align:center;color:#8feeff;font-size:10px;padding:9px}.karaokeSelected{margin-top:8px;padding:10px 12px;border-radius:11px;background:linear-gradient(135deg,rgba(72,10,92,.92),rgba(8,38,82,.96));border:1px solid rgba(255,0,223,.62);font-size:10px;color:#dffcff;box-shadow:0 0 14px rgba(255,0,223,.13),inset 0 0 12px rgba(0,229,255,.05)}.karaokeSelected strong{color:#fff;text-shadow:0 0 8px rgba(255,0,223,.45)}
@@ -461,7 +481,7 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <video id="video" muted="" playsinline=""></video>
 <canvas id="canvas"></canvas>
 <canvas aria-hidden="true" id="spectrumCanvas"></canvas>
-<div aria-hidden="true" class="soloVisual" id="soloVisual"><img alt="Xpresia — Arte y expresión en movimiento" id="soloVisualImage" src="assets/imagenes/xpresia_inicio.jpg"/><div class="soloVisualLabel" id="soloVisualLabel">🎙️ Modo solo micrófono<small>Tu voz es la protagonista</small></div></div><div aria-hidden="true" class="karaokeVisual" id="karaokeVisual"><div class="karaokeBadge">🎤 KARAOKE · VIDEO DE FONDO</div><iframe allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="" id="karaokeFrame" loading="eager" referrerpolicy="strict-origin-when-cross-origin" title="Video karaoke"></iframe><div aria-hidden="true" class="karaokeControlsMask"></div></div><video aria-hidden="true" id="karaokeAudioVideo" playsinline preload="auto" muted></video><button class="karaokeCameraToggle" id="karaokeCameraToggle" type="button" aria-label="Ocultar cámara" title="Ocultar cámara">✕</button>
+<div aria-hidden="true" class="soloVisual" id="soloVisual"><img alt="Xpresia — Arte y expresión en movimiento" id="soloVisualImage" src="assets/imagenes/xpresia_inicio.jpg"/><div class="soloVisualLabel" id="soloVisualLabel">🎙️ Modo solo micrófono<small>Tu voz es la protagonista</small></div></div><div aria-hidden="true" class="karaokeVisual" id="karaokeVisual"><div class="karaokeBadge">🎤 KARAOKE · VIDEO DE FONDO</div><iframe allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="" id="karaokeFrame" loading="eager" referrerpolicy="strict-origin-when-cross-origin" title="Video karaoke"></iframe><video id="karaokeVisibleVideo" class="karaokeVisibleVideo" playsinline preload="auto" aria-label="Video karaoke"></video><div class="karaokeControlsMask" aria-hidden="true"></div><div class="karaokeVolumeControl" id="karaokeVolumeControl" aria-label="Volumen del video karaoke"><span class="karaokeVolumeIcon">🔊</span><input id="karaokeVolumeSlider" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volumen del video karaoke"><span class="karaokeVolumeValue" id="karaokeVolumeValue">80%</span></div></div><video aria-hidden="true" id="karaokeAudioVideo" playsinline preload="auto" muted></video><button class="karaokeCameraToggle" id="karaokeCameraToggle" type="button" aria-label="Ocultar cámara" title="Ocultar cámara">✕</button>
 <div class="spectrumBadge" id="spectrumBadge"><span class="dot"></span><span>ANÁLISIS DE SONIDO</span></div>
 <div id="orientationOverlay"><div class="orientationCard"><div class="orientationIcon">📱↔️</div><h2>Modo horizontal</h2><p>También puedes usar Xpresia en horizontal si lo prefieres. Activa el <b>giro automático</b> de tu teléfono para cambiar la orientación.</p><button id="orientationClose">Continuar</button></div></div>
 <div id="activation"><div class="card activationPromo"><img alt="Xpresia — Arte y expresión en movimiento" src="assets/imagenes/Xpresia.jpg"/><div class="activationForm"><label for="startUserName">Tu nombre</label><input autocomplete="name" id="startUserName" maxlength="40" placeholder="Ej.: Daniela" type="text"/><div class="ageRow"><div><label for="startUserAge">Tu edad</label><input id="startUserAge" inputmode="numeric" max="120" min="1" placeholder="Ej.: 25" type="number"/></div><div style="display:flex;align-items:end"><div style="width:100%"><label style="visibility:hidden">Continuar</label><button class="primary activationEnter" id="activationEnter" type="button">ENTRAR A XPRESIA →</button></div></div></div><div class="activationError" id="activationError"></div></div></div></div>
@@ -663,7 +683,7 @@ const musicLibrary={
 let mediaRecorder=null,recordedChunks=[],recordedBlob=null,recordedUrl=null,recordingMime='';
 let pose=null,poseReady=false,poseBusy=false,lastPose=0;
 let category='dance',duration=60,userName='',userAge='',evaluationMode='camera',voiceSamplingId=null;
-let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
+let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeVolumeLevel=.8;let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
 const profiles={
  dance:{name:'Baile / Danza',description:'Prioriza actividad, coordinación, fluidez, variedad y continuidad del movimiento.',weights:{activity:.18,coordination:.25,fluidity:.25,stability:.12,variety:.20}},
  sing:{name:'Canto — voz + expresión',description:'Evalúa afinación, estabilidad vocal, dinámica y expresividad corporal mediante el micrófono y la expresión corporal.',weights:{activity:.10,coordination:.12,fluidity:.13,stability:.10,variety:.10,voice:.45}},
@@ -1284,18 +1304,8 @@ function restartKaraokeSong(){
   if(!evalRunning||evaluationMode!=='karaoke'||evalPaused)return;
   const v=document.getElementById('karaokeAudioVideo');
   try{if(v){v.currentTime=0;const p=v.play();if(p)p.catch(()=>{})}}catch(e){}
-  const frame=document.getElementById('karaokeFrame');
-  if(frame){
-    const src=getKaraokePreviewSrc();
-    try{
-      if(parseYouTubeId(document.getElementById('karaokeUrl')?.value||'')){
-        frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'seekTo',args:[0,true]}),'*');
-        frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*');
-      }else if(src){
-        frame.src=src;
-      }
-    }catch(e){}
-  }
+  seekKaraokeToStart();
+  playKaraoke();
 }
 function stopKaraokeCompletionWatch(){
   if(karaokeCompletionWatchId){clearInterval(karaokeCompletionWatchId);karaokeCompletionWatchId=null}
@@ -1342,6 +1352,7 @@ function selectKaraokeLibraryItem(item){
     loadKaraokeVideo(mediaUrl,false);
     karaokeSelectedItem=item;
     karaokeVideoId=parseYouTubeId(mediaUrl)||parseDriveId(mediaUrl)||karaokeVideoId;
+    prepareVisibleKaraokeVideo(mediaUrl);
     karaokeReady=!!karaokeVideoId;
     evaluationMode='karaoke';
     karaokeDurationPromise=resolveKaraokeDuration(item).then(sec=>{
@@ -1363,7 +1374,7 @@ function selectKaraokeLibraryItem(item){
 function clearKaraokeSourceState(message='', clearLibrary=true){
   stopKaraokeAudioAnalysis();
   karaokeVideoId='';karaokeReady=false;karaokeSelectedItem=null;karaokeLyricsText='';karaokeFolderId=DEFAULT_KARAOKE_FOLDER_ID;karaokeFolderUrl='https://drive.google.com/drive/folders/'+DEFAULT_KARAOKE_FOLDER_ID;karaokeConnectedFolderName='';
-  const frame=document.getElementById('karaokeFrame');if(frame)frame.src='';
+  const frame=document.getElementById('karaokeFrame');if(frame)frame.src=''; const vv=document.getElementById('karaokeVisibleVideo');if(vv){try{vv.pause();vv.removeAttribute('src');vv.load()}catch(e){}} setKaraokeVisualMode('');
   const input=document.getElementById('karaokeUrl');if(input)input.value='';
   const selected=document.getElementById('karaokeSelected');if(selected){selected.style.display='none';selected.innerHTML='';}
   const search=document.getElementById('karaokeSearch');if(search)search.value='';
@@ -1415,11 +1426,75 @@ async function startKaraokeAudioAnalysis(){
     return false;
   }
 }
+function getKaraokeDirectVideoSrc(raw){
+  const value=String(raw||'').trim();
+  const driveId=parseDriveId(value)||((karaokeSelectedItem&&parseDriveId(karaokeSelectedItem.url||karaokeSelectedItem.driveUrl||''))||'');
+  if(driveId && !/^https?:\/\/.*\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(value)){
+    return 'https://drive.google.com/uc?export=download&id='+encodeURIComponent(driveId);
+  }
+  if(value && /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(value))return value;
+  return '';
+}
+function setKaraokeVisualMode(mode){
+  const visual=document.getElementById('karaokeVisual');
+  if(!visual)return;
+  visual.classList.toggle('driveVideoMode',mode==='drive');
+  visual.classList.toggle('showKaraokeVolume',mode==='drive'||mode==='youtube');
+}
+function applyKaraokeVolume(value){
+  karaokeVolumeLevel=Math.max(0,Math.min(1,Number(value)||0));
+  const slider=document.getElementById('karaokeVolumeSlider');if(slider)slider.value=String(karaokeVolumeLevel);
+  const label=document.getElementById('karaokeVolumeValue');if(label)label.textContent=Math.round(karaokeVolumeLevel*100)+'%';
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(video){
+    video.volume=karaokeVolumeLevel;
+    video.muted=false;
+  }
+  const frame=document.getElementById('karaokeFrame');
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  if(parseYouTubeId(raw)&&frame){
+    try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[Math.round(karaokeVolumeLevel*100)]}),'*')}catch(e){}
+  }
+}
+function prepareVisibleKaraokeVideo(raw){
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  const ytId=parseYouTubeId(raw);
+  const direct=getKaraokeDirectVideoSrc(raw);
+  if(video){
+    try{video.pause();video.removeAttribute('src');video.load();video.muted=true;video.volume=karaokeVolumeLevel}catch(e){}
+  }
+  if(ytId){
+    setKaraokeVisualMode('youtube');
+    if(video)video.style.display='none';
+    if(frame){
+      const origin=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'';
+      const params=new URLSearchParams({enablejsapi:'1',playsinline:'1',rel:'0'});
+      if(origin)params.set('origin',origin);
+      frame.src='https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
+    }
+    return 'youtube';
+  }
+  if(direct){
+    setKaraokeVisualMode('drive');
+    if(frame)frame.src='about:blank';
+    if(video){
+      video.src=direct;
+      video.load();
+      video.muted=true;
+      video.volume=karaokeVolumeLevel;
+      const p=video.play();if(p)p.catch(()=>{});
+    }
+    return 'drive';
+  }
+  setKaraokeVisualMode('');
+  if(frame)frame.src='about:blank';
+  return '';
+}
 function loadKaraokeVideo(rawInput, replaceLibrary=true){
-  const input=document.getElementById('karaokeUrl'),status=document.getElementById('karaokeStatus'),frame=document.getElementById('karaokeFrame');
+  const input=document.getElementById('karaokeUrl'),status=document.getElementById('karaokeStatus');
   const raw=String(rawInput??input?.value??'').trim();
   if(!raw){if(status)status.textContent='No se indicó ningún enlace.';return false}
-  // Cada nueva carga reemplaza completamente la fuente anterior.
   clearKaraokeSourceState('', replaceLibrary);
   if(input)input.value=raw;
   const folderId=parseDriveFolderId(raw);
@@ -1445,19 +1520,10 @@ function loadKaraokeVideo(rawInput, replaceLibrary=true){
     return false;
   }
   karaokeVideoId=ytId||driveId;karaokeReady=true;
-  if(frame){
-    if(ytId){
-      const origin=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'';
-      const params=new URLSearchParams({enablejsapi:'1',playsinline:'1',rel:'0'});
-      if(origin)params.set('origin',origin);
-      frame.src='https://www.youtube.com/embed/'+encodeURIComponent(ytId)+'?'+params.toString();
-    }else{
-      frame.src='https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
-    }
-  }
+  prepareVisibleKaraokeVideo(raw);
   if(status){
     if(ytId)status.textContent=location.protocol==='file:'?'🎬 Video individual cargado. Para probar YouTube correctamente, abre Xpresia desde Netlify.':'🎬 Video individual cargado. Puedes comenzar la evaluación.';
-    else status.textContent='🎬 Video individual de Google Drive cargado. Asegúrate de que el archivo esté compartido como “Cualquier persona con el enlace · Lector”.';
+    else status.textContent='🎬 Video individual de Google Drive cargado. Puedes pausar y controlar su volumen durante la evaluación.';
   }
   evaluationMode='karaoke';stopCamera();updateEvaluationModeUI();return true;
 }
@@ -1469,26 +1535,22 @@ function loadOfficialKaraokeLibrary(){
     if(status)status.textContent='🏠 Biblioteca oficial de Xpresia cargada. '+karaokeLibrary.length+' vídeos disponibles.';
   });
 }
-
 function promptKaraokeFolder(){
   clearKaraokeSourceState('📁 Esperando el enlace de tu carpeta…');
   const raw=window.prompt('Pega el enlace de tu carpeta de Google Drive:','');
   if(raw&&raw.trim())loadKaraokeVideo(raw.trim());
   else {const status=document.getElementById('karaokeStatus');if(status)status.textContent='Biblioteca oficial de Xpresia cargada. No se cambió la biblioteca.';loadKaraokeLibrary();}
 }
-
 function promptKaraokeVideo(){
   clearKaraokeSourceState('🎬 Esperando el enlace del video…');
   const raw=window.prompt('Pega el enlace del karaoke individual (YouTube o Google Drive):','');
   if(raw&&raw.trim())loadKaraokeVideo(raw.trim());
   else {const status=document.getElementById('karaokeStatus');if(status)status.textContent='Biblioteca oficial de Xpresia cargada. No se cambió la biblioteca.';loadKaraokeLibrary();}
 }
-
 function clearKaraokeVideo(){
   clearKaraokeSourceState('Biblioteca oficial de Xpresia cargada. Selecciona una canción para comenzar.');
   loadKaraokeLibrary();
 }
-
 function getKaraokePreviewSrc(){
   const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
   const ytId=parseYouTubeId(raw);
@@ -1502,10 +1564,73 @@ function getKaraokePreviewSrc(){
   if(driveId)return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview?autoplay=1&rm=minimal';
   return '';
 }
-function stopKaraokePreview(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.src='about:blank'}catch(e){try{frame.removeAttribute('src')}catch(_){} }}
-function startKaraokePlayback(){const frame=document.getElementById('karaokeFrame');const src=getKaraokePreviewSrc();if(!frame||!src)return;try{frame.src=src;setTimeout(()=>{try{frame.blur()}catch(e){}},350)}catch(e){}}
-function playKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame||!karaokeVideoId)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), '*')}catch(e){} }
-function pauseKaraoke(){const frame=document.getElementById('karaokeFrame');if(!frame)return;try{frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}), '*')}catch(e){}}
+function stopKaraokePreview(){
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),'*')}catch(e){}
+  try{frame&&(frame.src='about:blank')}catch(e){}
+  try{video?.pause();video?.removeAttribute('src');video?.load()}catch(e){}
+  setKaraokeVisualMode('');
+}
+function startKaraokePlayback(){
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(parseYouTubeId(raw)){
+    if(!frame)return;
+    try{
+      frame.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}),'*');
+      setTimeout(()=>applyKaraokeVolume(karaokeVolumeLevel),120);
+    }catch(e){}
+  }else{
+    const direct=getKaraokeDirectVideoSrc(raw);
+    if(video&&direct){
+      setKaraokeVisualMode('drive');
+      try{
+        video.muted=false;video.volume=karaokeVolumeLevel;
+        const p=video.play();if(p)p.catch(()=>{});
+      }catch(e){}
+    }
+  }
+}
+function playKaraoke(){
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(parseYouTubeId(raw)){
+    try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}),'*');setTimeout(()=>applyKaraokeVolume(karaokeVolumeLevel),80)}catch(e){}
+  }else{
+    try{const p=video?.play();if(p)p.catch(()=>{})}catch(e){}
+  }
+}
+function pauseKaraoke(){
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),'*')}catch(e){}
+  try{video?.pause()}catch(e){}
+}
+function seekKaraokeToStart(){
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  const frame=document.getElementById('karaokeFrame');
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(parseYouTubeId(raw)){
+    try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func:'seekTo',args:[0,true]}),'*')}catch(e){}
+  }else{
+    try{if(video)video.currentTime=0}catch(e){}
+  }
+}
+function getVisibleKaraokeCurrentTime(){
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(parseYouTubeId(raw))return NaN;
+  return Number(video?.currentTime||0);
+}
+function getVisibleKaraokeDuration(){
+  const raw=(document.getElementById('karaokeUrl')?.value||'').trim();
+  const video=document.getElementById('karaokeVisibleVideo');
+  if(parseYouTubeId(raw))return NaN;
+  return Number(video?.duration||0);
+}
 
 const cameraModeBtn=document.getElementById('cameraModeBtn');if(cameraModeBtn)cameraModeBtn.onclick=()=>setEvaluationMode('camera');const voiceModeBtn=document.getElementById('voiceModeBtn');if(voiceModeBtn)voiceModeBtn.onclick=()=>setEvaluationMode('voice');const karaokeModeBtn=document.getElementById('karaokeModeBtn');if(karaokeModeBtn)karaokeModeBtn.onclick=()=>setEvaluationMode('karaoke');document.getElementById("karaokeFolderBtn")?.addEventListener("click",promptKaraokeFolder);document.getElementById("karaokeVideoBtn")?.addEventListener("click",promptKaraokeVideo);document.getElementById("karaokeOfficialBtn")?.addEventListener("click",loadOfficialKaraokeLibrary);document.getElementById('karaokeSearch').oninput=e=>renderKaraokeLibrary(e.target.value);document.getElementById('karaokeRefreshBtn').onclick=loadOfficialKaraokeLibrary;loadKaraokeLibrary();document.getElementById('cancelMusic').onclick=()=>cancelMusicPanel();document.getElementById('saveMusic').onclick=()=>saveMusicSelection();document.getElementById('saveKaraokeMusic').onclick=()=>{
   if(!karaokeSelectedItem){
@@ -2612,7 +2737,7 @@ document.getElementById('mainClose')?.addEventListener('click',closePanels);docu
   updateGuidedPanel();
   openPanel('guidedPanel');
 });document.getElementById('evaluationClose')?.addEventListener('click',()=>{if(!evalRunning&&document.getElementById('guidedPanel')?.style.display!=='none')openPanel('guidedPanel');else returnToMain});document.getElementById('learningClose')?.addEventListener('click',returnToMain);document.getElementById('contactClose')?.addEventListener('click',returnToMain);document.getElementById('collabClose')?.addEventListener('click',returnToMain);document.getElementById('competitionClose')?.addEventListener('click',returnToMain);
-document.getElementById('menuBtn').onclick=()=>{if(menuOpen)closePanels();else openPanel('mainMenu')};const applyMusicVolume=(value)=>{volumeLevel=Math.max(0,Math.min(1,parseFloat(value)||0));if(musicGain)musicGain.gain.value=volumeLevel;if(recordMusicGain)recordMusicGain.gain.value=volumeLevel;musicPlayer.volume=volumeLevel;musicAudio.volume=volumeLevel;const vs=document.getElementById('volumeSlider');if(vs)vs.value=volumeLevel;const ls=document.getElementById('liveMusicVolume');if(ls)ls.value=volumeLevel;const ms=document.getElementById('mobileMusicVolume');if(ms)ms.value=volumeLevel;const mv=document.getElementById('mobileMusicVolumeValue');if(mv)mv.textContent=Math.round(volumeLevel*100)+'%';};document.getElementById('liveMusicVolume').oninput=e=>applyMusicVolume(e.target.value);document.getElementById('mobileMusicVolume')?.addEventListener('input',e=>applyMusicVolume(e.target.value));document.getElementById('pauseTopBtn').onclick=()=>{if(evalRunning)pauseEvaluation()};document.getElementById('stopTopBtn').onclick=()=>{if(evalRunning)openStopConfirm()};document.getElementById('cancelStop').onclick=closeStopConfirm;document.getElementById('confirmStop').onclick=abortEvaluation;document.getElementById('orientationClose').onclick=()=>document.getElementById('orientationOverlay').style.display='none';
+document.getElementById('menuBtn').onclick=()=>{if(menuOpen)closePanels();else openPanel('mainMenu')};const applyMusicVolume=(value)=>{volumeLevel=Math.max(0,Math.min(1,parseFloat(value)||0));if(musicGain)musicGain.gain.value=volumeLevel;if(recordMusicGain)recordMusicGain.gain.value=volumeLevel;musicPlayer.volume=volumeLevel;musicAudio.volume=volumeLevel;const vs=document.getElementById('volumeSlider');if(vs)vs.value=volumeLevel;const ls=document.getElementById('liveMusicVolume');if(ls)ls.value=volumeLevel;const ms=document.getElementById('mobileMusicVolume');if(ms)ms.value=volumeLevel;const mv=document.getElementById('mobileMusicVolumeValue');if(mv)mv.textContent=Math.round(volumeLevel*100)+'%';};document.getElementById('liveMusicVolume').oninput=e=>applyMusicVolume(e.target.value);document.getElementById('mobileMusicVolume')?.addEventListener('input',e=>applyMusicVolume(e.target.value));document.getElementById('karaokeVolumeSlider')?.addEventListener('input',e=>applyKaraokeVolume(e.target.value));applyKaraokeVolume(.8);document.getElementById('pauseTopBtn').onclick=()=>{if(evalRunning)pauseEvaluation()};document.getElementById('stopTopBtn').onclick=()=>{if(evalRunning)openStopConfirm()};document.getElementById('cancelStop').onclick=closeStopConfirm;document.getElementById('confirmStop').onclick=abortEvaluation;document.getElementById('orientationClose').onclick=()=>document.getElementById('orientationOverlay').style.display='none';
 const initialVolumeValue=document.getElementById('volumeValue');if(initialVolumeValue)initialVolumeValue.textContent=Math.round(volumeLevel*100)+'%';
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,150));
 // Algunos navegadores móviles restauran la última vista desde bfcache.
