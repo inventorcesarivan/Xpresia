@@ -468,7 +468,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 
 <style id="xpresia-rating-share-styles">
 .dashboardFeedback{margin-top:14px;padding-top:13px;border-top:1px solid rgba(0,229,255,.38);text-align:center}.dashboardFeedbackTitle{color:#8feeff;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 10px rgba(0,229,255,.3);margin-bottom:4px}.dashboardFeedbackSubtitle{color:#8aaec8;font-size:10px;margin:0 0 9px}.ratingStars{display:flex;justify-content:center;gap:4px;margin:4px 0 8px}.ratingStar{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;width:34px!important;height:34px!important;min-width:34px!important;color:#5d7188;font-size:27px;line-height:1;cursor:pointer;transition:transform .15s,color .15s,text-shadow .15s}.ratingStar:hover,.ratingStar.active{color:#ffd45c;text-shadow:0 0 12px rgba(255,212,92,.55);transform:scale(1.08)}.ratingHint{font-size:10px;color:#bfefff;min-height:15px;margin-bottom:7px}.ratingComment{width:100%;min-height:56px;resize:vertical;box-sizing:border-box;border:1px solid rgba(0,229,255,.45);border-radius:12px;background:rgba(4,15,35,.9);color:#fff;padding:9px 10px;font:inherit;font-size:11px;outline:none}.ratingComment:focus{border-color:#00e5ff;box-shadow:0 0 12px rgba(0,229,255,.14)}.ratingSend{margin-top:7px;width:100%;height:42px;border:1px solid #00e5ff;border-radius:12px;background:linear-gradient(135deg,#0a2d55,#171044);color:#dffcff;font-weight:900;cursor:pointer}.ratingStatus{font-size:10px;color:#8feeff;min-height:14px;margin-top:5px}.dashboardShare{margin-top:13px;padding-top:11px;border-top:1px solid rgba(0,229,255,.24);text-align:center}.dashboardShareTitle{color:#d7c7ef;font-size:10px;font-weight:900;letter-spacing:1.5px;margin-bottom:7px}.dashboardShareGrid{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}.dashboardShareBtn{width:38px!important;height:38px!important;min-width:38px!important;padding:0!important;border-radius:50%!important;border:1px solid rgba(0,229,255,.45)!important;background:linear-gradient(145deg,#10254a,#09152c)!important;color:#fff!important;font-size:16px!important;box-shadow:0 0 10px rgba(0,229,255,.08)!important;cursor:pointer}.dashboardShareBtn:hover{transform:translateY(-2px);border-color:#fff!important}.dashboardShareBtn small{display:none}@media(max-width:700px){.dashboardFeedback{margin-top:10px;padding-top:9px}.dashboardFeedbackTitle{font-size:9px}.dashboardFeedbackSubtitle{font-size:8px;margin-bottom:5px}.ratingStar{width:29px!important;height:29px!important;min-width:29px!important;font-size:23px}.ratingComment{min-height:48px;font-size:10px}.ratingSend{height:37px;font-size:11px}.dashboardShare{margin-top:9px;padding-top:8px}.dashboardShareTitle{font-size:8px;margin-bottom:5px}.dashboardShareBtn{width:32px!important;height:32px!important;min-width:32px!important;font-size:14px!important}}
-</style>
+
+.ratingSummary{font-size:10px;color:#dffcff;margin-top:7px;min-height:15px}.ratingViewBtn{margin-top:6px;width:100%;height:36px;border:1px solid rgba(0,229,255,.42);border-radius:11px;background:rgba(9,28,53,.88);color:#bfefff;font-size:10px;font-weight:900;letter-spacing:.4px;cursor:pointer}.ratingViewBtn:hover{border-color:#00e5ff;color:#fff}.ratingCommentsOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72);z-index:10000}.ratingCommentsOverlay.show{display:flex}.ratingCommentsCard{position:relative;width:min(720px,94vw);max-height:min(82vh,760px);overflow:hidden;box-sizing:border-box;border:1px solid rgba(0,229,255,.48);border-radius:18px;background:linear-gradient(145deg,#08152b,#0c1f3c);box-shadow:0 0 35px rgba(0,229,255,.18);padding:20px;color:#fff}.ratingCommentsCard h3{margin:0 30px 6px 0;text-align:center;color:#e9fbff;font-size:16px}.ratingPublicStats{text-align:center;color:#ffd45c;font-size:12px;font-weight:900;margin-bottom:12px}.ratingCommentsClose{position:absolute;right:10px;top:8px;width:34px;height:34px;border:0;background:transparent;color:#bfefff;font-size:28px;cursor:pointer}.ratingCommentsList{max-height:58vh;overflow:auto;padding-right:4px}.ratingCommentItem{padding:10px 12px;margin-bottom:8px;border:1px solid rgba(0,229,255,.18);border-radius:12px;background:rgba(3,13,30,.7)}.ratingCommentStars{color:#ffd45c;letter-spacing:1px;font-size:12px}.ratingCommentDate{float:right;color:#7591aa;font-size:9px}.ratingCommentText{clear:both;margin-top:5px;color:#e6f8ff;font-size:11px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}.ratingEmpty{text-align:center;color:#91aec3;font-size:11px;padding:25px 10px}@media(max-width:700px){.ratingSummary{font-size:9px}.ratingViewBtn{height:34px;font-size:9px}.ratingCommentsCard{padding:16px;border-radius:15px}.ratingCommentsCard h3{font-size:14px}.ratingCommentsList{max-height:62vh}.ratingCommentItem{padding:9px}.ratingCommentText{font-size:10px}}</style>
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
@@ -518,6 +519,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <textarea class="ratingComment" id="ratingComment" maxlength="500" placeholder="Escribe un breve comentario sobre Xpresia..."></textarea>
 <button class="ratingSend" id="ratingSend" type="button">💌 ENVIAR VALORACIÓN</button>
 <div class="ratingStatus" id="ratingStatus"></div>
+<div class="ratingSummary" id="ratingSummary" aria-live="polite">Cargando valoraciones…</div>
+<button class="ratingViewBtn" id="ratingViewBtn" type="button">💬 VER ÚLTIMOS COMENTARIOS</button>
 </div>
 <div class="dashboardShare">
 <div class="dashboardShareTitle">📣 COMPARTE XPRESIA</div>
@@ -530,6 +533,14 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <button class="dashboardShareBtn" type="button" data-dashboard-share="native" aria-label="Compartir Xpresia">↗</button>
 </div></div>
 <div class="dashboardFooter"><span>💡 El arte vive en cada movimiento. Y en cada persona.</span><span>✦ Más que una evaluación. Una experiencia.</span></div>
+<div class="ratingCommentsOverlay" id="ratingCommentsOverlay" aria-hidden="true">
+  <div class="ratingCommentsCard" role="dialog" aria-modal="true" aria-labelledby="ratingCommentsTitle">
+    <button class="ratingCommentsClose" id="ratingCommentsClose" type="button" aria-label="Cerrar">×</button>
+    <h3 id="ratingCommentsTitle">⭐ Opiniones de la comunidad</h3>
+    <div class="ratingPublicStats" id="ratingPublicStats">Cargando…</div>
+    <div class="ratingCommentsList" id="ratingCommentsList"><div class="ratingEmpty">Cargando comentarios…</div></div>
+  </div>
+</div>
 <button aria-label="Cerrar menú" class="panelClose" id="mainClose">Cerrar</button>
 </div>
 <div class="panel skillConfigPanel" id="dancePanel">
@@ -2939,35 +2950,42 @@ spectrumLoop();
 
 <script id="xpresia-dashboard-feedback">
 (function(){
+  const FEEDBACK_API_URL='https://script.google.com/macros/s/AKfycbxwCLUEeIhVcna-iYUADBjfn9Tf1C9lxvkmCU40EbVO_CiOikETJUT-b-U82HBgn9XeOA/exec';
   let selectedRating=0;
   const stars=[...document.querySelectorAll('#ratingStars .ratingStar')];
-  const hint=document.getElementById('ratingHint');
-  const comment=document.getElementById('ratingComment');
-  const status=document.getElementById('ratingStatus');
+  const hint=document.getElementById('ratingHint'), comment=document.getElementById('ratingComment'), status=document.getElementById('ratingStatus');
+  const summary=document.getElementById('ratingSummary'), viewBtn=document.getElementById('ratingViewBtn');
+  const overlay=document.getElementById('ratingCommentsOverlay'), closeBtn=document.getElementById('ratingCommentsClose');
+  const stats=document.getElementById('ratingPublicStats'), list=document.getElementById('ratingCommentsList');
   const labels=['','No me gustó','Podría mejorar','Está bien','Me gustó mucho','¡Excelente!'];
-  function paint(n){stars.forEach(s=>s.classList.toggle('active',Number(s.dataset.rating)<=n)); if(hint) hint.textContent=n?labels[n]+' · '+n+'/5 estrellas':'Selecciona una puntuación';}
+  function paint(n){stars.forEach(s=>s.classList.toggle('active',Number(s.dataset.rating)<=n));if(hint)hint.textContent=n?labels[n]+' · '+n+'/5 estrellas':'Selecciona una puntuación';}
   stars.forEach(s=>s.addEventListener('click',()=>{selectedRating=Number(s.dataset.rating);paint(selectedRating);}));
-  document.getElementById('ratingSend')?.addEventListener('click',()=>{
+  function jsonp(params, timeout=15000){return new Promise((resolve,reject)=>{const cb='xpresiaFeedback_'+Date.now()+'_'+Math.floor(Math.random()*10000);const script=document.createElement('script');let done=false;const clean=()=>{if(done)return;done=true;script.remove();try{delete window[cb]}catch(e){window[cb]=undefined}};const timer=setTimeout(()=>{clean();reject(new Error('Tiempo de espera agotado'))},timeout);window[cb]=(data)=>{clearTimeout(timer);clean();resolve(data)};const q=new URLSearchParams({...params,mode:'feedback',callback:cb});script.src=FEEDBACK_API_URL+'?'+q.toString();script.onerror=()=>{clearTimeout(timer);clean();reject(new Error('No se pudo contactar con el servidor'))};document.head.appendChild(script);});}
+  function starsText(n){return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n)}
+  function renderPublic(data){
+    const total=Number(data.total||0), avg=Number(data.average||0), comments=Array.isArray(data.comments)?data.comments:[];
+    if(summary)summary.textContent=total?('⭐ '+avg.toFixed(1)+'/5 · '+total+' valoración'+(total===1?'':'es')):'Todavía no hay valoraciones';
+    if(stats)stats.textContent=total?('⭐ '+avg.toFixed(1)+'/5 · '+total+' valoración'+(total===1?'':'es')):'Sé el primero en valorar Xpresia';
+    if(list){if(!comments.length){list.innerHTML='<div class="ratingEmpty">Todavía no hay comentarios. ¡Sé el primero en dejar tu opinión!</div>';return;}list.innerHTML=comments.slice(0,50).map(c=>{const r=Math.max(1,Math.min(5,Number(c.rating)||1));const d=c.date?new Date(c.date):null;const ds=d&&!isNaN(d)?d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'';const safe=String(c.comment||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));return '<div class="ratingCommentItem"><div class="ratingCommentStars">'+starsText(r)+'<span class="ratingCommentDate">'+ds+'</span></div><div class="ratingCommentText">'+safe+'</div></div>';}).join('');}
+  }
+  async function loadPublic(){try{const data=await jsonp({action:'feedback-list'});if(data&&data.ok)renderPublic(data);else throw new Error(data&&data.error||'Error');}catch(e){if(summary)summary.textContent='Valoraciones disponibles próximamente';if(list)list.innerHTML='<div class="ratingEmpty">No se pudieron cargar las opiniones en este momento.</div>';}}
+  document.getElementById('ratingSend')?.addEventListener('click',async()=>{
     if(!selectedRating){if(status)status.textContent='Selecciona una puntuación antes de enviar.';return;}
-    const text=comment?.value.trim()||'(Sin comentario)';
-    const subject=encodeURIComponent('Valoración de Xpresia · '+selectedRating+'/5 estrellas');
-    const body=encodeURIComponent('Valoración de Xpresia: '+selectedRating+'/5 estrellas\n\nComentario:\n'+text+'\n\nEnviado desde Xpresia.');
-    if(status)status.textContent='Abriendo tu correo para enviar la valoración...';
-    window.location.href='mailto:inventorcesarivan@gmail.com?subject='+subject+'&body='+body;
+    const text=(comment?.value||'').trim();
+    if(!text){if(status)status.textContent='Escribe un breve comentario antes de enviar.';return;}
+    if(status)status.textContent='Enviando tu valoración…';
+    try{const data=await jsonp({action:'feedback-submit',rating:selectedRating,comment:text.slice(0,500)});if(!data||!data.ok)throw new Error(data&&data.error||'No se pudo guardar');if(status)status.textContent='¡Gracias! Tu valoración fue publicada.';comment.value='';selectedRating=0;paint(0);renderPublic(data);}
+    catch(e){if(status)status.textContent='No se pudo guardar ahora. Intenta nuevamente.';}
   });
+  function openComments(){overlay?.classList.add('show');overlay?.setAttribute('aria-hidden','false');loadPublic();}
+  function closeComments(){overlay?.classList.remove('show');overlay?.setAttribute('aria-hidden','true');}
+  viewBtn?.addEventListener('click',openComments);closeBtn?.addEventListener('click',closeComments);overlay?.addEventListener('click',e=>{if(e.target===overlay)closeComments()});
+  loadPublic();
   document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventListener('click',async()=>{
-    const platform=btn.dataset.dashboardShare;
-    const url=window.location.href.split('#')[0];
-    const text='Estoy usando Xpresia, una experiencia para evaluar y desarrollar habilidades artísticas. ¡Conócela!';
-    if(platform==='native' && navigator.share){try{await navigator.share({title:'Xpresia',text,url});}catch(e){}return;}
+    const platform=btn.dataset.dashboardShare,url=window.location.href.split('#')[0],text='Estoy usando Xpresia, una experiencia para evaluar y desarrollar habilidades artísticas. ¡Conócela!';
+    if(platform==='native'&&navigator.share){try{await navigator.share({title:'Xpresia',text,url});}catch(e){}return;}
     if(platform==='instagram'){try{await navigator.clipboard.writeText(url);alert('Enlace de Xpresia copiado. Puedes pegarlo en Instagram para compartirlo.');}catch(e){window.prompt('Copia este enlace para compartir Xpresia:',url);}return;}
-    let share='';
-    if(platform==='whatsapp')share='https://wa.me/?text='+encodeURIComponent(text+' '+url);
-    else if(platform==='facebook')share='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);
-    else if(platform==='x')share='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url);
-    else if(platform==='telegram')share='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
-    if(share)window.open(share,'_blank','noopener,noreferrer');
-    else if(navigator.share){try{await navigator.share({title:'Xpresia',text,url});}catch(e){}}
+    let share='';if(platform==='whatsapp')share='https://wa.me/?text='+encodeURIComponent(text+' '+url);else if(platform==='facebook')share='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);else if(platform==='x')share='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url);else if(platform==='telegram')share='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);if(share)window.open(share,'_blank','noopener,noreferrer');
   }));
 })();
 </script>

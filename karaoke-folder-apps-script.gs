@@ -39,6 +39,14 @@ function doGet(e) {
   }
 
   const callback = e && e.parameter ? String(e.parameter.callback || '').trim() : '';
+  if (mode === 'feedback') {
+    try {
+      const result = handleFeedback_(e.parameter || {});
+      return output_(JSON.stringify(result), callback);
+    } catch (err) {
+      return output_(JSON.stringify({ok:false,error:String(err && err.message || err)}), callback);
+    }
+  }
   try {
     const requestedFolderId = e && e.parameter ? String(e.parameter.folderId || '').trim() : '';
     const folderId = requestedFolderId || DEFAULT_FOLDER_ID;
@@ -137,4 +145,62 @@ function testSpecificFolder() {
   const songs = listKaraokeFiles_(folderId);
   Logger.log('Vídeos encontrados: ' + songs.length);
   songs.forEach(function(song) { Logger.log(song.name + ' → ' + song.id); });
+}
+
+// ============================================================
+// Xpresia - Valoraciones públicas
+// Guarda valoraciones anónimas en una hoja de Google Sheets y
+// devuelve el promedio + las últimas 50 opiniones.
+// ============================================================
+const XPRESIA_FEEDBACK_SHEET_ID = ''; // Opcional: pega aquí el ID de una hoja existente.
+const XPRESIA_FEEDBACK_SHEET_NAME = 'Valoraciones Xpresia';
+
+function getFeedbackSheet_() {
+  let ss;
+  if (XPRESIA_FEEDBACK_SHEET_ID) {
+    ss = SpreadsheetApp.openById(XPRESIA_FEEDBACK_SHEET_ID);
+  } else {
+    const props = PropertiesService.getScriptProperties();
+    let id = props.getProperty('XPRESIA_FEEDBACK_SHEET_ID');
+    if (id) {
+      try { ss = SpreadsheetApp.openById(id); } catch (e) { id = ''; }
+    }
+    if (!ss) {
+      ss = SpreadsheetApp.create('Xpresia - Valoraciones');
+      props.setProperty('XPRESIA_FEEDBACK_SHEET_ID', ss.getId());
+    }
+  }
+  let sh = ss.getSheetByName(XPRESIA_FEEDBACK_SHEET_NAME);
+  if (!sh) sh = ss.insertSheet(XPRESIA_FEEDBACK_SHEET_NAME);
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(['Fecha', 'Puntuación', 'Comentario']);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function feedbackPayload_() {
+  const sh = getFeedbackSheet_();
+  const last = sh.getLastRow();
+  if (last < 2) return { ok:true, total:0, average:0, comments:[] };
+  const values = sh.getRange(2,1,last-1,3).getValues();
+  const rows = values.filter(r => Number(r[1]) >= 1 && Number(r[1]) <= 5);
+  const total = rows.length;
+  const sum = rows.reduce((a,r)=>a+Number(r[1]),0);
+  const comments = rows.slice(-50).reverse().map(r => ({ date:r[0] instanceof Date ? r[0].toISOString() : String(r[0]||''), rating:Number(r[1]), comment:String(r[2]||'') }));
+  return { ok:true, total:total, average:total ? Math.round((sum/total)*10)/10 : 0, comments:comments };
+}
+
+function handleFeedback_(params) {
+  const action = String(params.action || 'list').toLowerCase();
+  if (action === 'submit') {
+    const rating = Math.round(Number(params.rating));
+    const comment = String(params.comment || '').trim().slice(0,500);
+    if (rating < 1 || rating > 5) return {ok:false,error:'Puntuación inválida'};
+    if (!comment) return {ok:false,error:'El comentario es obligatorio'};
+    const sh = getFeedbackSheet_();
+    sh.appendRow([new Date(), rating, comment]);
+    return feedbackPayload_();
+  }
+  return feedbackPayload_();
 }
