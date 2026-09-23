@@ -529,58 +529,44 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 
 @media(max-width:700px){
   :root{
-    --xpresia-panel-height:209px;
+    --xpresia-panel-height:220px;
     --xpresia-panel-width:calc(100vw - 16px);
   }
 }
 </style>
 
-
-<style id="xpresia-final-mobile-desktop-polish">
-/* Contador de visitas: reducción uniforme del 10%, sin alterar su posición. */
-#visitCounterFloating.visitCounterRow{
-  transform:translateX(-50%) scale(.9) !important;
-  transform-origin:top center !important;
+<style id="xpresia-stage-menu-lift-final">
+/* La base visual y el botón MENÚ se elevan juntos, sin cambiar dimensiones. */
+#bottom{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 10px) !important}
+</style>
+<style id="xpresia-panel-lift-definitive">
+/* Corrección definitiva de posicionamiento de paneles.
+   El escenario se mueve independientemente; los paneles no deben seguir
+   centrados en la ventana ni quedar sujetos a reglas antiguas de bottom. */
+:root{--xpresia-panel-lift:72px}
+.panel,
+.xpresiaDashboard,
+.skillConfigPanel,
+#evaluationPanel{
+  top:calc(50% - var(--xpresia-panel-lift)) !important;
+  bottom:auto !important;
+  margin-top:0 !important;
 }
-
-/* Los botones cuadrados de configuración toman exactamente el ancho de
-   las tarjetas del menú inicial. Así no vuelven a quedar más grandes. */
-:root{
-  --xpresia-square-size:calc((min(850px,calc(100vw - 16px)) - 48px - 20px) / 3);
-}
-@media(max-width:1050px) and (min-width:701px){
-  :root{
-    --xpresia-square-size:calc((min(850px,calc(100vw - 16px)) - 32px - 20px) / 3);
-  }
+/* Todos los subpaneles dinámicos creados como .panel heredan exactamente
+   la misma corrección. */
+.panel.choicePanel,
+.panel.musicPanel,
+#tvSharePanel{
+  top:calc(50% - var(--xpresia-panel-lift)) !important;
 }
 @media(max-width:700px){
-  /* 2 columnas del menú inicial: mismo ancho real de cada tarjeta. */
-  :root{
-    --xpresia-square-size:calc((100vw - 45px) / 2);
-  }
-  #visitCounterFloating.visitCounterRow{
-    transform:translateX(-50%) scale(.9) !important;
-  }
-
-  /* Los cuadrados de pasos/opciones usan ahora exactamente la medida
-     horizontal de las tarjetas del menú inicial. */
-  .guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap,.skillOptionCard{
-    width:var(--xpresia-square-size)!important;
-    max-width:var(--xpresia-square-size)!important;
-    height:var(--xpresia-square-size)!important;
-    min-height:var(--xpresia-square-size)!important;
-    aspect-ratio:1/1!important;
-  }
-  .guidedStepWrap{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important}
-
-  /* El escenario/base con la imagen de fondo queda un 5% más bajo
-     solo en móvil; el ancho y el centrado permanecen iguales. */
-  .xpresiaDashboard{
-    height:209px !important;
-    min-height:209px !important;
-    max-height:209px !important;
-  }
+  :root{--xpresia-panel-lift:58px}
 }
+</style>
+<style id="xpresia-panel-stage-alignment-final">
+/* La posición vertical de los paneles se calcula desde el mismo rectángulo
+   que contiene cámara/imagen. Las reglas antiguas de top/bottom no mandan. */
+.panel{bottom:auto !important;margin-top:0 !important;}
 </style>
 </head>
 <body>
@@ -866,23 +852,70 @@ const HISTORY_DB='XpresiaEvaluationsDB',HISTORY_STORE='evaluations',MAX_SAVED_EV
 function resize(){const w=Math.max(1,Math.floor(innerWidth)),h=Math.max(1,Math.floor(innerHeight));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}if(spectrumCanvas.width!==innerWidth*devicePixelRatio||spectrumCanvas.height!==innerHeight*devicePixelRatio){spectrumCanvas.width=Math.max(1,Math.floor(innerWidth*devicePixelRatio));spectrumCanvas.height=Math.max(1,Math.floor(innerHeight*devicePixelRatio));spectrumCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}}
 function spectrumVisible(){return document.getElementById('activation')?.style.display==='none'}
 function getStageScreenRect(){
-  const isMobile=innerWidth<700, margin=8;
-  const topEl=document.getElementById('top'), bottomEl=document.getElementById('bottom');
-  const tr=topEl?.getBoundingClientRect(), br=bottomEl?.getBoundingClientRect();
+  const margin=2;
+  const topEl=document.getElementById('top');
+  const tr=topEl?.getBoundingClientRect();
+  /* La base queda prácticamente pegada al contenedor superior. */
   const top=Math.max(8,(tr?.bottom||46)+margin);
-  const bottom=Math.min(innerHeight-8,(br?.top||innerHeight-50)-margin-11);
+
+  /*
+     IMPORTANTE: el borde inferior del escenario NO se calcula usando la
+     altura actual de #bottom. En versiones anteriores #bottom conservaba
+     un `bottom: ... !important`; al asignarle también `top`, ambos valores
+     hacían que el contenedor se estirara y, como consecuencia, cada apertura
+     de un panel cambiaba su altura y volvía a mover toda la interfaz.
+     Ahora usamos un anclaje fijo al viewport y #bottom se coloca después.
+  */
+  const safeBottom=Math.max(8,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('padding-bottom'))||8);
+  const menuGap=7;
+  const menuButtonH=48; // altura estable del botón MENÚ; no depende del panel abierto
+  const bottom=Math.min(innerHeight-8,innerHeight-safeBottom-menuButtonH-menuGap);
   const side=8;
-  // La cámara/imagen usa el mismo ancho útil que el panel principal de menú.
-  // En móvil ocupa todo el ancho disponible; en web respeta el máximo común de 760 px.
   const maxW=Math.min(760,innerWidth-side*2);
-  const finalW=Math.max(180,maxW);
-  // La altura ocupa todo el espacio disponible entre cabecera y menú inferior,
-  // manteniendo una geometría común para web y móvil.
-  const finalH=Math.max(180,bottom-top);
+  const finalW=Math.max(180,Math.round(maxW*.95));
+  const availableH=Math.max(180,bottom-top);
+  const finalH=Math.max(180,Math.round(availableH*.95));
   const x=Math.round((innerWidth-finalW)/2);
-  const y=Math.round(top);
+  const stageLift=10;
+  const y=Math.round(top+(availableH-finalH)/2-stageLift);
   return{x,y,w:finalW,h:finalH};
 }
+function alignPanelsToStage(){
+  /* Primero eliminamos la regla antigua que estiraba #bottom. */
+  const bottom=document.getElementById('bottom');
+  if(bottom){
+    bottom.style.setProperty('bottom','auto','important');
+    bottom.style.setProperty('height','auto','important');
+    bottom.style.setProperty('min-height','0','important');
+    bottom.style.setProperty('top','auto','important');
+  }
+
+  const r=getStageScreenRect();
+  document.querySelectorAll('.panel').forEach(panel=>{
+    if(getComputedStyle(panel).display==='none') return;
+    const h=panel.getBoundingClientRect().height;
+    const targetTop=Math.round(r.y+r.h-h);
+    let finalTop=targetTop;
+    panel.style.setProperty('top',finalTop+'px','important');
+    panel.style.setProperty('bottom','auto','important');
+    panel.style.setProperty('transform','translateX(-50%)','important');
+    panel.style.setProperty('margin-top','0','important');
+  });
+
+  if(bottom){
+    const gap=7;
+    const stageBottom=Math.round(r.y+r.h);
+    /* Una sola coordenada vertical; nunca top + bottom simultáneamente. */
+    bottom.style.setProperty('top',Math.round(stageBottom+gap)+'px','important');
+    bottom.style.setProperty('bottom','auto','important');
+    bottom.style.setProperty('height','auto','important');
+    bottom.style.setProperty('min-height','0','important');
+    bottom.style.setProperty('transform','translateX(-50%)','important');
+  }
+}
+window.addEventListener('resize',()=>{
+  requestAnimationFrame(()=>{positionVisualStage();alignPanelsToStage();});
+});
 function getCameraScreenRect(){return getStageScreenRect()}
 function drawSpectrum(){
   resize();
@@ -1173,7 +1206,7 @@ function openIndependentTextPanel(){
   if(sel)sel.value=textSource||'none';if(wrap)wrap.classList.toggle('show',textSource==='custom');if(area)area.value=customEvaluationText||'';if(count)count.textContent=(customEvaluationText||'').length+' / 3000';
   openPanel('textConfigIndependent');
 }
-function openMusicPanel(){if(evalRunning)return;if(category==='sing'&&(singImitationMode||evaluationMode==='karaoke')){openKaraokeMusicPanel();return}pendingMusic={...selectedMusic};pendingMusicObjectUrl=null;const sel=document.getElementById('musicSelect');sel.value=pendingMusic.id||'none';const isCustom=pendingMusic.id==='custom',isUrl=pendingMusic.id==='url';document.getElementById('musicFileWrap').style.display=isCustom?'block':'none';document.getElementById('musicUrlWrap').style.display=isUrl?'block':'none';updateSingFreeMusicTextUI();document.getElementById('musicFile').value='';document.getElementById('musicUrl').value=isUrl?(pendingMusic.sourceUrl||pendingMusic.url||''):'';setMusicStatus(pendingMusic.id==='none'?'Sin música de fondo.':('Selección actual: '+pendingMusic.name));closePanels();document.getElementById('musicPanel').style.display='block';menuOpen=true}
+function openMusicPanel(){if(evalRunning)return;if(category==='sing'&&(singImitationMode||evaluationMode==='karaoke')){openKaraokeMusicPanel();return}pendingMusic={...selectedMusic};pendingMusicObjectUrl=null;const sel=document.getElementById('musicSelect');sel.value=pendingMusic.id||'none';const isCustom=pendingMusic.id==='custom',isUrl=pendingMusic.id==='url';document.getElementById('musicFileWrap').style.display=isCustom?'block':'none';document.getElementById('musicUrlWrap').style.display=isUrl?'block':'none';updateSingFreeMusicTextUI();document.getElementById('musicFile').value='';document.getElementById('musicUrl').value=isUrl?(pendingMusic.sourceUrl||pendingMusic.url||''):'';setMusicStatus(pendingMusic.id==='none'?'Sin música de fondo.':('Selección actual: '+pendingMusic.name));closePanels();document.getElementById('musicPanel').style.display='block';menuOpen=true;requestAnimationFrame(alignPanelsToStage)}
 function openKaraokeMusicPanel(){
   if(evalRunning)return;
   stopPreviewMusic();
@@ -1913,6 +1946,7 @@ function openPanel(id){
   if(el)el.style.display='block';
   const floating=document.getElementById('floatingStartEval'); if(floating && id!=='guidedPanel') floating.classList.remove('show');
   menuOpen=true;
+  requestAnimationFrame(alignPanelsToStage);
   if(id==='evaluationPanel'){updateEvaluationPanelContext();updateGuidePanel();updateTextConfigUI();}
 }
 function returnToMain(){openPanel('mainMenu')}
@@ -3254,7 +3288,7 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 #visitCounterFloating.visitCounterRow{
   position:fixed !important;
   left:50% !important;
-  top:18px !important;
+  top:14px !important;
   transform:translateX(-50%) !important;
   z-index:2147483647 !important;
   display:flex !important;
@@ -3273,8 +3307,24 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   opacity:1 !important;
   overflow:visible !important;
 }
-#visitCounterFloating .visitCounterLabel{display:inline-block !important;visibility:visible !important;color:#fff !important;font-size:12px !important;font-weight:900 !important;}
-#visitCounterFloating .visitCounterImage{display:block !important;visibility:visible !important;opacity:1 !important;width:110px !important;height:auto !important;min-width:110px !important;max-width:none !important;object-fit:contain !important;}
-#visitCounterFloating .visitCounterClose{display:block !important;border:0 !important;background:transparent !important;color:#fff !important;font-size:16px !important;line-height:1 !important;padding:0 2px !important;cursor:pointer !important;}
-@media(max-width:700px){#visitCounterFloating.visitCounterRow{top:10px !important;padding:5px 8px !important;min-width:145px !important}#visitCounterFloating .visitCounterImage{width:90px !important;min-width:90px !important}#visitCounterFloating .visitCounterLabel{font-size:10px !important}}
+#visitCounterFloating .visitCounterLabel{display:inline-block !important;visibility:visible !important;color:#fff !important;font-size:10.8px !important;font-weight:900 !important;}
+#visitCounterFloating .visitCounterImage{display:block !important;visibility:visible !important;opacity:1 !important;width:89.6px !important;height:auto !important;min-width:89.6px !important;max-width:none !important;object-fit:contain !important;}
+#visitCounterFloating .visitCounterClose{display:block !important;border:0 !important;background:transparent !important;color:#fff !important;font-size:14.4px !important;line-height:1 !important;padding:0 2px !important;cursor:pointer !important;}
+@media(max-width:700px){#visitCounterFloating.visitCounterRow{top:7px !important;padding:5px 8px !important;min-width:145px !important}#visitCounterFloating .visitCounterImage{width:73.2px !important;min-width:73.2px !important}#visitCounterFloating .visitCounterLabel{font-size:9.0px !important}}
+
+/* Ajuste final: Modo imitación de Baile/Danza debe tener la misma altura
+   estructural de los paneles altos. Su borde inferior sigue siendo colocado
+   por alignPanelsToStage(), por lo que al crecer el panel su borde inferior
+   permanece alineado con la base y solo se desplaza hacia arriba el borde superior. */
+#danceImitationPanel{
+  height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+  max-height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+  min-height:0 !important;
+}
+@media(max-width:700px){
+  #danceImitationPanel{
+    height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+    max-height:min(calc(79.4dvh - var(--xpresia-height-reduction)),676px) !important;
+  }
+}
 </style>
