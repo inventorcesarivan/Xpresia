@@ -700,35 +700,6 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
   }
 }
 </style>
-
-<style id="xpresia-mobile-button-height-final">
-/* Ajustes finales SOLO para móvil: se conserva exactamente el ancho actual. */
-
-/* 1) Botones de los pasos de configuración: +20% de altura. */
-@media (max-width:700px){
-  .guidedStep{
-    aspect-ratio:5 / 6 !important;
-    width:100% !important;
-    max-width:205px !important;
-  }
-
-  /* 2) Modo libre / Modo imitación: 3x de altura, mismo ancho. */
-  .modeChoice{
-    aspect-ratio:1 / 3 !important;
-    width:100% !important;
-    max-width:205px !important;
-    min-height:0 !important;
-  }
-
-  /* 3) Evaluar con cámara / sin cámara: +10% de altura, mismo ancho. */
-  .evalChoiceCard{
-    aspect-ratio:10 / 11 !important;
-    width:100% !important;
-    max-width:205px !important;
-  }
-}
-</style>
-
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
@@ -3296,32 +3267,6 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 
 <script>document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('visitCounterClose');if(b)b.addEventListener('click',function(){var r=document.getElementById('visitCounterFloating');if(r)r.remove();});});</script>
 
-<style id="xpresia-mobile-final-panel-and-buttons">
-/* Ajuste móvil final: las tarjetas de configuración usan exactamente la
-   misma medida que las tarjetas de habilidades del menú inicial. */
-@media(max-width:700px){
-  :root{--xpresia-mobile-skill-card-size:205px}
-  .guidedStep,
-  .evalChoiceCard,
-  .modeChoice,
-  .skillHubCard,
-  .guidedStepWrap{
-    width:var(--xpresia-mobile-skill-card-size)!important;
-    max-width:var(--xpresia-mobile-skill-card-size)!important;
-    height:var(--xpresia-mobile-skill-card-size)!important;
-    min-height:var(--xpresia-mobile-skill-card-size)!important;
-    aspect-ratio:1/1!important;
-  }
-  .guidedStepWrap{width:var(--xpresia-mobile-skill-card-size)!important}
-
-  /* Los paneles crecen hacia arriba manteniendo fijo su borde inferior.
-     alignPanelsToStage() coloca el borde inferior en el mismo punto que la
-     base; aquí solo igualamos la altura al alto real de esa base. */
-  .panel{
-    box-sizing:border-box!important;
-  }
-}
-</style>
 <script id="xpresia-mobile-panel-final-alignment">
 (function(){
   const oldAlign=window.alignPanelsToStage;
@@ -3416,6 +3361,9 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 
 
 </body>
+
+
+
 
 
 
@@ -4075,105 +4023,56 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 }
 </style>
 
-<style id="xpresia-mobile-action-height-final">
-/* ============================================================
-   MÓVIL — TARJETAS DE ACCIÓN CON IMAGEN MÁS VERTICALES
-   Conserva el ancho ya ajustado y aumenta solo la altura.
-   ============================================================ */
-@media(max-width:700px){
-  :root{
-    --xpresia-mobile-action-h:260px !important;
-  }
+<style id="xpresia-mobile-button-sizes-clean-final">
+/* Xpresia — AJUSTE LIMPIO DE BOTONES EN MÓVIL
+   Solo cambia ALTURA. El ancho actual se conserva exactamente.
+   - Pasos de configuración (con imagen): +20%
+   - Modo libre / Modo imitación: 3x la altura base actual
+   - Evaluar con cámara / sin cámara: +10%
+   - Tiempo 1–5 min: no se modifica
+*/
+@media (max-width:700px){
+  /* El ancho se hereda de la regla móvil estable existente.
+     No se establece width aquí para evitar alterar su tamaño. */
 
-  #skillHubEvaluate,
-  #skillHubLearn,
-  #skillHubCompete,
-  .guidedStepWrap,
-  .evalChoiceCard,
-  .modeChoice,
-  .skillOptionCard,
-  .choiceGrid .choiceButton,
-  .skillConfigOptions .skillOptionCard{
-    height:260px !important;
-    min-height:260px !important;
+  /* 1) PASOS PARA CONFIGURAR CADA HABILIDAD */
+  .guidedStepWrap{
+    height:312px !important;
+    min-height:312px !important;
   }
-
   .guidedStepWrap .guidedStep{
     height:100% !important;
     min-height:0 !important;
+    aspect-ratio:auto !important;
   }
-}
-</style>
-
-<style id="xpresia-mobile-image-vs-horizontal-final">
-/* ============================================================
-   MÓVIL — PROPORCIÓN SEGÚN EL TIPO DE BOTÓN
-   - Tarjetas con imagen de fondo: rectángulos verticales.
-   - Botones sin imagen (tiempo, modos, opciones simples):
-     rectángulos apaisados.
-   ============================================================ */
-@media(max-width:700px){
-  :root{
-    --xpresia-mobile-action-w:min(82vw,430px);
-    --xpresia-mobile-image-h:260px;
-    --xpresia-mobile-flat-h:72px;
+  .guidedStep{
+    height:312px !important;
+    min-height:312px !important;
+    aspect-ratio:auto !important;
   }
 
-  /* Mantener una sola columna y ancho amplio en todos los grupos. */
-  .skillHubOptions,
-  .guidedSteps,
-  .evalChoiceGrid,
-  .choiceGrid,
-  .skillConfigOptions{
-    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
-    justify-content:center!important;
-    justify-items:center!important;
-  }
-
-  /* ========================================================
-     BOTONES CON IMAGEN DE FONDO — VERTICALES
-     ======================================================== */
-  #skillHubEvaluate,
-  #skillHubLearn,
-  #skillHubCompete,
-  .guidedStepWrap,
-  .guidedStepWrap .guidedStep,
-  .evalChoiceCard{
-    width:var(--xpresia-mobile-action-w)!important;
-    max-width:var(--xpresia-mobile-action-w)!important;
-    height:var(--xpresia-mobile-image-h)!important;
-    min-height:var(--xpresia-mobile-image-h)!important;
-    aspect-ratio:auto!important;
-    justify-self:center!important;
-  }
-
-  .guidedStepWrap .guidedStep{
-    height:100%!important;
-    min-height:0!important;
-  }
-
-  /* ========================================================
-     BOTONES SIN IMAGEN — APAISADOS
-     ======================================================== */
-  .choiceGrid .choiceButton,
+  /* 2) MODO LIBRE / MODO IMITACIÓN */
   .choiceGrid .modeChoice,
-  .skillConfigOptions .skillOptionCard{
-    width:var(--xpresia-mobile-action-w)!important;
-    max-width:var(--xpresia-mobile-action-w)!important;
-    height:var(--xpresia-mobile-flat-h)!important;
-    min-height:var(--xpresia-mobile-flat-h)!important;
-    aspect-ratio:auto!important;
-    box-sizing:border-box!important;
-    justify-self:center!important;
+  #modeChoices .modeChoice,
+  #singFreeModeChoices .modeChoice,
+  #singImitationModeChoices .modeChoice{
+    height:216px !important;
+    min-height:216px !important;
+    aspect-ratio:auto !important;
   }
 
-  /* Tiempo 1–5 minutos: específicamente apaisado. */
+  /* 3) EVALUAR CON CÁMARA / SIN CÁMARA */
+  .evalChoiceGrid .evalChoiceCard{
+    height:286px !important;
+    min-height:286px !important;
+    aspect-ratio:auto !important;
+  }
+
+  /* 4) TIEMPOS 1–5 MINUTOS: conservar su altura actual */
   #durationChoices .choiceButton{
-    height:68px!important;
-    min-height:68px!important;
-    border-radius:15px!important;
-    padding:10px 16px!important;
-    font-size:16px!important;
+    height:68px !important;
+    min-height:68px !important;
+    aspect-ratio:auto !important;
   }
 }
 </style>
