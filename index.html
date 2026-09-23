@@ -3954,3 +3954,94 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
     margin:8px 3px;
   }
 }
+
+<style id="xpresia-mobile-all-action-buttons-one-column-final">
+/* ============================================================
+   MÓVIL — TODOS LOS BOTONES DE CONFIGURACIÓN EN UNA COLUMNA
+   Mantiene intacta la versión de PC.
+   ============================================================ */
+@media(max-width:700px){
+  :root{
+    --xpresia-mobile-action-w:163.59px;
+    --xpresia-mobile-action-h:204.49px;
+  }
+
+  /* Panel de acciones de la habilidad:
+     Evaluar, Aprender y Competir tienen exactamente el mismo tamaño. */
+  .skillHubOptions{
+    display:grid!important;
+    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
+    justify-content:center!important;
+    align-items:stretch!important;
+    gap:11px!important;
+    width:100%!important;
+  }
+  #skillHubEvaluate,
+  #skillHubLearn,
+  #skillHubCompete{
+    grid-column:1!important;
+    grid-row:auto!important;
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    height:var(--xpresia-mobile-action-h)!important;
+    min-height:var(--xpresia-mobile-action-h)!important;
+    justify-self:center!important;
+    margin:0!important;
+  }
+
+  /* Pasos principales de configuración: 1 columna, mismo formato. */
+  .guidedSteps{
+    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
+    justify-content:center!important;
+    justify-items:center!important;
+    gap:11px!important;
+  }
+  .guidedStepWrap{
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    height:var(--xpresia-mobile-action-h)!important;
+    min-height:var(--xpresia-mobile-action-h)!important;
+    justify-self:center!important;
+  }
+  .guidedStepWrap .guidedStep{
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:0!important;
+  }
+
+  /* Selecciones que aparecen después de los pasos: una sola columna. */
+  .evalChoiceGrid{
+    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
+    justify-content:center!important;
+    justify-items:center!important;
+    gap:11px!important;
+  }
+  .evalChoiceCard,
+  .modeChoice,
+  .skillOptionCard{
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    height:var(--xpresia-mobile-action-h)!important;
+    min-height:var(--xpresia-mobile-action-h)!important;
+    aspect-ratio:auto!important;
+    justify-self:center!important;
+  }
+
+  /* Opciones simples (tiempo, música y similares): también una columna,
+     ocupando el ancho útil del panel sin convertirlas en tarjetas gigantes. */
+  .choiceGrid,
+  .skillConfigOptions{
+    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
+    justify-content:center!important;
+    justify-items:center!important;
+    gap:11px!important;
+  }
+  .choiceGrid .choiceButton,
+  .skillConfigOptions .skillOptionCard{
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    box-sizing:border-box!important;
+  }
+}
+</style>
