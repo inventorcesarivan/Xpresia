@@ -201,8 +201,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 #spectrumCanvas{z-index:17;}
 .textGuidePanel.liveTextGuide{z-index:21;}
 .xpresiaDashboard{
-  top:67px !important;
-  bottom:calc(max(8px, env(safe-area-inset-bottom)) + 23px) !important;
+  top:52px !important;
+  bottom:calc(max(8px, env(safe-area-inset-bottom)) + 46px) !important;
   transform:translateX(-50%) !important;
   height:auto !important;
   max-height:none !important;
@@ -211,8 +211,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 }
 @media(max-width:700px){
   .xpresiaDashboard{
-    top:67px !important;
-    bottom:calc(max(8px, env(safe-area-inset-bottom)) + 23px) !important;
+    top:52px !important;
+    bottom:calc(max(8px, env(safe-area-inset-bottom)) + 46px) !important;
     height:auto !important;
     max-height:none !important;
     aspect-ratio:auto !important;
@@ -226,8 +226,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 /* El panel de configuración mantiene exactamente el mismo marco general que el menú principal. */
 #evaluationPanel{
   width:min(850px,calc(100vw - 16px));
-  top:67px !important;
-  bottom:calc(max(8px, env(safe-area-inset-bottom)) + 23px) !important;
+  top:52px !important;
+  bottom:calc(max(8px, env(safe-area-inset-bottom)) + 46px) !important;
   height:auto !important;
   max-height:none !important;
   transform:translateX(-50%) !important;
@@ -235,8 +235,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 @media(max-width:700px){
   #evaluationPanel{
     width:calc(100vw - 16px);
-    top:67px !important;
-    bottom:calc(max(8px, env(safe-area-inset-bottom)) + 23px) !important;
+    top:52px !important;
+    bottom:calc(max(8px, env(safe-area-inset-bottom)) + 46px) !important;
     height:auto !important;
     max-height:none !important;
   }
@@ -466,6 +466,75 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 </style>
 
 
+<style id="xpresia-square-buttons-final">
+:root{--xpresia-square-size:clamp(220px,27vh,285px)}
+@media(max-width:1050px) and (min-width:701px){:root{--xpresia-square-size:220px}}
+@media(max-width:700px){:root{--xpresia-square-size:205px}}
+.guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap,.skillOptionCard{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;min-height:var(--xpresia-square-size)!important;aspect-ratio:1/1!important}
+.skillOptionCard{justify-self:center}
+.guidedStepWrap{display:flex!important;flex-direction:column}
+@media(max-width:390px){.guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap,.skillOptionCard{width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important}}
+</style>
+
+<style id="xpresia-unificacion-paneles-final">
+/* Xpresia — marco único para todos los paneles.
+   La altura toma como referencia exacta el escenario/imagen de fondo
+   visible cuando los paneles están cerrados. No se modifica el ancho. */
+:root{
+  --xpresia-panel-height:300px;
+  --xpresia-panel-width:min(760px,calc(100vw - 16px));
+}
+
+/* Botón principal: rojo, pero con marco blanco/negro para separarlo del fondo. */
+.startEvalButton{
+  border:2px solid #fff !important;
+  outline:2px solid #000 !important;
+  outline-offset:-4px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.35),
+    0 0 16px rgba(255,35,70,.48),
+    0 0 38px rgba(255,0,50,.16),
+    inset 0 0 20px rgba(0,0,0,.24),
+    inset 0 0 10px rgba(255,255,255,.06) !important;
+}
+.startEvalButton:hover{
+  border-color:#fff !important;
+  outline-color:#000 !important;
+}
+
+/* Todos los paneles comparten exactamente la misma altura y quedan centrados.
+   El contenido excedente se desplaza dentro del propio panel, no cambia su marco. */
+.panel,
+.xpresiaDashboard,
+.skillConfigPanel,
+#evaluationPanel{
+  left:50% !important;
+  top:50% !important;
+  bottom:auto !important;
+  width:var(--xpresia-panel-width) !important;
+  max-width:var(--xpresia-panel-width) !important;
+  height:var(--xpresia-panel-height) !important;
+  max-height:var(--xpresia-panel-height) !important;
+  min-height:var(--xpresia-panel-height) !important;
+  transform:translate(-50%,-50%) !important;
+  box-sizing:border-box !important;
+  overflow:auto !important;
+}
+
+/* El menú principal también usa el mismo marco, sin conservar su antigua
+   relación 16:9 ni su desplazamiento vertical. */
+.xpresiaDashboard{
+  aspect-ratio:auto !important;
+}
+
+@media(max-width:700px){
+  :root{
+    --xpresia-panel-height:220px;
+    --xpresia-panel-width:calc(100vw - 16px);
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
@@ -493,8 +562,8 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 <div id="bottom"><button id="menuBtn">MENÚ</button></div><button id="floatingStartEval" class="floatingStartEval" type="button" aria-label="Comenzar evaluación">▶ <span>COMENZAR EVALUACIÓN</span><small>¡Demuestra tu talento!</small></button>
 <div id="tvSharePanel" role="dialog" aria-modal="true" aria-labelledby="tvShareTitle"><div id="tvShareCard"><h3 id="tvShareTitle">📺 Compartir Xpresia en TV</h3><div id="tvShareStatus">Buscando la mejor forma disponible para conectar este dispositivo con una pantalla grande...</div><div class="tvMethod" id="tvCastMethod"><strong>1. Google Cast / Chromecast / Google TV</strong><small id="tvCastInfo">Xpresia puede preparar la conexión Cast cuando el navegador y el dispositivo lo permiten.</small></div><div class="tvMethod"><strong>2. Samsung / LG / otros Smart TV</strong><small>La duplicación de pantalla de estos televisores normalmente la controla el sistema del teléfono (Smart View, AirPlay, Miracast, Screen Share, etc.). Una página web no puede activar de forma universal esos protocolos privados.</small></div><div class="tvMethod"><strong>3. Experiencia Xpresia</strong><small>La idea es mantener cámara, micrófono y controles en el teléfono y utilizar el TV como pantalla grande, especialmente para Karaoke y Baile.</small></div><div class="tvActions"><button class="tvPrimary" id="tvTryConnect" type="button">📡 Intentar conexión automática</button><button id="tvHelpMirror" type="button">📱 Cómo duplicar mi pantalla</button><button id="tvClose" type="button">Cerrar</button></div></div></div>
 <div class="panel xpresiaDashboard" id="mainMenu">
-<div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="visitCounterRow" id="visitCounterFloating"><span class="visitCounterLabel">Visitas</span><img class="visitCounterImage" id="visitCounter" src="https://contador-de-visitas.com/c/xpresia.netlify.app.svg?style=neon&amp;digits=6&amp;theme=dark&amp;start=693" alt="contador de visitas"><button class="visitCounterClose" id="visitCounterClose" type="button" aria-label="Cerrar contador">×</button></div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
-<button id="tvShareBtn" type="button" aria-label="Compartir Xpresia en TV">Transmitir a Tv</button><div class="dashboardIntro"><h2>ELIGE TU EXPERIENCIA</h2><p>Explora tus capacidades artísticas y descubre nuevas formas de expresarte.</p></div>
+<div class="dashboardBrand"><div><div class="dashboardLogo">Xpresia</div><div class="visitCounterRow" id="visitCounterFloating"><span class="visitCounterLabel">Visitas</span><img class="visitCounterImage" id="visitCounter" src="https://contador-de-visitas.com/c/xpresia.netlify.app.svg?style=neon&amp;digits=6&amp;theme=dark&amp;start=693&amp;bg=09090b&amp;color=ffffff" alt="contador de visitas"><button class="visitCounterClose" id="visitCounterClose" type="button" aria-label="Cerrar contador">×</button></div><div class="dashboardTag">ARTE Y EXPRESIÓN EN MOVIMIENTO</div></div></div>
+<button id="tvShareBtn" type="button" aria-label="Compartir Xpresia en TV">📺 TV</button><div class="dashboardIntro"><h2>ELIGE TU EXPERIENCIA</h2><p>Explora tus capacidades artísticas y descubre nuevas formas de expresarte.</p></div>
 <div aria-label="Habilidades de evaluación" class="skillCards">
 <button class="skillCard skillSing" data-category="sing" type="button"><span class="skillImage"></span><span class="skillOverlay"></span><span class="skillContent"><b>🎤 CANTO <span class="karaokeSkillTitle">/ KARAOKE</span></b><small>Voz + expresión · afinación y presencia</small><em>INICIAR →</em></span></button>
 <button class="skillCard skillDance" data-category="dance" id="evalAccess" type="button"><span class="skillImage"></span><span class="skillOverlay"></span><span class="skillContent"><b>💃 BAILE / DANZA</b><small>Ritmo, coordinación, fluidez y expresividad en el movimiento</small><em>INICIAR →</em></span></button>
@@ -511,11 +580,18 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 .dashboardJotformSubtitle{color:#8aaec8;font-size:9px;margin:0 0 8px}
 .dashboardBrand>div:first-child{width:100%;position:relative}.visitCounterRow{position:absolute;left:50%;top:0px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:6px;width:max-content;max-width:100%;line-height:1;z-index:2}.visitCounterLabel{color:#8feeff;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;text-shadow:0 0 8px rgba(0,229,255,.28)}.visitCounter{display:flex;justify-content:center;align-items:center;min-width:28px;min-height:16px;margin:0;text-align:center;line-height:1;overflow:visible;visibility:visible}.visitCounter script{display:block}.jotformRatingBtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:58px;margin:0 auto;border:1px solid #00e5ff;border-radius:14px;background:linear-gradient(135deg,#0a2d55,#171044);color:#dffcff;font-size:14px;font-weight:900;letter-spacing:.5px;cursor:pointer;text-decoration:none;box-shadow:0 0 12px rgba(0,229,255,.10);box-sizing:border-box}
 .jotformRatingBtn:hover{border-color:#fff;box-shadow:0 0 16px rgba(0,229,255,.18)}
+.dashboardShare{display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;flex-wrap:nowrap !important;text-align:center !important;width:100% !important;margin:12px auto 0 !important;box-sizing:border-box !important}
+.dashboardShareTitle{display:block !important;width:100% !important;text-align:center !important;margin:0 auto 8px !important}
+.dashboardShareGrid{display:flex !important;justify-content:center !important;align-items:center !important;flex-wrap:wrap !important;gap:8px !important;width:100% !important;margin:0 auto !important;padding:0 !important;box-sizing:border-box !important}
+.dashboardShareGrid .dashboardShareBtn{flex:0 0 auto !important;margin:0 !important}
 @media(max-width:700px){
   .dashboardJotform{margin-top:9px;padding-top:8px}
   .dashboardJotformTitle{font-size:8px}
   .dashboardJotformSubtitle{font-size:8px;margin-bottom:5px}
   .visitCounterRow{top:0px;gap:5px}.visitCounterLabel{font-size:9px}.visitCounter{min-width:24px;min-height:14px;overflow:visible}.jotformRatingBtn{width:100%;height:52px;font-size:12px;border-radius:12px}
+  .dashboardShare{margin-top:9px !important}
+  .dashboardShareTitle{margin-bottom:6px !important}
+  .dashboardShareGrid{gap:7px !important}
 }
 </style>
 <div class="dashboardJotform">
@@ -529,6 +605,16 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
     ⭐ VALORA LA APP Y DEJA TU COMENTARIO
   </a>
 </div>
+<div class="dashboardShare">
+<div class="dashboardShareTitle">📣 COMPARTE XPRESIA</div>
+<div class="dashboardShareGrid">
+<button class="dashboardShareBtn" type="button" data-dashboard-share="whatsapp" aria-label="Compartir por WhatsApp">💬</button>
+<button class="dashboardShareBtn" type="button" data-dashboard-share="facebook" aria-label="Compartir en Facebook">f</button>
+<button class="dashboardShareBtn" type="button" data-dashboard-share="instagram" aria-label="Compartir en Instagram">◎</button>
+<button class="dashboardShareBtn" type="button" data-dashboard-share="x" aria-label="Compartir en X">𝕏</button>
+<button class="dashboardShareBtn" type="button" data-dashboard-share="telegram" aria-label="Compartir por Telegram">✈</button>
+<button class="dashboardShareBtn" type="button" data-dashboard-share="native" aria-label="Compartir Xpresia">↗</button>
+</div></div>
 <div class="dashboardFooter"><span>💡 El arte vive en cada movimiento. Y en cada persona.</span><span>✦ Más que una evaluación. Una experiencia.</span></div>
 </div>
 </div>
@@ -1344,31 +1430,25 @@ function stopKaraokeCompletionWatch(){
 }
 function startKaraokeCompletionWatch(){
   stopKaraokeCompletionWatch();
-  const v=document.getElementById('karaokeAudioVideo');
-  if(!v)return;
+  /* La fuente técnica del análisis no controla el reinicio del video visible. */
+  const visible=document.getElementById('karaokeVisibleVideo');
+  if(!visible)return;
   karaokeEndHandler=()=>{
     if(!evalRunning||evaluationMode!=='karaoke'||evalPaused)return;
     const elapsed=currentElapsed();
     if(duration>0&&elapsed>=duration){finishEvaluation(true);return}
     restartKaraokeSong();
   };
-  v.addEventListener('ended',karaokeEndHandler);
+  visible.addEventListener('ended',karaokeEndHandler);
   karaokeCompletionWatchId=setInterval(()=>{
     if(!evalRunning||evaluationMode!=='karaoke'||evalPaused)return;
     const elapsed=currentElapsed();
     if(duration>0&&elapsed>=duration){finishEvaluation(true);return}
-    const vd=Number(v.duration);
-    if(Number.isFinite(vd)&&vd>0&&Number.isFinite(v.currentTime)){
-      if(v.currentTime>=vd-.25){
-        if(duration>0&&elapsed>=duration){finishEvaluation(true);return}
-        restartKaraokeSong();
-      }
-    }
-    if(v.ended){
+    if(visible.ended){
       if(duration>0&&elapsed>=duration)finishEvaluation(true);
       else restartKaraokeSong();
     }
-  },200);
+  },250);
 }
 
 function selectKaraokeLibraryItem(item){
@@ -2446,9 +2526,15 @@ async function countdownStart(){if(countdown||evalRunning)return;if(!userName){s
 async function startEvaluation(){if(category==='sing'&&evaluationMode==='karaoke'&&karaokeWithCamera&&!cameraReady){try{await initCamera()}catch(e){console.warn('Cámara:',e)}}const soloVoice=(category==='sing'||category==='reading')&&(evaluationMode==='voice'||(evaluationMode==='karaoke'&&!karaokeWithCamera));if(!soloVoice&&!poseReady){setTop('El detector corporal todavía no está listo.');return}resetScore();duration=+document.getElementById('duration').value;
   // En Karaoke, duration es exclusivamente el tiempo elegido por el usuario.
   // No se reemplaza por la duración de la canción.
-  evalRunning=true;karaokeStartAt=evaluationMode==='karaoke'?performance.now():0;if(evaluationMode==='karaoke')karaokeResumeSeconds=0;if(evaluationMode==='karaoke'&&karaokeVideoId){startKaraokePlayback();startKaraokeCompletionWatch();startKaraokeAudioAnalysis().then(ok=>{
-      const kv=document.getElementById('karaokeAudioVideo');
-      if(kv&&duration<=0){try{const p=kv.play();if(p)p.catch(()=>{})}catch(e){}}if(ok)setTop('Evaluando: voz + audio del karaoke');else setTop('Evaluando: voz · el audio del karaoke no pudo ser analizado desde esta fuente');})}if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:30);if(!soloVoice)startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled&&textSource!=='none')startReadingRecognition();
+  evalRunning=true;karaokeStartAt=evaluationMode==='karaoke'?performance.now():0;if(evaluationMode==='karaoke')karaokeResumeSeconds=0;if(evaluationMode==='karaoke'&&karaokeVideoId){
+    /* Un único disparo del reproductor visible al comenzar. */
+    startKaraokePlayback();
+    startKaraokeCompletionWatch();
+    startKaraokeAudioAnalysis().then(ok=>{
+      if(ok)setTop('Evaluando: voz + audio del karaoke');
+      else setTop('Evaluando: voz · el audio del karaoke no pudo ser analizado desde esta fuente');
+    });
+  }if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:30);if(!soloVoice)startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled&&textSource!=='none')startReadingRecognition();
   if(category==='sing'&&evaluationMode==='karaoke'&&karaokeLyricsText&&micEnabled)startReadingRecognition();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();startRecordingMusic()}evalPaused=false;startTime=performance.now();elapsedBeforePause=0;setTop('Evaluando: '+profiles[category].name+(category==='imitation'?' · '+(document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Desafío') :''));document.getElementById('start').textContent='Evaluación en curso';document.getElementById('start').disabled=true;document.getElementById('pause').style.display='block';document.getElementById('finish').style.display='block';document.getElementById('topEvalControls').style.display='flex';document.getElementById('pauseTopBtn').textContent='⏸';document.getElementById('topTimer').style.display='inline';document.getElementById('topTimer').textContent=duration>0?formatTime(duration):'00:00';updateLiveMusicControls();startEvaluationTimer();if(evaluationMode==='karaoke'&&duration<=0){document.getElementById('topTimer').textContent='00:00';}if(poseReady===false)loadPose()}
 function stopKaraokePlayback(clearFrame=true){
   try{pauseKaraoke()}catch(e){}
@@ -2939,106 +3025,20 @@ spectrumLoop();
 })();
 </script>
 
-
-
-
-
-
-
-<style id="xpresia-counter-position-clean">
-/* Contador: dentro del panel principal, alineado a la derecha */
-#mainMenu #visitCounterFloating{
-  position:absolute !important;
-  top:10px !important;
-  right:14px !important;
-  left:auto !important;
-  bottom:auto !important;
-  transform:none !important;
-  z-index:2147483646 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  width:auto !important;
-  min-width:0 !important;
-  max-width:calc(100% - 28px) !important;
-  height:auto !important;
-  padding:4px 7px !important;
-  margin:0 !important;
-  gap:5px !important;
-  box-sizing:border-box !important;
-  background:rgba(9,9,11,.96) !important;
-  border:1px solid rgba(0,229,255,.65) !important;
-  border-radius:9px !important;
-  box-shadow:0 0 16px rgba(0,229,255,.30) !important;
-  visibility:visible !important;
-  opacity:1 !important;
-  overflow:visible !important;
-}
-#mainMenu #visitCounterFloating .visitCounterImage{
-  display:block !important;
-  width:82px !important;
-  min-width:82px !important;
-  max-width:82px !important;
-  height:auto !important;
-  min-height:0 !important;
-  max-height:none !important;
-  margin:0 !important;
-  padding:0 !important;
-  object-fit:contain !important;
-  visibility:visible !important;
-  opacity:1 !important;
-  flex:0 0 82px !important;
-}
-#mainMenu #visitCounterFloating .visitCounterLabel{
-  display:inline-block !important;
-  width:auto !important; min-width:0 !important; max-width:none !important;
-  margin:0 !important; padding:0 !important; color:#fff !important;
-  font-size:10px !important; line-height:1 !important; font-weight:900 !important;
-  white-space:nowrap !important;
-}
-#mainMenu #visitCounterFloating .visitCounterClose{
-  display:block !important; width:auto !important; min-width:0 !important;
-  margin:0 !important; padding:0 1px !important; border:0 !important;
-  background:transparent !important; color:#fff !important; font-size:14px !important;
-  line-height:1 !important; cursor:pointer !important;
-}
-/* TV: centrado real dentro del panel */
-#mainMenu #tvShareBtn{
-  position:absolute !important; left:50% !important; right:auto !important; top:10px !important; bottom:auto !important;
-  transform:translateX(-50%) !important; margin:0 !important; z-index:2147483645 !important; white-space:nowrap !important;
-}
-@media(max-width:700px){
-  #mainMenu #visitCounterFloating{top:9px !important; right:3px !important; left:auto !important; padding:3px 5px !important; gap:3px !important; max-width:calc(100% - 6px) !important;}
-  #mainMenu #visitCounterFloating .visitCounterImage{width:64px !important; min-width:64px !important; max-width:64px !important; flex-basis:64px !important;}
-  #mainMenu #visitCounterFloating .visitCounterLabel{font-size:8px !important}
-  #mainMenu #visitCounterFloating .visitCounterClose{font-size:12px !important}
-  #mainMenu #tvShareBtn{top:9px !important;font-size:10px !important;padding:7px 10px !important}
-}
-</style>
-<script id="xpresia-counter-position-clean">
-(function(){
-  function placeCounter(){
-    var r=document.getElementById('visitCounterFloating');
-    var menu=document.getElementById('mainMenu');
-    if(!r || !menu) return;
-    if(r.parentNode!==menu) menu.appendChild(r);
-    r.style.setProperty('position','absolute','important');
-    r.style.setProperty('right','14px','important');
-    r.style.setProperty('left','auto','important');
-    r.style.setProperty('top','10px','important');
-    r.style.setProperty('bottom','auto','important');
-    r.style.setProperty('transform','none','important');
-  }
-  function init(){
-    placeCounter();
-    setTimeout(placeCounter,100);
-    setTimeout(placeCounter,500);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
-  else init();
-  window.addEventListener('resize',placeCounter);
+<script id="xpresia-dashboard-feedback">
+document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const platform=btn.dataset.dashboardShare,url=window.location.href.split('#')[0],text='Estoy usando Xpresia, una experiencia para evaluar y desarrollar habilidades artísticas. ¡Conócela!';
+    if(platform==='native'&&navigator.share){try{await navigator.share({title:'Xpresia',text,url});}catch(e){}return;}
+    if(platform==='instagram'){try{await navigator.clipboard.writeText(url);alert('Enlace de Xpresia copiado. Puedes pegarlo en Instagram para compartirlo.');}catch(e){window.prompt('Copia este enlace para compartir Xpresia:',url);}return;}
+    let share='';if(platform==='whatsapp')share='https://wa.me/?text='+encodeURIComponent(text+' '+url);else if(platform==='facebook')share='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);else if(platform==='x')share='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url);else if(platform==='telegram')share='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);if(share)window.open(share,'_blank','noopener,noreferrer');
+  }));
 })();
+
+})();
+
 </script>
+
+<script>document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('visitCounterClose');if(b)b.addEventListener('click',function(){var r=document.getElementById('visitCounterFloating');if(r)r.remove();});});</script>
 </body>
 </html>
 
@@ -3144,4 +3144,90 @@ spectrumLoop();
 
 </style>
 
+<style id="xpresia-unified-square-buttons">
+/* Xpresia — tamaño único para todas las tarjetas/botones cuadrados.
+   La referencia es la altura de las tarjetas de habilidades del menú inicial. */
+:root{--xpresia-square-size:clamp(220px,27vh,285px)}
+.guidedSteps{grid-template-columns:repeat(3,minmax(0,var(--xpresia-square-size)))}
+.guidedStep{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
+.guidedStepWrap{width:var(--xpresia-square-size);max-width:var(--xpresia-square-size)}
+.evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
+.evalChoiceCard{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
+.modeChoice{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
+.skillHubOptions{grid-template-columns:repeat(3,minmax(0,var(--xpresia-square-size)))}
+.skillHubCard{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important;height:var(--xpresia-square-size)!important;aspect-ratio:1/1}
+@media(max-width:1050px) and (min-width:701px){
+  :root{--xpresia-square-size:220px}
+}
+@media(max-width:700px){
+  :root{--xpresia-square-size:205px}
+  .guidedSteps{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
+  .evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
+  .skillHubOptions{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
+}
+@media(max-width:390px){
+  .guidedSteps,.evalChoiceGrid,.skillHubOptions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap{width:100%!important;max-width:100%!important}
+}
 
+/* Xpresia — panel inicial de cada habilidad: distribución triangular.
+   1ª opción arriba centrada; 2ª y 3ª abajo, izquierda y derecha.
+   Se aplica por igual a todas las habilidades. */
+.skillHubOptions{
+  grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size))) !important;
+  justify-content:center;
+  align-items:start;
+  column-gap:14px;
+  row-gap:14px;
+}
+#skillHubEvaluate{
+  grid-column:1 / -1 !important;
+  grid-row:1 !important;
+  justify-self:center !important;
+}
+#skillHubLearn{
+  grid-column:1 !important;
+  grid-row:2 !important;
+  justify-self:center !important;
+}
+#skillHubCompete{
+  grid-column:2 !important;
+  grid-row:2 !important;
+  justify-self:center !important;
+}
+@media(max-width:390px){
+  .skillHubOptions{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    column-gap:9px;
+    row-gap:9px;
+  }
+}
+
+/* PRUEBA CONTADOR FLOTANTE — por encima de toda la interfaz */
+#visitCounterFloating.visitCounterRow{
+  position:fixed !important;
+  left:50% !important;
+  top:18px !important;
+  transform:translateX(-50%) !important;
+  z-index:2147483647 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:auto !important;
+  max-width:none !important;
+  min-width:170px !important;
+  padding:6px 10px !important;
+  gap:7px !important;
+  background:rgba(9,9,11,.96) !important;
+  border:1px solid rgba(0,229,255,.65) !important;
+  border-radius:10px !important;
+  box-shadow:0 0 18px rgba(0,229,255,.35) !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  overflow:visible !important;
+}
+#visitCounterFloating .visitCounterLabel{display:inline-block !important;visibility:visible !important;color:#fff !important;font-size:12px !important;font-weight:900 !important;}
+#visitCounterFloating .visitCounterImage{display:block !important;visibility:visible !important;opacity:1 !important;width:110px !important;height:auto !important;min-width:110px !important;max-width:none !important;object-fit:contain !important;}
+#visitCounterFloating .visitCounterClose{display:block !important;border:0 !important;background:transparent !important;color:#fff !important;font-size:16px !important;line-height:1 !important;padding:0 2px !important;cursor:pointer !important;}
+@media(max-width:700px){#visitCounterFloating.visitCounterRow{top:10px !important;padding:5px 8px !important;min-width:145px !important}#visitCounterFloating .visitCounterImage{width:90px !important;min-width:90px !important}#visitCounterFloating .visitCounterLabel{font-size:10px !important}}
+</style>
