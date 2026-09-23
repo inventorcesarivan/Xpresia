@@ -529,12 +529,59 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
 
 @media(max-width:700px){
   :root{
-    --xpresia-panel-height:220px;
+    --xpresia-panel-height:209px;
     --xpresia-panel-width:calc(100vw - 16px);
   }
 }
 </style>
 
+
+<style id="xpresia-final-mobile-desktop-polish">
+/* Contador de visitas: reducción uniforme del 10%, sin alterar su posición. */
+#visitCounterFloating.visitCounterRow{
+  transform:translateX(-50%) scale(.9) !important;
+  transform-origin:top center !important;
+}
+
+/* Los botones cuadrados de configuración toman exactamente el ancho de
+   las tarjetas del menú inicial. Así no vuelven a quedar más grandes. */
+:root{
+  --xpresia-square-size:calc((min(850px,calc(100vw - 16px)) - 48px - 20px) / 3);
+}
+@media(max-width:1050px) and (min-width:701px){
+  :root{
+    --xpresia-square-size:calc((min(850px,calc(100vw - 16px)) - 32px - 20px) / 3);
+  }
+}
+@media(max-width:700px){
+  /* 2 columnas del menú inicial: mismo ancho real de cada tarjeta. */
+  :root{
+    --xpresia-square-size:calc((100vw - 45px) / 2);
+  }
+  #visitCounterFloating.visitCounterRow{
+    transform:translateX(-50%) scale(.9) !important;
+  }
+
+  /* Los cuadrados de pasos/opciones usan ahora exactamente la medida
+     horizontal de las tarjetas del menú inicial. */
+  .guidedStep,.evalChoiceCard,.modeChoice,.skillHubCard,.guidedStepWrap,.skillOptionCard{
+    width:var(--xpresia-square-size)!important;
+    max-width:var(--xpresia-square-size)!important;
+    height:var(--xpresia-square-size)!important;
+    min-height:var(--xpresia-square-size)!important;
+    aspect-ratio:1/1!important;
+  }
+  .guidedStepWrap{width:var(--xpresia-square-size)!important;max-width:var(--xpresia-square-size)!important}
+
+  /* El escenario/base con la imagen de fondo queda un 5% más bajo
+     solo en móvil; el ancho y el centrado permanecen iguales. */
+  .xpresiaDashboard{
+    height:209px !important;
+    min-height:209px !important;
+    max-height:209px !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
