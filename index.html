@@ -2923,7 +2923,7 @@ function openGuidedPanel(cat){
     return '<div class="guidedStepWrap '+(done?'completed':'')+'" data-step-wrap="'+st.key+'"><button class="guidedStep '+(done?'completed ':'')+(active?'active':'')+'" type="button" data-step-key="'+st.key+'" aria-label="'+st.title+' · '+st.value+'" title="'+st.title+' · '+st.value+'"><span class="stepNum" aria-hidden="true">'+st.n+'</span><span class="stepText" aria-hidden="true"><strong>'+st.icon+' PASO '+st.n+' · '+st.title+'</strong><small id="guidedValue-'+st.key+'">'+st.value+'</small></span></button><div class="guidedCompletion" aria-live="polite"><span class="okHand">👌</span><span>Listo, paso configurado</span></div></div>';
   }).join('');
   panel.innerHTML='<button class="returnMainButton" id="guidedBack"><span>↩</span> VOLVER AL MENÚ PRINCIPAL</button><h2>🎯 '+(cat==='sing'?'Canto / Karaoke':skillTitle(cat))+'</h2><p class="guidedIntro">'+(cat==='sing'?'Configura tu karaoke paso a paso para comenzar la evaluación.':'Para evaluar tu habilidad primero debes elegir algunas opciones.')+'</p><div class="guidedSteps">'+stepHtml+'</div><button class="primary guidedStart" id="guidedStart" disabled>▶ COMENZAR EVALUACIÓN</button>';
-  const guidedImages={mode:cat==='imitation'?'./assets/imagenes/config_modo_evaluacion_azul.png':'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
+  const guidedImages={mode:'./assets/imagenes/config_modo_evaluacion.jpg',duration:'./assets/imagenes/config_tiempo.jpg',music:'./assets/imagenes/config_musica.jpg',text:'./assets/imagenes/config_texto.jpg',imitation:'./assets/imagenes/config_desafio.jpg'};
   const guidedStepsBox=panel.querySelector('.guidedSteps');
   if(guidedStepsBox) guidedStepsBox.classList.toggle('guidedTwoSteps',false);guidedStepsBox.classList.toggle('guidedThreeSteps',cat==='sing');
   panel.querySelectorAll('.guidedStep').forEach(b=>{const url=guidedImages[b.dataset.stepKey];if(url)b.style.backgroundImage='url("'+url+'")';});
@@ -3356,6 +3356,9 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   #visitCounterFloating .visitCounterClose{font-size:12.996px!important}
 }
 </style>
+
+
+
 
 
 
@@ -4076,3 +4079,91 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   }
 }
 </style>
+
+<style id="xpresia-pc-config-buttons-final-size">
+/* ============================================================
+   PC — AJUSTE FINAL REAL DE LOS BOTONES
+   Importante: la versión anterior solo actuaba desde 1051px.
+   En muchos PC el viewport CSS queda entre 701 y 1050px, por eso
+   seguían entrando las reglas antiguas de 185x220.
+   Aquí se corrige SOLO desde 701px. Móvil (<=700px) queda intacto.
+   ============================================================ */
+@media (min-width:701px){
+  :root{
+    --xpresia-pc-config-button-w:215px;
+    --xpresia-pc-config-button-h:265px;
+  }
+
+  .guidedStep,
+  .guidedStepWrap,
+  .evalChoiceCard,
+  .modeChoice,
+  .skillHubCard,
+  .skillOptionCard{
+    width:var(--xpresia-pc-config-button-w)!important;
+    max-width:var(--xpresia-pc-config-button-w)!important;
+    height:var(--xpresia-pc-config-button-h)!important;
+    min-height:var(--xpresia-pc-config-button-h)!important;
+    aspect-ratio:auto!important;
+  }
+
+  .guidedStepWrap{
+    width:var(--xpresia-pc-config-button-w)!important;
+    max-width:var(--xpresia-pc-config-button-w)!important;
+    height:var(--xpresia-pc-config-button-h)!important;
+    min-height:var(--xpresia-pc-config-button-h)!important;
+  }
+  .guidedStepWrap .guidedStep{
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:0!important;
+  }
+
+  .guidedSteps{
+    grid-template-columns:repeat(3,minmax(0,var(--xpresia-pc-config-button-w)))!important;
+  }
+
+  .evalChoiceGrid{
+    grid-template-columns:repeat(2,minmax(0,var(--xpresia-pc-config-button-w)))!important;
+  }
+
+  .skillHubOptions{
+    gap:16px!important;
+  }
+
+  #skillHubEvaluate,
+  #skillHubLearn,
+  #skillHubCompete{
+    flex:0 0 var(--xpresia-pc-config-button-w)!important;
+    width:var(--xpresia-pc-config-button-w)!important;
+    max-width:var(--xpresia-pc-config-button-w)!important;
+    height:var(--xpresia-pc-config-button-h)!important;
+    min-height:var(--xpresia-pc-config-button-h)!important;
+  }
+
+  .skillOptionCard{
+    justify-self:center!important;
+  }
+}
+
+/* En escritorios grandes se aprovecha el espacio disponible sin
+   tocar móvil ni reducir los tamaños ya establecidos allí. */
+@media (min-width:1051px){
+  :root{
+    --xpresia-pc-config-button-w:235px;
+    --xpresia-pc-config-button-h:305px;
+  }
+}
+</style>
+
+<style id="xpresia-mode-image-fallback-final">
+/* Imagen estable para el botón Modo de evaluación del flujo de Im itación. */
+#guidedPanel .guidedStep[data-step-key="mode"]{
+  background-image:url('./assets/imagenes/config_modo_evaluacion.jpg') !important;
+  background-size:100% 100% !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+}
+</style>
+
