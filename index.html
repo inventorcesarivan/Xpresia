@@ -4045,3 +4045,33 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   }
 }
 </style>
+
+<style id="xpresia-mobile-action-height-final">
+/* ============================================================
+   MÓVIL — TARJETAS DE ACCIÓN CON IMAGEN MÁS VERTICALES
+   Conserva el ancho ya ajustado y aumenta solo la altura.
+   ============================================================ */
+@media(max-width:700px){
+  :root{
+    --xpresia-mobile-action-h:260px !important;
+  }
+
+  #skillHubEvaluate,
+  #skillHubLearn,
+  #skillHubCompete,
+  .guidedStepWrap,
+  .evalChoiceCard,
+  .modeChoice,
+  .skillOptionCard,
+  .choiceGrid .choiceButton,
+  .skillConfigOptions .skillOptionCard{
+    height:260px !important;
+    min-height:260px !important;
+  }
+
+  .guidedStepWrap .guidedStep{
+    height:100% !important;
+    min-height:0 !important;
+  }
+}
+</style>
