@@ -3619,3 +3619,64 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   #bottom #visitCounterFloating .visitCounterClose{font-size:12.996px !important}
 }
 </style>
+
+<style id="xpresia-rectangular-config-buttons-final">
+/* Los botones de pasos y subpaneles dejan de ser cuadrados.
+   Se usa la misma proporción visual de las tarjetas de habilidades del menú inicial. */
+:root{--xpresia-config-button-w:220px;--xpresia-config-button-h:285px}
+.guidedStep,
+.guidedStepWrap,
+.evalChoiceCard,
+.modeChoice,
+.skillHubCard,
+.skillOptionCard{
+  width:var(--xpresia-config-button-w)!important;
+  max-width:var(--xpresia-config-button-w)!important;
+  height:var(--xpresia-config-button-h)!important;
+  min-height:var(--xpresia-config-button-h)!important;
+  aspect-ratio:auto!important;
+}
+.guidedStepWrap{height:var(--xpresia-config-button-h)!important}
+.guidedStepWrap .guidedStep{width:100%!important;max-width:none!important;height:100%!important;min-height:0!important}
+.guidedSteps{grid-template-columns:repeat(3,minmax(0,var(--xpresia-config-button-w)))!important}
+.evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-config-button-w)))!important}
+.skillHubOptions{grid-template-columns:repeat(2,minmax(0,var(--xpresia-config-button-w)))!important}
+.skillHubOptions #skillHubEvaluate{grid-column:1 / -1!important}
+.skillOptionCard{justify-self:center!important}
+
+@media(max-width:1050px) and (min-width:701px){
+  :root{--xpresia-config-button-w:185px;--xpresia-config-button-h:220px}
+  .guidedSteps{grid-template-columns:repeat(3,minmax(0,var(--xpresia-config-button-w)))!important}
+  .evalChoiceGrid,.skillHubOptions{grid-template-columns:repeat(2,minmax(0,var(--xpresia-config-button-w)))!important}
+}
+
+@media(max-width:700px){
+  /* Mantiene el 5% de reducción ya aplicado a estos botones, pero ahora en formato rectangular. */
+  :root{--xpresia-config-button-w:155.8px;--xpresia-config-button-h:194.75px}
+  .guidedStep,
+  .guidedStepWrap,
+  .evalChoiceCard,
+  .modeChoice,
+  .skillHubCard,
+  .skillOptionCard{
+    width:var(--xpresia-config-button-w)!important;
+    max-width:var(--xpresia-config-button-w)!important;
+    height:var(--xpresia-config-button-h)!important;
+    min-height:var(--xpresia-config-button-h)!important;
+    aspect-ratio:auto!important;
+  }
+  .guidedStepWrap .guidedStep{width:100%!important;max-width:none!important;height:100%!important;min-height:0!important}
+  .guidedSteps,.evalChoiceGrid,.skillHubOptions{
+    grid-template-columns:repeat(2,minmax(0,var(--xpresia-config-button-w)))!important;
+    justify-content:center!important;
+  }
+}
+
+/* MENÚ ligeramente más bajo, sin modificar su ancho ni su posición. */
+#bottom #menuBtn{
+  padding:8px 15px!important;
+}
+@media(max-width:700px){
+  #bottom #menuBtn{padding:7px 14px!important}
+}
+</style>
