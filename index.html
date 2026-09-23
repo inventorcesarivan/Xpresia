@@ -700,6 +700,35 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
   }
 }
 </style>
+
+<style id="xpresia-mobile-button-height-final">
+/* Ajustes finales SOLO para móvil: se conserva exactamente el ancho actual. */
+
+/* 1) Botones de los pasos de configuración: +20% de altura. */
+@media (max-width:700px){
+  .guidedStep{
+    aspect-ratio:5 / 6 !important;
+    width:100% !important;
+    max-width:205px !important;
+  }
+
+  /* 2) Modo libre / Modo imitación: 3x de altura, mismo ancho. */
+  .modeChoice{
+    aspect-ratio:1 / 3 !important;
+    width:100% !important;
+    max-width:205px !important;
+    min-height:0 !important;
+  }
+
+  /* 3) Evaluar con cámara / sin cámara: +10% de altura, mismo ancho. */
+  .evalChoiceCard{
+    aspect-ratio:10 / 11 !important;
+    width:100% !important;
+    max-width:205px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
