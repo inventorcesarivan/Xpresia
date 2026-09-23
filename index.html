@@ -4075,3 +4075,76 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   }
 }
 </style>
+
+<style id="xpresia-mobile-image-vs-horizontal-final">
+/* ============================================================
+   MÓVIL — PROPORCIÓN SEGÚN EL TIPO DE BOTÓN
+   - Tarjetas con imagen de fondo: rectángulos verticales.
+   - Botones sin imagen (tiempo, modos, opciones simples):
+     rectángulos apaisados.
+   ============================================================ */
+@media(max-width:700px){
+  :root{
+    --xpresia-mobile-action-w:min(82vw,430px);
+    --xpresia-mobile-image-h:260px;
+    --xpresia-mobile-flat-h:72px;
+  }
+
+  /* Mantener una sola columna y ancho amplio en todos los grupos. */
+  .skillHubOptions,
+  .guidedSteps,
+  .evalChoiceGrid,
+  .choiceGrid,
+  .skillConfigOptions{
+    grid-template-columns:minmax(0,var(--xpresia-mobile-action-w))!important;
+    justify-content:center!important;
+    justify-items:center!important;
+  }
+
+  /* ========================================================
+     BOTONES CON IMAGEN DE FONDO — VERTICALES
+     ======================================================== */
+  #skillHubEvaluate,
+  #skillHubLearn,
+  #skillHubCompete,
+  .guidedStepWrap,
+  .guidedStepWrap .guidedStep,
+  .evalChoiceCard{
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    height:var(--xpresia-mobile-image-h)!important;
+    min-height:var(--xpresia-mobile-image-h)!important;
+    aspect-ratio:auto!important;
+    justify-self:center!important;
+  }
+
+  .guidedStepWrap .guidedStep{
+    height:100%!important;
+    min-height:0!important;
+  }
+
+  /* ========================================================
+     BOTONES SIN IMAGEN — APAISADOS
+     ======================================================== */
+  .choiceGrid .choiceButton,
+  .choiceGrid .modeChoice,
+  .skillConfigOptions .skillOptionCard{
+    width:var(--xpresia-mobile-action-w)!important;
+    max-width:var(--xpresia-mobile-action-w)!important;
+    height:var(--xpresia-mobile-flat-h)!important;
+    min-height:var(--xpresia-mobile-flat-h)!important;
+    aspect-ratio:auto!important;
+    box-sizing:border-box!important;
+    justify-self:center!important;
+  }
+
+  /* Tiempo 1–5 minutos: específicamente apaisado. */
+  #durationChoices .choiceButton{
+    height:68px!important;
+    min-height:68px!important;
+    border-radius:15px!important;
+    padding:10px 16px!important;
+    font-size:16px!important;
+  }
+}
+</style>
