@@ -3537,17 +3537,30 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   function alignTvCard(){
     const panel=document.getElementById('tvSharePanel');
     const card=document.getElementById('tvShareCard');
-    if(!panel||!card||getComputedStyle(panel).display==='none') return;
-    const r=window.getCameraScreenRect ? window.getCameraScreenRect() : null;
-    if(!r) return;
-    card.style.setProperty('left','50%','important');
-    const tvShift=37; /* ≈5 mm más abajo respecto de la posición anterior */
-    card.style.setProperty('top',Math.round(r.y+tvShift)+'px','important');
-    card.style.setProperty('width',Math.min(500,Math.max(280,Math.round(r.w)))+'px','important');
-    const tvHeight=Math.max(240,Math.round(r.h-tvShift));
-    card.style.setProperty('height',tvHeight+'px','important');
-    card.style.setProperty('max-height',tvHeight+'px','important');
-    card.style.setProperty('transform','translateX(-50%)','important');
+    if(!panel||!card) return;
+    /* El panel TV queda realmente centrado en la pantalla tanto en PC como en móvil.
+       No depende de la cámara, del escenario ni de #bottom. */
+    panel.style.setProperty('display','flex','important');
+    panel.style.setProperty('align-items','center','important');
+    panel.style.setProperty('justify-content','center','important');
+    panel.style.setProperty('inset','0','important');
+    panel.style.setProperty('padding','18px','important');
+    panel.style.setProperty('box-sizing','border-box','important');
+    card.style.removeProperty('left');
+    card.style.removeProperty('top');
+    card.style.removeProperty('transform');
+    card.style.removeProperty('height');
+    card.style.removeProperty('max-height');
+    card.style.setProperty('position','relative','important');
+    card.style.setProperty('left','auto','important');
+    card.style.setProperty('top','auto','important');
+    card.style.setProperty('width','min(500px,94vw)','important');
+    card.style.setProperty('max-width','500px','important');
+    card.style.setProperty('height','auto','important');
+    card.style.setProperty('max-height','min(84dvh,720px)','important');
+    card.style.setProperty('transform','none','important');
+    card.style.setProperty('margin','0 auto','important');
+    card.style.setProperty('box-sizing','border-box','important');
     card.style.setProperty('overflow','auto','important');
   }
   window.addEventListener('resize',()=>requestAnimationFrame(alignTvCard));
@@ -3680,3 +3693,196 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   #bottom #menuBtn{padding:7px 14px!important}
 }
 </style>
+
+<style id="xpresia-hub-desktop-mobile-final">
+/* === Panel de acciones de cada habilidad ===
+   PC: las 3 opciones quedan en una sola fila.
+   Móvil: conserva la distribución triangular actual, con un aumento aproximado del 5%. */
+@media(min-width:701px){
+  /* PC: fuerza las 3 tarjetas en una única fila, en orden Evaluar → Aprender → Competir.
+     Flex evita que reglas antiguas de grid vuelvan a centrar Evaluar en una fila propia. */
+  .skillHubOptions{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    justify-content:center!important;
+    align-items:stretch!important;
+    gap:14px!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  #skillHubEvaluate,
+  #skillHubLearn,
+  #skillHubCompete{
+    order:initial!important;
+    flex:0 0 var(--xpresia-config-button-w)!important;
+    width:var(--xpresia-config-button-w)!important;
+    max-width:var(--xpresia-config-button-w)!important;
+    grid-column:auto!important;
+    grid-row:auto!important;
+    justify-self:auto!important;
+    margin:0!important;
+  }
+}
+
+@media(max-width:700px){
+  /* +5% respecto de los botones móviles rectangulares actuales. */
+  :root{
+    --xpresia-config-button-w-mobile:163.59px;
+    --xpresia-config-button-h-mobile:204.49px;
+  }
+  .skillHubOptions{
+    grid-template-columns:repeat(2,minmax(0,min(163.59px,calc((100% - 11px)/2))))!important;
+    justify-content:center!important;
+    column-gap:11px!important;
+    row-gap:11px!important;
+  }
+  #skillHubEvaluate{
+    grid-column:1 / -1!important;
+    grid-row:1!important;
+    width:min(163.59px,calc((100% - 11px)/2))!important;
+    max-width:min(163.59px,calc((100% - 11px)/2))!important;
+    height:204.49px!important;
+    min-height:204.49px!important;
+    justify-self:center!important;
+  }
+  #skillHubLearn{
+    grid-column:1!important;
+    grid-row:2!important;
+    width:min(163.59px,calc((100% - 11px)/2))!important;
+    max-width:min(163.59px,calc((100% - 11px)/2))!important;
+    height:204.49px!important;
+    min-height:204.49px!important;
+    justify-self:center!important;
+  }
+  #skillHubCompete{
+    grid-column:2!important;
+    grid-row:2!important;
+    width:min(163.59px,calc((100% - 11px)/2))!important;
+    max-width:min(163.59px,calc((100% - 11px)/2))!important;
+    height:204.49px!important;
+    min-height:204.49px!important;
+    justify-self:center!important;
+  }
+}
+
+/* === Pantalla inicial ===
+   El botón de entrada queda con la misma altura útil que el campo de edad
+   y alineado verticalmente con él. */
+.activationEnter{
+  box-sizing:border-box!important;
+  height:43px!important;
+  min-height:43px!important;
+  margin-top:0!important;
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+}
+@media(max-width:700px){
+  .activationEnter{
+    height:43px!important;
+    min-height:43px!important;
+    margin-top:0!important;
+  }
+}
+</style>
+
+
+/* ============================================================
+   SCROLLBARS — acabado redondeado dentro de los paneles
+   Sin flechas/botones nativos y con el recorrido ligeramente
+   reducido para que la barra quede contenida dentro del panel.
+   ============================================================ */
+.panel::-webkit-scrollbar,
+#finalCard::-webkit-scrollbar,
+.sharePopupCard::-webkit-scrollbar,
+.sharePanel::-webkit-scrollbar,
+.resultActionPanel::-webkit-scrollbar,
+#tvShareCard::-webkit-scrollbar,
+.karaokeResults::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+.panel::-webkit-scrollbar-button,
+#finalCard::-webkit-scrollbar-button,
+.sharePopupCard::-webkit-scrollbar-button,
+.sharePanel::-webkit-scrollbar-button,
+.resultActionPanel::-webkit-scrollbar-button,
+#tvShareCard::-webkit-scrollbar-button,
+.karaokeResults::-webkit-scrollbar-button{
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+}
+
+.panel::-webkit-scrollbar-track,
+#finalCard::-webkit-scrollbar-track,
+.sharePopupCard::-webkit-scrollbar-track,
+.sharePanel::-webkit-scrollbar-track,
+.resultActionPanel::-webkit-scrollbar-track,
+#tvShareCard::-webkit-scrollbar-track,
+.karaokeResults::-webkit-scrollbar-track{
+  background:transparent !important;
+  margin:9px 4px;
+  border-radius:999px;
+}
+
+.panel::-webkit-scrollbar-thumb,
+#finalCard::-webkit-scrollbar-thumb,
+.sharePopupCard::-webkit-scrollbar-thumb,
+.sharePanel::-webkit-scrollbar-thumb,
+.resultActionPanel::-webkit-scrollbar-thumb,
+#tvShareCard::-webkit-scrollbar-thumb,
+.karaokeResults::-webkit-scrollbar-thumb{
+  background:#00e5ff !important;
+  border:none !important;
+  border-radius:999px !important;
+  min-height:28px;
+  box-shadow:none;
+}
+
+#tvShareCard::-webkit-scrollbar-thumb{
+  background:#ff00df !important;
+}
+
+#tvShareCard::-webkit-scrollbar-track{
+  background:transparent !important;
+}
+
+.panel,
+#finalCard,
+.sharePopupCard,
+.sharePanel,
+.resultActionPanel,
+#tvShareCard,
+.karaokeResults{
+  scrollbar-width:thin;
+  scrollbar-color:#00e5ff transparent;
+}
+
+#tvShareCard{
+  scrollbar-color:#ff00df transparent;
+}
+
+@media(max-width:700px){
+  .panel::-webkit-scrollbar,
+  #finalCard::-webkit-scrollbar,
+  .sharePopupCard::-webkit-scrollbar,
+  .sharePanel::-webkit-scrollbar,
+  .resultActionPanel::-webkit-scrollbar,
+  #tvShareCard::-webkit-scrollbar,
+  .karaokeResults::-webkit-scrollbar{
+    width:7px;
+    height:7px;
+  }
+
+  .panel::-webkit-scrollbar-track,
+  #finalCard::-webkit-scrollbar-track,
+  .sharePopupCard::-webkit-scrollbar-track,
+  .sharePanel::-webkit-scrollbar-track,
+  .resultActionPanel::-webkit-scrollbar-track,
+  #tvShareCard::-webkit-scrollbar-track,
+  .karaokeResults::-webkit-scrollbar-track{
+    margin:8px 3px;
+  }
+}
