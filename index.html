@@ -632,6 +632,74 @@ body{min-height:100dvh}video{display:none}canvas{position:fixed;inset:0;width:10
   #bottom #visitCounterFloating .visitCounterClose{font-size:12.996px !important}
 }
 </style>
+
+<style id="xpresia-mobile-single-column-final">
+/* En móvil, todos los botones de configuración y subpaneles posteriores a
+   la elección de habilidad ocupan una sola columna para aprovechar mejor
+   el ancho disponible y facilitar la lectura. PC queda sin cambios. */
+@media(max-width:700px){
+  :root{
+    --xpresia-mobile-panel-button-w:min(320px,calc(100% - 28px));
+    --xpresia-mobile-panel-button-h:220px;
+  }
+
+  .guidedSteps,
+  .evalChoiceGrid,
+  .skillHubOptions{
+    grid-template-columns:1fr !important;
+    grid-auto-flow:row !important;
+    justify-content:center !important;
+    justify-items:center !important;
+    align-items:stretch !important;
+    column-gap:0 !important;
+    row-gap:14px !important;
+    width:100% !important;
+  }
+
+  .guidedStep,
+  .guidedStepWrap,
+  .evalChoiceCard,
+  .modeChoice,
+  .skillHubCard,
+  .skillOptionCard{
+    width:var(--xpresia-mobile-panel-button-w) !important;
+    max-width:var(--xpresia-mobile-panel-button-w) !important;
+    height:var(--xpresia-mobile-panel-button-h) !important;
+    min-height:var(--xpresia-mobile-panel-button-h) !important;
+    aspect-ratio:auto !important;
+    justify-self:center !important;
+    box-sizing:border-box !important;
+  }
+
+  .guidedStepWrap .guidedStep{
+    width:100% !important;
+    max-width:none !important;
+    height:100% !important;
+    min-height:0 !important;
+  }
+
+  /* Anula la distribución especial del panel Evaluar/Aprender/Competir. */
+  .skillHubOptions #skillHubEvaluate,
+  .skillHubOptions #skillHubLearn,
+  .skillHubOptions #skillHubCompete{
+    grid-column:1 !important;
+    grid-row:auto !important;
+    justify-self:center !important;
+    width:var(--xpresia-mobile-panel-button-w) !important;
+    max-width:var(--xpresia-mobile-panel-button-w) !important;
+    height:var(--xpresia-mobile-panel-button-h) !important;
+    min-height:var(--xpresia-mobile-panel-button-h) !important;
+    margin:0 !important;
+  }
+}
+
+@media(max-width:390px){
+  :root{
+    --xpresia-mobile-panel-button-w:calc(100% - 22px);
+    --xpresia-mobile-panel-button-h:210px;
+  }
+}
+</style>
 </head>
 <body>
 <div id="xpresiaInstallOverlay" role="dialog" aria-modal="true" aria-labelledby="xpresiaInstallTitle">
