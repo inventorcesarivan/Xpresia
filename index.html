@@ -3120,6 +3120,68 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
 </script>
 
 <script>document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('visitCounterClose');if(b)b.addEventListener('click',function(){var r=document.getElementById('visitCounterFloating');if(r)r.remove();});});</script>
+
+<style id="xpresia-mobile-final-panel-and-buttons">
+/* Ajuste móvil final: las tarjetas de configuración usan exactamente la
+   misma medida que las tarjetas de habilidades del menú inicial. */
+@media(max-width:700px){
+  :root{--xpresia-mobile-skill-card-size:205px}
+  .guidedStep,
+  .evalChoiceCard,
+  .modeChoice,
+  .skillHubCard,
+  .guidedStepWrap{
+    width:var(--xpresia-mobile-skill-card-size)!important;
+    max-width:var(--xpresia-mobile-skill-card-size)!important;
+    height:var(--xpresia-mobile-skill-card-size)!important;
+    min-height:var(--xpresia-mobile-skill-card-size)!important;
+    aspect-ratio:1/1!important;
+  }
+  .guidedStepWrap{width:var(--xpresia-mobile-skill-card-size)!important}
+
+  /* Los paneles crecen hacia arriba manteniendo fijo su borde inferior.
+     alignPanelsToStage() coloca el borde inferior en el mismo punto que la
+     base; aquí solo igualamos la altura al alto real de esa base. */
+  .panel{
+    box-sizing:border-box!important;
+  }
+}
+</style>
+<script id="xpresia-mobile-panel-final-alignment">
+(function(){
+  const oldAlign=window.alignPanelsToStage;
+  if(typeof oldAlign!=='function') return;
+  window.alignPanelsToStage=function(){
+    oldAlign();
+    if(window.innerWidth>700) return;
+    const r=window.getCameraScreenRect ? window.getCameraScreenRect() : null;
+    if(!r) return;
+    document.querySelectorAll('.panel').forEach(panel=>{
+      if(getComputedStyle(panel).display==='none') return;
+      /* Igualamos la altura del panel al escenario. Su borde inferior queda
+         exactamente donde ya lo había colocado el sistema estable. */
+      panel.style.setProperty('height',Math.round(r.h)+'px','important');
+      panel.style.setProperty('max-height',Math.round(r.h)+'px','important');
+      panel.style.setProperty('min-height',Math.round(r.h)+'px','important');
+      panel.style.setProperty('top',Math.round(r.y)+'px','important');
+      panel.style.setProperty('bottom','auto','important');
+      panel.style.setProperty('transform','translateX(-50%)','important');
+    });
+  };
+  window.addEventListener('resize',function(){requestAnimationFrame(window.alignPanelsToStage)});
+})();
+</script>
+<style id="xpresia-visit-counter-final-5">
+/* Configuración general: 5% menos respecto de la medida anterior. */
+#visitCounterFloating .visitCounterImage{width:85.12px!important;min-width:85.12px!important}
+#visitCounterFloating .visitCounterLabel{font-size:10.26px!important}
+#visitCounterFloating .visitCounterClose{font-size:13.68px!important}
+@media(max-width:700px){
+  #visitCounterFloating .visitCounterImage{width:69.54px!important;min-width:69.54px!important}
+  #visitCounterFloating .visitCounterLabel{font-size:8.55px!important}
+  #visitCounterFloating .visitCounterClose{font-size:12.996px!important}
+}
+</style>
 </body>
 </html>
 
@@ -3241,7 +3303,7 @@ document.querySelectorAll('[data-dashboard-share]').forEach(btn=>btn.addEventLis
   :root{--xpresia-square-size:220px}
 }
 @media(max-width:700px){
-  :root{--xpresia-square-size:205px}
+  :root{--xpresia-square-size:205px;--xpresia-mobile-skill-card-size:205px}
   .guidedSteps{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
   .evalChoiceGrid{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
   .skillHubOptions{grid-template-columns:repeat(2,minmax(0,var(--xpresia-square-size)))}
