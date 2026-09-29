@@ -933,7 +933,7 @@ const activation=document.getElementById('activation');
 let stream=null,initPromise=null,cameraReady=false,mirror=false,menuOpen=false,paused=false,countdown=false;
 let micStream=null,audioContext=null,audioSource=null,audioGain=null,audioDestination=null,micAnalyser=null,spectrumAnalyser=null,micEnabled=false,volumeLevel=.8,micNoiseFloorRms=.004;
 let musicAudio=new Audio(),musicSource=null,musicGain=null,musicPlayer=new Audio(),recordMusicPlayer=new Audio(),recordAudioContext=null,recordMusicSource=null,recordMusicGain=null,recordMusicAnalyser=null,recordAudioDestination=null,selectedMusic={id:'none',name:'Sin música de fondo',url:''},pendingMusic={id:'none',name:'Sin música de fondo',url:'',objectUrl:false},pendingMusicObjectUrl=null;
-let karaokeAudioContext=null,karaokeAudioSource=null,karaokeAudioAnalyser=null,karaokeAudioReady=false,karaokeAudioUrl='';
+let karaokeAudioContext=null,karaokeAudioSource=null,karaokeAudioAnalyser=null,karaokeAudioDestination=null,karaokeAudioReady=false,karaokeAudioUrl='';
 let karaokeDurationPromise=Promise.resolve(0);
 let karaokeCompletionWatchId=null;
 let karaokeEndHandler=null;
@@ -961,6 +961,7 @@ const musicLibrary={
 'trap':{name:'Trap',url:'assets/bases-laterales/20.mp3'}
 };
 let mediaRecorder=null,recordedChunks=[],recordedBlob=null,recordedUrl=null,recordingMime='';
+let recordingMixContext=null,recordingMixDestination=null,recordingMixSources=[],recordingKaraokeStream=null;
 let pose=null,poseReady=false,poseBusy=false,lastPose=0;
 let category='dance',duration=60,userName='',userAge='',evaluationMode='camera',voiceSamplingId=null;
 let guidedStep=0, guidedSkillPanel='guidedPanel',guidedCompleted={},guidedActiveKey=''; let karaokeResumeSeconds=0; let karaokePlaybackMode='';let singImitationMode=false;let karaokeWithCamera=false;let karaokeVideoId='';let karaokeVolumeLevel=.8;let karaokeCameraHidden=false;let karaokeReady=false;let karaokeLibrary=[];let karaokeSelectedItem=null;let imitationType='airguitar';let categoryChosen=false;const DEFAULT_VISUAL_IMAGE='assets/imagenes/xpresia_inicio.jpg';
@@ -1098,7 +1099,10 @@ function drawSpectrum(){
 }
 
 function spectrumLoop(){updateMicNoiseFloor();drawSpectrum();requestAnimationFrame(spectrumLoop)}
-function draw(){resize();ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#050b18';ctx.fillRect(0,0,canvas.width,canvas.height);const g=getCameraRect();const recordingCameraMode=evaluationMode==='camera'||(category==='sing'&&evaluationMode==='karaoke'&&karaokeWithCamera);if(recordingCameraMode&&video.readyState>=2&&video.videoWidth){const s=Math.min(g.w/video.videoWidth,g.h/video.videoHeight),dw=video.videoWidth*s,dh=video.videoHeight*s;const ox=g.x+(g.w-dw)/2,oy=g.y+(g.h-dh)/2;ctx.save();ctx.beginPath();ctx.rect(g.x,g.y,g.w,g.h);ctx.clip();if(mirror){ctx.translate(ox+dw,oy);ctx.scale(-1,1);ctx.drawImage(video,0,0,dw,dh)}else ctx.drawImage(video,ox,oy,dw,dh);ctx.restore()}requestAnimationFrame(draw)}
+function draw(){resize();ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#050b18';ctx.fillRect(0,0,canvas.width,canvas.height);const g=getCameraRect();const recordingCameraMode=evaluationMode==='camera'||(category==='sing'&&evaluationMode==='karaoke'&&karaokeWithCamera);const karaokeComposite=evaluationMode==='karaoke'&&karaokePlaybackMode==='drive'&&karaokeVisibleVideoReady();
+  if(karaokeComposite){try{const kv=document.getElementById('karaokeVisibleVideo');if(kv&&kv.readyState>=2&&kv.videoWidth){const s=Math.max(g.w/kv.videoWidth,g.h/kv.videoHeight),dw=kv.videoWidth*s,dh=kv.videoHeight*s,ox=g.x+(g.w-dw)/2,oy=g.y+(g.h-dh)/2;ctx.save();ctx.beginPath();ctx.rect(g.x,g.y,g.w,g.h);ctx.clip();ctx.drawImage(kv,ox,oy,dw,dh);ctx.restore();}}catch(e){/* Si CORS impide dibujar el karaoke, conservamos la cámara. */}}
+  if(recordingCameraMode&&video.readyState>=2&&video.videoWidth){const target=(karaokeComposite&&karaokeWithCamera)?{x:g.x+g.w*.64,y:g.y+g.h*.06,w:g.w*.31,h:g.h*.36}:g;const s=Math.min(target.w/video.videoWidth,target.h/video.videoHeight),dw=video.videoWidth*s,dh=video.videoHeight*s,ox=target.x+(target.w-dw)/2,oy=target.y+(target.h-dh)/2;ctx.save();ctx.beginPath();ctx.rect(target.x,target.y,target.w,target.h);ctx.clip();if(mirror){ctx.translate(ox+dw,oy);ctx.scale(-1,1);ctx.drawImage(video,0,0,dw,dh)}else ctx.drawImage(video,ox,oy,dw,dh);ctx.restore();if(karaokeComposite&&karaokeWithCamera){ctx.save();ctx.strokeStyle='rgba(0,229,255,.9)';ctx.lineWidth=Math.max(2,Math.round(g.w*.004));ctx.strokeRect(target.x,target.y,target.w,target.h);ctx.restore();}}requestAnimationFrame(draw)}
+function karaokeVisibleVideoReady(){const v=document.getElementById('karaokeVisibleVideo');return !!(v&&v.style.display!=='none'&&v.readyState>=2&&v.videoWidth&&v.videoHeight)}
 function getCameraRect(){return getStageScreenRect()}
 function getRecordingMime(){const options=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];return options.find(x=>window.MediaRecorder&&MediaRecorder.isTypeSupported(x))||''}
 function ensureAudioForMusicSync(){
@@ -1148,15 +1152,46 @@ function shouldRecordEvaluationVideo(){
   // generan video porque no hay imagen del usuario que registrar.
   return evaluationMode==='camera' || (category==='sing' && evaluationMode==='karaoke' && karaokeWithCamera);
 }
-function startVideoRecording(){try{
+async function buildRecordingAudioTrack(){
+  try{
+    if(recordingMixContext){try{await recordingMixContext.close()}catch(e){}}
+    recordingMixContext=new (window.AudioContext||window.webkitAudioContext)();
+    if(recordingMixContext.state==='suspended')await recordingMixContext.resume();
+    recordingMixDestination=recordingMixContext.createMediaStreamDestination();
+    recordingMixSources=[];
+    const addStream=(stream,label,gainValue=1)=>{
+      if(!stream?.getAudioTracks?.().length)return false;
+      const src=recordingMixContext.createMediaStreamSource(stream);
+      const gain=recordingMixContext.createGain();gain.gain.value=gainValue;
+      src.connect(gain);gain.connect(recordingMixDestination);recordingMixSources.push({src,gain,label});return true;
+    };
+    // Micrófono procesado por la cadena de Xpresia.
+    addStream(audioDestination?.stream,'mic',1);
+    // Música de fondo configurada fuera de Karaoke.
+    if(selectedMusic.url)addStream(recordAudioDestination?.stream,'music',1);
+    // En Karaoke usamos primero la cadena técnica directa (Drive/HTML5).
+    // Si no está disponible, para un video HTML5 intentamos captureStream().
+    if(evaluationMode==='karaoke'&&karaokeAudioDestination?.stream?.getAudioTracks?.().length){
+      addStream(karaokeAudioDestination.stream,'karaoke-analysis',1);
+    }else if(evaluationMode==='karaoke'&&karaokePlaybackMode==='drive'){
+      const kv=document.getElementById('karaokeVisibleVideo');
+      try{recordingKaraokeStream=kv?.captureStream?.()||null}catch(e){recordingKaraokeStream=null}
+      if(recordingKaraokeStream)addStream(recordingKaraokeStream,'karaoke',1);
+    }
+    return recordingMixDestination.stream.getAudioTracks().length>0;
+  }catch(e){console.warn('No se pudo crear la mezcla de audio de la grabación:',e);return false}
+}
+async function closeRecordingAudioMix(){try{recordingMixSources=[];if(recordingMixContext)await recordingMixContext.close()}catch(e){}recordingMixContext=null;recordingMixDestination=null;recordingKaraokeStream=null}
+async function startVideoRecording(){try{
   if(!shouldRecordEvaluationVideo())return false;
   if(!window.MediaRecorder||!canvas.captureStream){setTop('La grabación de video no está disponible en este navegador');return false}
   recordedChunks=[];recordedBlob=null;
   if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}
-  const cs=canvas.captureStream(30);let recStream=cs;
-  if(selectedMusic.url){ensureAudioForMusicSync();if(recordAudioDestination?.stream?.getAudioTracks?.().length){recordAudioDestination.stream.getAudioTracks().forEach(t=>recStream.addTrack(t))}}
+  const cs=canvas.captureStream(30);
+  const audioReady=await buildRecordingAudioTrack();
+  if(audioReady&&recordingMixDestination?.stream?.getAudioTracks?.().length){recordingMixDestination.stream.getAudioTracks().forEach(t=>cs.addTrack(t))}
   recordingMime=getRecordingMime();
-  mediaRecorder=recordingMime?new MediaRecorder(recStream,{mimeType:recordingMime,videoBitsPerSecond:2500000}):new MediaRecorder(recStream,{videoBitsPerSecond:2500000});
+  mediaRecorder=recordingMime?new MediaRecorder(cs,{mimeType:recordingMime,videoBitsPerSecond:2500000}):new MediaRecorder(cs,{videoBitsPerSecond:2500000});
   mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size)recordedChunks.push(e.data)};
   mediaRecorder.onstop=()=>{
     try{
@@ -1170,7 +1205,7 @@ function startVideoRecording(){try{
   mediaRecorder.start(1000);
   return true;
 }catch(e){console.error(e);setTop('No se pudo iniciar la grabación de video');return false}}
-function stopVideoRecording(){return new Promise(resolve=>{if(!mediaRecorder||mediaRecorder.state==='inactive'){resolve();return}let done=false;const finish=()=>{if(done)return;done=true;resolve()};mediaRecorder.addEventListener('stop',finish,{once:true});try{mediaRecorder.stop()}catch(e){console.warn('No se pudo detener MediaRecorder:',e);finish()}setTimeout(finish,3500)})}
+function stopVideoRecording(){return new Promise(resolve=>{if(!mediaRecorder||mediaRecorder.state==='inactive'){closeRecordingAudioMix().finally(resolve);return}let done=false;const finish=()=>{if(done)return;done=true;closeRecordingAudioMix().finally(resolve)};mediaRecorder.addEventListener('stop',finish,{once:true});try{mediaRecorder.stop()}catch(e){console.warn('No se pudo detener MediaRecorder:',e);finish()}setTimeout(finish,3500)})}
 function prepareRecordedVideo(){const v=document.getElementById('recordedVideo');if(recordedUrl&&v){v.src=recordedUrl}else if(v){v.removeAttribute('src');v.load()}}
 function getAppUrl(){return location.protocol==='file:'?'':(location.origin+location.pathname)}
 function getShareText(){const score=Math.round((finalEvaluationResult?.score ?? compute()?.score ?? 0)),cat=(profiles[category]?.name||'expresión').toLowerCase(),url=getAppUrl();const base=userName?`${userName} obtuvo ${score} puntos en su evaluación de ${cat}. ¡Anímate a evaluar tus capacidades!`:`Obtuve ${score} puntos en mi evaluación de ${cat}. ¡Anímate a evaluar tus capacidades!`;return url?`${base} ${url}`:base}
@@ -1736,7 +1771,7 @@ function stopKaraokeAudioAnalysis(){
   const v=document.getElementById('karaokeAudioVideo');
   try{v?.pause()}catch(e){}
   if(v){try{v.removeAttribute('src');v.load()}catch(e){}}
-  karaokeAudioReady=false;karaokeAudioUrl='';karaokeAudioAnalyser=null;karaokeAudioSource=null;
+  karaokeAudioReady=false;karaokeAudioUrl='';karaokeAudioAnalyser=null;karaokeAudioSource=null;karaokeAudioDestination=null;
   try{karaokeAudioContext?.close()}catch(e){}
   karaokeAudioContext=null;
 }
@@ -1757,16 +1792,18 @@ async function startKaraokeAudioAnalysis(){
   const v=document.getElementById('karaokeAudioVideo');
   if(!v)return false;
   try{
-    v.crossOrigin='anonymous';v.muted=true;v.volume=0;v.src=url;v.currentTime=0;
+    v.crossOrigin='anonymous';v.muted=false;v.volume=0;v.src=url;v.currentTime=0;
     await v.load();
     karaokeAudioContext=new (window.AudioContext||window.webkitAudioContext)();
     if(karaokeAudioContext.state==='suspended')await karaokeAudioContext.resume();
     karaokeAudioSource=karaokeAudioContext.createMediaElementSource(v);
+    karaokeAudioDestination=karaokeAudioContext.createMediaStreamDestination();
     karaokeAudioAnalyser=karaokeAudioContext.createAnalyser();
     karaokeAudioAnalyser.fftSize=1024;karaokeAudioAnalyser.smoothingTimeConstant=.82;
     karaokeAudioSource.connect(karaokeAudioAnalyser);
-    /* El elemento está silenciado: se utiliza solamente como fuente de análisis. */
-    karaokeAudioSource.connect(karaokeAudioContext.destination);
+    karaokeAudioSource.connect(karaokeAudioDestination);
+    /* Volumen 0 del elemento: no duplica el audio en los parlantes; la salida
+       de esta cadena se utiliza para análisis y para la grabación final. */
     const p=v.play();if(p)await p;
     karaokeAudioReady=true;karaokeAudioUrl=url;return true;
   }catch(e){
@@ -1824,6 +1861,7 @@ function prepareVisibleKaraokeVideo(raw){
       video.style.display='block';
       video.preload='auto';
       video.playsInline=true;
+      video.crossOrigin='anonymous';
       video.muted=false;
       video.volume=karaokeVolumeLevel;
       let fallbackTimer=setTimeout(()=>{
@@ -2781,14 +2819,14 @@ async function startEvaluation(){if(category==='sing'&&evaluationMode==='karaoke
   // En Karaoke, duration es exclusivamente el tiempo elegido por el usuario.
   // No se reemplaza por la duración de la canción.
   evalRunning=true;karaokeStartAt=evaluationMode==='karaoke'?performance.now():0;if(evaluationMode==='karaoke')karaokeResumeSeconds=0;if(evaluationMode==='karaoke'&&karaokeVideoId){
-    /* Un único disparo del reproductor visible al comenzar. */
+    /* Preparamos primero la pista técnica para que el audio del karaoke pueda
+       entrar en la misma mezcla que el micrófono antes de MediaRecorder. */
+    const karaokeAudioOk=await startKaraokeAudioAnalysis();
     startKaraokePlayback();
     startKaraokeCompletionWatch();
-    startKaraokeAudioAnalysis().then(ok=>{
-      if(ok)setTop('Evaluando: voz + audio del karaoke');
-      else setTop('Evaluando: voz · el audio del karaoke no pudo ser analizado desde esta fuente');
-    });
-  }if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:30);if(shouldRecordEvaluationVideo())startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled&&textSource!=='none')startReadingRecognition();
+    if(karaokeAudioOk)setTop('Evaluando: voz + audio del karaoke');
+    else setTop('Evaluando: voz · el audio del karaoke no pudo ser incorporado desde esta fuente');
+  }if(category==='reading'&&textSource!=='none')setReadingPassageForDuration(duration>0?duration:30);if((category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke')renderGuideText(category,duration>0?duration:30);if(shouldRecordEvaluationVideo())await startVideoRecording();const liveGuide=document.getElementById('liveTextGuidePanel');if(liveGuide){liveGuide.classList.add('liveTextGuide');liveGuide.style.display=(category==='sing'||category==='acting'||category==='reading')&&textSource!=='none'&&evaluationMode!=='karaoke'?'block':'none'}updateEvaluationModeUI();startGuidePlayback();if(soloVoice){if(voiceSamplingId)clearInterval(voiceSamplingId);voiceSamplingId=setInterval(()=>{if(evalRunning&&!evalPaused)sampleVoice()},100)}if(category==='reading'&&micEnabled&&textSource!=='none')startReadingRecognition();
   if(category==='sing'&&evaluationMode==='karaoke'&&karaokeLyricsText&&micEnabled)startReadingRecognition();if(selectedMusic.url&&evaluationMode!=='karaoke'){startBackgroundMusic();startRecordingMusic()}evalPaused=false;startTime=performance.now();elapsedBeforePause=0;setTop('Evaluando: '+profiles[category].name+(category==='imitation'?' · '+(document.getElementById('imitationType')?.selectedOptions?.[0]?.textContent||'Desafío') :''));document.getElementById('start').textContent='Evaluación en curso';document.getElementById('start').disabled=true;document.getElementById('pause').style.display='block';document.getElementById('finish').style.display='block';document.getElementById('topEvalControls').style.display='flex';document.getElementById('pauseTopBtn').textContent='⏸';document.getElementById('topTimer').style.display='inline';document.getElementById('topTimer').textContent=duration>0?formatTime(duration):'00:00';updateLiveMusicControls();startEvaluationTimer();if(evaluationMode==='karaoke'&&duration<=0){document.getElementById('topTimer').textContent='00:00';}if(poseReady===false)loadPose()}
 function stopKaraokePlayback(clearFrame=true){
   try{pauseKaraoke()}catch(e){}
