@@ -1775,12 +1775,18 @@ function stopKaraokeAudioAnalysis(){
   try{karaokeAudioContext?.close()}catch(e){}
   karaokeAudioContext=null;
 }
+function getKaraokeMediaProxyUrl(driveId){
+  const id=String(driveId||'').trim();
+  if(!id)return '';
+  if(location.protocol==='http:'||location.protocol==='https:')return location.origin+'/api/karaoke-media?id='+encodeURIComponent(id);
+  return 'https://drive.usercontent.google.com/download?id='+encodeURIComponent(id)+'&export=download&confirm=t';
+}
 function getKaraokeAnalysisUrl(item){
   const direct=String(item?.audioUrl||item?.mediaUrl||item?.downloadUrl||'').trim();
-  if(direct && /^(https?:|blob:|data:|file:)/i.test(direct))return direct;
+  if(direct && /^(blob:|data:|file:)/i.test(direct))return direct;
   const raw=String(item?.url||item?.driveUrl||'').trim();
   const driveId=parseDriveId(raw)||String(item?.id||'').trim();
-  if(driveId && !/^https?:\/\/.*\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(raw))return 'https://drive.usercontent.google.com/download?id='+encodeURIComponent(driveId)+'&export=download&confirm=t';
+  if(driveId && !/^https?:\/\/.*\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(raw))return getKaraokeMediaProxyUrl(driveId);
   if(raw && /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(raw))return raw;
   return '';
 }
@@ -1792,7 +1798,7 @@ async function startKaraokeAudioAnalysis(){
   const v=document.getElementById('karaokeAudioVideo');
   if(!v)return false;
   try{
-    v.crossOrigin='anonymous';v.muted=false;v.volume=0;v.src=url;v.currentTime=0;
+    v.removeAttribute('crossorigin');v.muted=false;v.volume=0;v.src=url;v.currentTime=0;
     await v.load();
     karaokeAudioContext=new (window.AudioContext||window.webkitAudioContext)();
     if(karaokeAudioContext.state==='suspended')await karaokeAudioContext.resume();
@@ -1816,7 +1822,7 @@ function getKaraokeDirectVideoSrc(raw){
   const value=String(raw||'').trim();
   const driveId=parseDriveId(value)||((karaokeSelectedItem&&parseDriveId(karaokeSelectedItem.url||karaokeSelectedItem.driveUrl||''))||'');
   if(driveId && !/^https?:\/\/.*\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(value)){
-    return 'https://drive.usercontent.google.com/download?id='+encodeURIComponent(driveId)+'&export=download&confirm=t';
+    return getKaraokeMediaProxyUrl(driveId);
   }
   if(value && /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(value))return value;
   return '';
@@ -1855,13 +1861,13 @@ function prepareVisibleKaraokeVideo(raw){
     // Para Google Drive usamos el endpoint actual de contenido directo. A diferencia
     // de /uc?export=download, este endpoint entrega el archivo y permite usar el
     // reproductor HTML5, por lo que Xpresia puede pausar, reanudar y controlar volumen.
-    const direct='https://drive.usercontent.google.com/download?id='+encodeURIComponent(driveId)+'&export=download&confirm=t';
+    const direct=getKaraokeMediaProxyUrl(driveId);
     setKaraokeVisualMode('drive');
     if(video){
       video.style.display='block';
       video.preload='auto';
       video.playsInline=true;
-      video.crossOrigin='anonymous';
+      video.removeAttribute('crossorigin');
       video.muted=false;
       video.volume=karaokeVolumeLevel;
       let fallbackTimer=setTimeout(()=>{
