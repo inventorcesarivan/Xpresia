@@ -1,7 +1,3 @@
 [build]
   publish = "."
   functions = "netlify/functions"
-
-[[edge_functions]]
-  function = "karaoke-media"
-  path = "/api/karaoke-media"
